@@ -4,7 +4,9 @@
 
 package frc.robot.commands;
 
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Timer;
@@ -28,17 +30,26 @@ public class DriveChoreoPathCommand extends Command {
   private final PoseEstimatorSubsystem poseEstimatorSubsystem;
   private Optional<Trajectory<SwerveSample>> trajectory;
   private final Timer timer = new Timer();
+  private final double speedFactor; // Can be used to speed up or slow down the path following  1.0 = speed as defined in path.
+  private PIDController[] pidControllers = new PIDController[3]; // X, Y, and Rotation
 
   /** Creates a new DriveChoreoPathCommand. */
   public DriveChoreoPathCommand(
     DriveSubsystemSRX robotDrive
   , PoseEstimatorSubsystem poseEstimatorSubsystem
   , String trajectoryName 
-  , DrivingConfig config) {
+  , DrivingConfig config
+  , double speedFactor
+  , double pidCorrectionFactor) {
     this.robotDrive = robotDrive;
     this.poseEstimatorSubsystem = poseEstimatorSubsystem;
     this.trajectoryName = trajectoryName;
+    this.speedFactor = speedFactor;
     trajectory  = Choreo.loadTrajectory(trajectoryName);
+    pidControllers[0] = new PIDController(10.0 * pidCorrectionFactor, 0.0, 0.0);
+    pidControllers[1] = new PIDController(10.0 * pidCorrectionFactor, 0.0, 0.0);
+    pidControllers[2] = new PIDController(7.5  * pidCorrectionFactor, 0.0, 0.0);
+    pidControllers[2].enableContinuousInput(-Math.PI, Math.PI); // For wrapping rotation.
 
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(robotDrive, poseEstimatorSubsystem);
@@ -55,12 +66,17 @@ public class DriveChoreoPathCommand extends Command {
 
             if (initialPose.isPresent()) {
                 // Reset odometry to the start of the trajectory
-                robotDrive.resetOdometry(initialPose.get());
+                //robotDrive.resetOdometry(initialPose.get());
+
+                poseEstimatorSubsystem.setCurrentPose(initialPose.get());
+                //robotDrive.setAngleDegrees(initialPose.get().getRotation().getDegrees()+(Utilities.isRedAlliance() ? 180 : 0.0));
+
                 if (trajectoryName == "PID test")
                 {
                   // Set up at the wrong start location to see if the robot can correct itself
                   Pose2d  offsetPose = initialPose.get();
-                  poseEstimatorSubsystem.setCurrentPose(new Pose2d(offsetPose.getX(), offsetPose.getY() + 2.0, offsetPose.getRotation()));
+                  //poseEstimatorSubsystem.setCurrentPose(initialPose.get());
+                  poseEstimatorSubsystem.setCurrentPose(new Pose2d(offsetPose.getX(), offsetPose.getY() + 2.0, new Rotation2d(Math.PI/2.0))); //offsetPose.getRotation()));
                 }
                 else              
                 {  // Set the pose estimator to the start of the traject
@@ -81,10 +97,10 @@ public class DriveChoreoPathCommand extends Command {
 
    if (trajectory.isPresent()) {
       // Sample the trajectory at the current time into the autonomous period
-      Optional<SwerveSample> sample = trajectory.get().sampleAt(timer.get(), isRedAlliance());
+      Optional<SwerveSample> sample = trajectory.get().sampleAt(timer.get() * speedFactor, isRedAlliance());
 
       if (sample.isPresent()) {
-          robotDrive.followTrajectory(sample.get());
+          robotDrive.followTrajectory(sample.get(),pidControllers, speedFactor);
       }
     }
   
@@ -97,7 +113,7 @@ public class DriveChoreoPathCommand extends Command {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return trajectory.isPresent() && (timer.get() >= trajectory.get().getTotalTime());
+    return trajectory.isPresent() && (timer.get() * speedFactor >= trajectory.get().getTotalTime());
   }
 
   private boolean isRedAlliance() {

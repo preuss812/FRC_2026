@@ -247,29 +247,47 @@ public class DriveSubsystemSRX extends SubsystemBase {
     double ySpeedDelivered = m_currentYSpeed * maxSpeedMetersPerSecond;
     double rotDelivered = m_currentRotation * maxAngularSpeed;
 
-    /*
-     * For simulation, update the position of the robot based on the requested speeds
-     */
-    if (RobotContainer.isSimulation()) {
-      RobotContainer.m_preussDriveSimulation.drive(xSpeedDelivered, ySpeedDelivered, rotDelivered);
+    drive(xSpeedDelivered, ySpeedDelivered, rotDelivered, fieldRelative);
+  }
 
+  /*
+   * Drive the robot using meters per second and radians per second.
+   */
+  public void drive(double vxMetersPerSec, double vyMetersPerSec, double omegaRadiansPerSec, boolean fieldRelative) {
+    
+    // Calculate the Chassis Speeds
+    ChassisSpeeds chassisSpeeds = fieldRelative
+      ? ChassisSpeeds.fromFieldRelativeSpeeds(vxMetersPerSec, vyMetersPerSec, omegaRadiansPerSec, RobotContainer.m_PoseEstimatorSubsystem.getCurrentPose().getRotation())
+      : new ChassisSpeeds(vxMetersPerSec, vyMetersPerSec, omegaRadiansPerSec);
+
+    if (debug) {
+      SmartDashboard.putNumber("ChassisSpeeds vx", chassisSpeeds.vxMetersPerSecond);
+      SmartDashboard.putNumber("ChassisSpeeds vy", chassisSpeeds.vyMetersPerSecond);
     }
-    // Convert the inputs into chassis speeds, ie speeds and rotations for each wheel.
-    var swerveModuleStates = DriveConstants.kDriveKinematics.toSwerveModuleStates(
-        fieldRelative
-            ? ChassisSpeeds.fromFieldRelativeSpeeds(xSpeedDelivered, ySpeedDelivered, rotDelivered, Rotation2d.fromDegrees(-m_gyro.getAngle()))
-            : new ChassisSpeeds(xSpeedDelivered, ySpeedDelivered, rotDelivered));
-       
+
+    // For simulation, update the position of the robot based on the requested speeds.
+    if (RobotContainer.isSimulation()) {
+      RobotContainer.m_preussDriveSimulation.drive(
+        chassisSpeeds.vxMetersPerSecond
+        , chassisSpeeds.vyMetersPerSecond
+        , chassisSpeeds.omegaRadiansPerSecond
+      );
+    }
+    // Calculate the swerve module states from the chassis speeds
+      var swerveModuleStates = DriveConstants.kDriveKinematics.toSwerveModuleStates(chassisSpeeds);
+        
     // Enforce the maximum speed of the robot
     SwerveDriveKinematics.desaturateWheelSpeeds(
         swerveModuleStates, maxSpeedMetersPerSecond);
-    
+
     // Set the swerve module states
     m_frontLeft.setDesiredState(swerveModuleStates[0]);
     m_frontRight.setDesiredState(swerveModuleStates[1]);
     m_rearLeft.setDesiredState(swerveModuleStates[2]);
     m_rearRight.setDesiredState(swerveModuleStates[3]);
+
   }
+
 
   /**
    * Sets the wheels into an X formation to prevent movement.
@@ -419,35 +437,21 @@ public class DriveSubsystemSRX extends SubsystemBase {
     return drivingMode;
   }
   
-  public void followTrajectory(SwerveSample sample) {
+  public void followTrajectory(SwerveSample sample, PIDController[] pidControllers, double speedFactor) {
     // Get the current pose of the robot
-    Pose2d pose = getPose();
-    pose = RobotContainer.m_preussDriveSimulation.getCurrentPose();
-    PIDController xController = new PIDController(10.0, 0.0, 0.0);
-    PIDController yController = new PIDController(10.0, 0.0, 0.0);
-    PIDController headingController = new PIDController(7.5, 0.0, 0.0);
-    headingController.enableContinuousInput(-Math.PI, Math.PI);
-    var x = xController.calculate(pose.getX(), sample.x);
-    System.out.println(x);
+    Pose2d pose; // = getPose();
+    pose = RobotContainer.m_PoseEstimatorSubsystem.getCurrentPose();
+    // TODO: reactivate and tune the PID controllers and move to a better location.
+    
     // Generate the next speeds for the robot
     ChassisSpeeds speeds = new ChassisSpeeds(
-      sample.vx + xController.calculate(pose.getX(), sample.x),
-      sample.vy + yController.calculate(pose.getY(), sample.y),
-      sample.omega + headingController.calculate(pose.getRotation().getRadians(), sample.heading)
+      sample.vx * speedFactor + pidControllers[0].calculate(pose.getX(), sample.x),
+      sample.vy * speedFactor + pidControllers[1].calculate(pose.getY(), sample.y),
+      sample.omega * speedFactor + pidControllers[2].calculate(pose.getRotation().getRadians(), sample.heading)
     );
-    var swerveModuleStates = DriveConstants.kDriveKinematics.toSwerveModuleStates(speeds);
-    if (RobotContainer.isSimulation())
-      RobotContainer.m_preussDriveSimulation.drive(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond, speeds.omegaRadiansPerSecond);
 
-    // Enforce the maximum speed of the robot
-    SwerveDriveKinematics.desaturateWheelSpeeds(
-        swerveModuleStates, maxSpeedMetersPerSecond);
-    
-    // Set the swerve module states
-    m_frontLeft.setDesiredState(swerveModuleStates[0]);
-    m_frontRight.setDesiredState(swerveModuleStates[1]);
-    m_rearLeft.setDesiredState(swerveModuleStates[2]);
-    m_rearRight.setDesiredState(swerveModuleStates[3]);
+    // Drive the robot at the calculated speeds    drive(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond, speeds.omegaRadiansPerSecond, false);
+
   }
 
 }
