@@ -101,13 +101,11 @@ public class FollowTrajectoryCommand extends SequentialCommandGroup {
     PreussSwerveControllerCommand debugSwerveControllerCommand = new PreussSwerveControllerCommand(
       trajectory,
       poseEstimatorSubsystem::getCurrentPose, // Functional interface to feed supplier
-      DriveConstants.kDriveKinematics,
-
       // Position controllers
       new PIDController(AutoConstants.kPXController, 0, 0),
       new PIDController(AutoConstants.kPYController, 0, 0),
       thetaController,
-      robotDrive::setModuleStates,
+      robotDrive::driveFieldRelative,
       robotDrive);
     
     addCommands(debugSwerveControllerCommand);

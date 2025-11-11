@@ -34,7 +34,9 @@ import frc.robot.subsystems.DriveSubsystemSRX;
 import frc.robot.commands.DriveChoreoPathCommand;
 import frc.robot.commands.DriveCircle;
 import frc.robot.commands.DriveCircleThrottle;
+import frc.robot.commands.RandomRobotPosition;
 import frc.robot.commands.RotateRobotCommand;
+import frc.robot.commands.SwerveToProcessorCommand;
 import frc.robot.commands.ResetDriveTrainCommand;
 import frc.utils.PoseEstimatorCamera;
 import frc.utils.PreussDriveSimulation;
@@ -79,7 +81,8 @@ public class RobotContainer {
   private final Joystick leftJoystick = new Joystick(OIConstants.kLeftJoystick);
   private final Joystick rightJoystick = new Joystick(OIConstants.kRightJoystick);
   XboxController m_driverController = new XboxController(OIConstants.kDriverControllerPort);
-  
+  public static double startingHeading;
+
   double POV_to_double(int pov) {
     double result;
     if (pov == -1) {
@@ -125,7 +128,7 @@ public class RobotContainer {
     // By default this is not a simulation.
     // For convenience, set the simulation mode to true if this is not linux (ie if it is MacOS or Windows).
     RobotContainer.isSimulation = !(System.getProperty("os.name").equals("Linux"));
-    //TrajectoryPlans.buildAutoTrajectories(); 
+    TrajectoryPlans.buildAutoTrajectories(); 
 
     // Configure the button bindings
     configureButtonBindings();
@@ -175,7 +178,7 @@ public class RobotContainer {
       new DriveCircleThrottle(m_robotDrive, m_PoseEstimatorSubsystem, m_robotDrive.circleAutoConfig, 1.0));
   
       // Xbox Y button resets the robot coorinate system
-    new JoystickButton(m_driverController, Button.kY.value).onTrue(new ResetDriveTrainCommand());
+    new JoystickButton(m_driverController, Button.kY.value).onTrue(new ResetDriveTrainCommand(this));
     new JoystickButton(m_driverController, Button.kX.value).onTrue(new InstantCommand(()->m_PoseEstimatorSubsystem.setCurrentPose(new Pose2d(0,0, Rotation2d.kZero))));
 
     // Xbox start button puts thte robot in fast/speed driving mode.
@@ -208,9 +211,10 @@ public class RobotContainer {
       SmartDashboard.putData("Choreo1", new DriveChoreoPathCommand(m_robotDrive, m_PoseEstimatorSubsystem, "Blue 1 Meter", m_robotDrive.circleAutoConfig, 0.1, 0.0));
       SmartDashboard.putData("Choreo2", new DriveChoreoPathCommand(m_robotDrive, m_PoseEstimatorSubsystem, "Low to AT22", m_robotDrive.circleAutoConfig, 1.0, 1.0));
       SmartDashboard.putData("Choreo3", new DriveChoreoPathCommand(m_robotDrive, m_PoseEstimatorSubsystem, "PID test", m_robotDrive.circleAutoConfig, 1.0, 1.0));
-      SmartDashboard.putData("Y", new ResetDriveTrainCommand());
+      SmartDashboard.putData("Y", new ResetDriveTrainCommand(this));
       SmartDashboard.putData("Z", new InstantCommand(()->m_PoseEstimatorSubsystem.setCurrentPose(new Pose2d(5.5 + 0.145916,4, Rotation2d.kZero))));
-
+      SmartDashboard.putData("TT", new SwerveToProcessorCommand(m_robotDrive, m_PoseEstimatorSubsystem).withTimeout(15.0));
+      SmartDashboard.putData("R", new RandomRobotPosition(m_PoseEstimatorSubsystem));
 
     } // (isSimulation()
   } // (configureButtonBindings)
@@ -250,11 +254,10 @@ public class RobotContainer {
    * alliance wall.  The "Y" coordinates of the robot will be determined by the
    * PoseEstimator once an april tag is captured by the vision system.
    */
-   public static void setGyroAngleToStartMatch() {
+   public void setGyroAngleToStartMatch() {
     boolean isBlueAlliance = Utilities.isBlueAlliance(); // From the Field Management system.
-    double startingHeading; // degrees.
     if (isBlueAlliance) {
-      startingHeading = 0.0;
+      startingHeading = 180.0;
       m_robotDrive.setAngleDegrees(startingHeading);
       m_robotDrive.resetOdometry(
         new Pose2d(
@@ -264,7 +267,7 @@ public class RobotContainer {
         )
       );
     } else {
-      startingHeading = 180.0;
+      startingHeading = 0.0;
       m_robotDrive.setAngleDegrees(startingHeading);
       m_robotDrive.resetOdometry(
         new Pose2d(
@@ -282,14 +285,13 @@ public class RobotContainer {
    * close to the Processor wall. The X coodinate will be calculate based on the
    * assumption that the robot is just inside the starting box.
    */
-  public static void setGyroAngleToStartMatchProcessor() {
+  public void setGyroAngleToStartMatchProcessor() {
     double ProcessorZoneDepth = Units.inchesToMeters(13);
     double startingBoxDepth = Units.inchesToMeters(76.1);
     double startingRobotCenterY = FieldConstants.yMax - ProcessorZoneDepth - DriveConstants.kBackToCenterDistance;
     double startingRobotCenterX = FieldConstants.xMin + startingBoxDepth - DriveConstants.kRobotWidth/2.0 - Units.inchesToMeters(2.0)/* tape */;
 
     boolean isBlueAlliance = Utilities.isBlueAlliance(); // From the Field Management system.
-    double startingHeading; // degrees.
     if (isBlueAlliance) {
       startingHeading = 90; // Facing source wall
       m_robotDrive.setAngleDegrees(startingHeading);
@@ -318,6 +320,10 @@ public class RobotContainer {
     */
     public static boolean isSimulation() {
       return isSimulation;
+    }
+
+    public static double startingHeading() {
+      return startingHeading;
     }
 
 }

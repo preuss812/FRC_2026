@@ -41,6 +41,8 @@ public class PreussDriveSimulation {
             , simulatedRobotPose.getRotation().plus(new Rotation2d(rotationSpeed*seconds)));
 
             poseEstimatorSubsystem.setCurrentPose(simulatedRobotPose);
+            //RobotContainer.m_robotDrive.setAngleDegrees(simulatedRobotPose.getRotation().getDegrees());
+            RobotContainer.m_robotDrive.m_gyro.getAngle();
         }
     }
 

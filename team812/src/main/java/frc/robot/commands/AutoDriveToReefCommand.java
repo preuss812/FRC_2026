@@ -71,7 +71,7 @@ public class AutoDriveToReefCommand extends SequentialCommandGroup {
       //new WaitCommand(2.0),
 
       new InstantCommand(() ->SmartDashboard.putString("AutoCommand", "GotoReefPose")),
-      TrajectoryPlans.gotoFinalPoseCommand(robotDrive, poseEstimatorSubsystem).withTimeout(5.0),
+      TrajectoryPlans.gotoFinalPoseCommand(robotDrive, poseEstimatorSubsystem), //.withTimeout(5.0),
       //new StandStillCommand(robotDrive).withTimeout(0.1)
       new InstantCommand(() ->SmartDashboard.putString("AutoCommand", "driveDone"))
 

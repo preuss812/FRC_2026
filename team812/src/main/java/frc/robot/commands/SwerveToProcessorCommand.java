@@ -9,6 +9,7 @@ import java.util.function.Supplier;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.Constants.AutoConstants;
 import frc.robot.Constants.DriveConstants;
@@ -28,23 +29,23 @@ public class SwerveToProcessorCommand extends SequentialCommandGroup {
     // Add your commands in the addCommands() call, e.g.
     // addCommands(new FooCommand(), new BarCommand());
     var thetaController = new ProfiledPIDController(
-    AutoConstants.kPThetaController, 0, 0, AutoConstants.kThetaControllerConstraints);
+    AutoConstants.kPThetaController, 0, 0, new TrapezoidProfile.Constraints(Math.PI, Math.PI));
+      //AutoConstants.kThetaControllerConstraints);
     thetaController.enableContinuousInput(-Math.PI, Math.PI);
-    boolean faceReef = true;
+    boolean faceReef = false;
     Supplier<Rotation2d> rotationSupplier =  (faceReef) 
       ? () -> TrajectoryPlans.reefFacingRotationSupplier(poseEstimatorSubsystem)
       : () -> SwerveToProcessorSetupCommand.robotRotationToFaceProcessor();
     PreussSwerveControllerCommand debugSwerveControllerCommand = new PreussSwerveControllerCommand(
       null,
       poseEstimatorSubsystem::getCurrentPose, // Functional interface to feed supplier
-      DriveConstants.kDriveKinematics,
 
       // Position controllers
       new PIDController(AutoConstants.kPXController, 0, 0),
       new PIDController(AutoConstants.kPYController, 0, 0),
       thetaController,
       rotationSupplier,
-      robotDrive::setModuleStates,
+      robotDrive::driveFieldRelative,
       robotDrive);
 
     addCommands(

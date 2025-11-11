@@ -24,6 +24,7 @@ import frc.robot.ModifiedSlewRateLimiter;
 import frc.robot.Utilities;
 import frc.utils.DrivingConfig;
 import frc.utils.PreussDriveSimulation;
+import frc.robot.Autonomous;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.RobotContainer;
 
@@ -55,7 +56,7 @@ public class DriveSubsystemSRX extends SubsystemBase {
       DriveConstants.kBackRightChassisAngularOffset);
 
   // The gyro sensor
-  private final AHRS m_gyro = new AHRS(SerialPort.Port.kUSB1);
+  public final AHRS m_gyro = new AHRS(SerialPort.Port.kUSB1);
 
 
   // Slew rate filter variables for controlling lateral acceleration
@@ -257,12 +258,19 @@ public class DriveSubsystemSRX extends SubsystemBase {
     
     // Calculate the Chassis Speeds
     ChassisSpeeds chassisSpeeds = fieldRelative
-      ? ChassisSpeeds.fromFieldRelativeSpeeds(vxMetersPerSec, vyMetersPerSec, omegaRadiansPerSec, RobotContainer.m_PoseEstimatorSubsystem.getCurrentPose().getRotation())
+      ? ChassisSpeeds.fromFieldRelativeSpeeds(
+        vxMetersPerSec
+        ,vyMetersPerSec
+        ,omegaRadiansPerSec
+        ,RobotContainer.isSimulation()
+        ? Rotation2d.fromDegrees(0.0 * RobotContainer.startingHeading())
+        : Rotation2d.fromDegrees(-m_gyro.getAngle()))
       : new ChassisSpeeds(vxMetersPerSec, vyMetersPerSec, omegaRadiansPerSec);
 
     if (debug) {
       SmartDashboard.putNumber("ChassisSpeeds vx", chassisSpeeds.vxMetersPerSecond);
       SmartDashboard.putNumber("ChassisSpeeds vy", chassisSpeeds.vyMetersPerSecond);
+      //System.out.println("ChassisSpeeds vx"+chassisSpeeds.vxMetersPerSecond + " ChassisSpeeds vy"+chassisSpeeds.vyMetersPerSecond);
     }
 
     // For simulation, update the position of the robot based on the requested speeds.
@@ -450,8 +458,13 @@ public class DriveSubsystemSRX extends SubsystemBase {
       sample.omega * speedFactor + pidControllers[2].calculate(pose.getRotation().getRadians(), sample.heading)
     );
 
-    // Drive the robot at the calculated speeds    drive(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond, speeds.omegaRadiansPerSecond, false);
+    // Drive the robot at the calculated speeds    
+    drive(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond, speeds.omegaRadiansPerSecond, true);
 
+  }
+
+  public void driveFieldRelative(ChassisSpeeds speeds) {
+    drive(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond, speeds.omegaRadiansPerSecond, true);
   }
 
 }

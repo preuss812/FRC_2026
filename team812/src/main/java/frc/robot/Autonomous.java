@@ -37,6 +37,7 @@ import frc.robot.commands.FindAprilTagCommand;
 import frc.robot.commands.GotoAprilTagCommand;
 import frc.robot.commands.GotoPoseCommand;
 import frc.robot.commands.GotoProcessorCommand;
+//mport frc.robot.commands.RotateRobotAutoCommand;
 import frc.robot.commands.PushTowardsWallUltrasonic;
 import frc.robot.Constants.ElbowConstants;
 import frc.robot.Constants.AutoConstants;
@@ -128,7 +129,6 @@ public class Autonomous extends SequentialCommandGroup {
     
     // get the required subsystems for constructing the plans below.
     m_robotDrive = RobotContainer.m_robotDrive;
-    
     m_PoseEstimatorSubsystem = RobotContainer.m_PoseEstimatorSubsystem;
     m_PingResponseUltrasonicSubsystem = RobotContainer.m_PingResponseUltrasonicSubsystem;
 
@@ -139,7 +139,7 @@ public class Autonomous extends SequentialCommandGroup {
 
     // Initialize the robot before moving.
     addCommands(new ParallelCommandGroup(
-      new InstantCommand(() -> RobotContainer.setGyroAngleToStartMatch()),
+      new InstantCommand(() -> robotContainer.setGyroAngleToStartMatch()),
       new InstantCommand(() -> RobotContainer.m_robotDrive.setDrivingMode(DrivingMode.SPEED)) // TODO Should be SPEED, not PRECISION
       //new ElbowHomeCommand(m_ElbowRotationSubsystem),
       //new ShoulderHomeCommand(m_ShoulderRotationSubsystem),
@@ -158,6 +158,7 @@ public class Autonomous extends SequentialCommandGroup {
       return;
     }
 
+   
 
     // Perform the initial driving to get from the start line to the reef.
     double timeout = 15;
@@ -166,9 +167,10 @@ public class Autonomous extends SequentialCommandGroup {
     if (getAutoMode() == TrajectoryPlans.AUTO_MODE_CENTER_STRAIGHT)
       timeout = 8;
     addCommands(
-      new AutoDriveToReefCommand(m_robotDrive, m_PoseEstimatorSubsystem).withTimeout(timeout)
+      new AutoDriveToReefCommand(m_robotDrive, m_PoseEstimatorSubsystem) // .withTimeout(timeout)
     );
 
+    
     
   }
 }

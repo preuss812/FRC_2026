@@ -29,6 +29,7 @@ import frc.robot.Constants.DriveConstants;
 import frc.robot.Constants.FieldConstants;
 import frc.robot.commands.GotoPoseCommand;
 import frc.robot.commands.PreussSwerveControllerCommand;
+import frc.robot.commands.PreussSwerveControllerCommand;
 import frc.robot.subsystems.DriveSubsystemSRX;
 import frc.robot.subsystems.PoseEstimatorSubsystem;
 import frc.robot.subsystems.DriveSubsystemSRX.DrivingMode;
@@ -71,12 +72,12 @@ public class TrajectoryPlans {
     // the 0.9 is to allow headroom for the robot to make sure it does not run out of time during the FollowTrajectoryCommand.
     public static final TrajectoryConfig m_forwardTrajectoryConfig = new TrajectoryConfig(
         AutoConstants.kMaxSpeedMetersPerSecond*0.9,
-        AutoConstants.kMaxAccelerationMetersPerSecondSquared*0.9)
+        AutoConstants.kMaxAccelerationMetersPerSecondSquared*0.9*4.0)
         .setKinematics(DriveConstants.kDriveKinematics);
 
     public static final TrajectoryConfig m_reverseTrajectoryConfig = new TrajectoryConfig(
         AutoConstants.kMaxSpeedMetersPerSecond*1.0,
-        AutoConstants.kMaxAccelerationMetersPerSecondSquared*1.0)
+        AutoConstants.kMaxAccelerationMetersPerSecondSquared*1.0*4.0)
         .setKinematics(DriveConstants.kDriveKinematics)
         .setReversed(true);
     
@@ -572,13 +573,11 @@ public class TrajectoryPlans {
             command = new PreussSwerveControllerCommand(
             trajectory,
             poseEstimatorSubsystem::getCurrentPose, // Functional interface to feed supplier
-            DriveConstants.kDriveKinematics,
-
             // Position controllers
             new PIDController(AutoConstants.kPXController, 0, 0),
             new PIDController(AutoConstants.kPYController, 0, 0),
             new ProfiledPIDController(AutoConstants.kPThetaController, 0, 0, AutoConstants.kThetaControllerConstraints),
-            driveTrain::setModuleStates,
+            driveTrain::driveFieldRelative,
             driveTrain);
         } else {
             command = Commands.none();
@@ -618,14 +617,13 @@ public class TrajectoryPlans {
             command = new PreussSwerveControllerCommand(
             trajectory,
             poseEstimatorSubsystem::getCurrentPose, // Functional interface to feed supplier
-            DriveConstants.kDriveKinematics,
 
             // Position controllers
             new PIDController(AutoConstants.kPXController, 0, 0),
             new PIDController(AutoConstants.kPYController, 0, 0),
             thetaController,
             () -> reefFacingRotationSupplier(poseEstimatorSubsystem),
-            driveTrain::setModuleStates,
+            driveTrain::driveFieldRelative,
             driveTrain);
         } else {
             command = Commands.none();
@@ -699,21 +697,7 @@ public class TrajectoryPlans {
                 result = false;
             }
         }
-        /*
-         
-        if (Utilities.comparePoses(poseEstimatorSubsystem.getAprilTagPose(1),poseEstimatorSubsystem.getAprilTagPose(13),translationThreshold, rotationThreshold)
-        &&  Utilities.comparePoses(poseEstimatorSubsystem.getAprilTagPose(2),poseEstimatorSubsystem.getAprilTagPose(12),translationThreshold, rotationThreshold)
-        &&  Utilities.comparePoses(poseEstimatorSubsystem.getAprilTagPose(3),poseEstimatorSubsystem.getAprilTagPose(16),translationThreshold, rotationThreshold)
-        &&  Utilities.comparePoses(poseEstimatorSubsystem.getAprilTagPose(4),poseEstimatorSubsystem.getAprilTagPose(15),translationThreshold, rotationThreshold)
-        &&  Utilities.comparePoses(poseEstimatorSubsystem.getAprilTagPose(5),poseEstimatorSubsystem.getAprilTagPose(14),translationThreshold, rotationThreshold)
-        &&  Utilities.comparePoses(poseEstimatorSubsystem.getAprilTagPose(6),poseEstimatorSubsystem.getAprilTagPose(19),translationThreshold, rotationThreshold)
-        &&  Utilities.comparePoses(poseEstimatorSubsystem.getAprilTagPose(7),poseEstimatorSubsystem.getAprilTagPose(18),translationThreshold, rotationThreshold)
-        &&  Utilities.comparePoses(poseEstimatorSubsystem.getAprilTagPose(8),poseEstimatorSubsystem.getAprilTagPose(17),translationThreshold, rotationThreshold)
-        &&  Utilities.comparePoses(poseEstimatorSubsystem.getAprilTagPose(9),poseEstimatorSubsystem.getAprilTagPose(22),translationThreshold, rotationThreshold)
-        &&  Utilities.comparePoses(poseEstimatorSubsystem.getAprilTagPose(10),poseEstimatorSubsystem.getAprilTagPose(21),translationThreshold, rotationThreshold)
-        &&  Utilities.comparePoses(poseEstimatorSubsystem.getAprilTagPose(11),poseEstimatorSubsystem.getAprilTagPose(20),translationThreshold, rotationThreshold)) {
-         */
-         
+        
         return result;
     }
 
@@ -748,52 +732,6 @@ public class TrajectoryPlans {
             );
             }
         }
-    }
-
-    public static SequentialCommandGroup robotDanceCommand(DriveSubsystemSRX driveTrain, PoseEstimatorSubsystem poseEstimatorSubsystem, TrajectoryConfig config) {
-        Command command = null;
-        
-        ProfiledPIDController thetaController = new ProfiledPIDController(AutoConstants.kPThetaController, 0, 0, AutoConstants.kThetaControllerConstraints);
-        thetaController.enableContinuousInput(-Math.PI, Math.PI);
-        Pose2d[] danceMoves = new Pose2d[] {
-            new Pose2d(FieldConstants.blueRowOfAlgae,FieldConstants.yCenter,new Rotation2d(0.0)),
-            new Pose2d(FieldConstants.blueRowOfAlgae,FieldConstants.yCenter+1,new Rotation2d(Math.PI*7/4)),
-            new Pose2d(FieldConstants.blueRowOfAlgae+1,FieldConstants.yCenter,new Rotation2d(Math.PI*4/4)),
-            new Pose2d(FieldConstants.blueRowOfAlgae,FieldConstants.yCenter-1,new Rotation2d(Math.PI*1/4)),
-            new Pose2d(FieldConstants.blueRowOfAlgae+1,FieldConstants.yCenter+1,new Rotation2d(Math.PI*5/4)),
-            new Pose2d(FieldConstants.blueRowOfAlgae+1,FieldConstants.yCenter-1,new Rotation2d(Math.PI*3/4)),
-            new Pose2d(FieldConstants.blueRowOfAlgae+0.5,FieldConstants.yCenter,new Rotation2d(Math.PI*1/4)),
-            new Pose2d(FieldConstants.blueRowOfAlgae,FieldConstants.yCenter,new Rotation2d(0.0))
-        };
-
-        Trajectory trajectory = createTrajectory(danceMoves, config);
-        if (trajectory != null) {
-            command = new PreussSwerveControllerCommand(
-            trajectory,
-            poseEstimatorSubsystem::getCurrentPose, // Functional interface to feed supplier
-            DriveConstants.kDriveKinematics,
-
-            // Position controllers
-            new PIDController(AutoConstants.kPXController, 0, 0),
-            new PIDController(AutoConstants.kPYController, 0, 0),
-            thetaController,
-            driveTrain::setModuleStates,
-            driveTrain);
-        }
-        return new SequentialCommandGroup(
-            // might need some robot initialization here (e.g. home arm, check to see an april tag to make sure the robot is where it is assumed to be)
-            new InstantCommand(() -> RobotContainer.setGyroAngleToStartMatch()),
-            new InstantCommand(() -> RobotContainer.m_robotDrive.setDrivingMode(DrivingMode.PRECISION)),
-            //new VerifyStartingPositionCommand(poseEstimatorSubsystem, danceMoves[0]),
-            new InstantCommand(() -> poseEstimatorSubsystem.setCurrentPose(danceMoves[0])),
-            new InstantCommand(() -> poseEstimatorSubsystem.field2d.setRobotPose(danceMoves[0])), // for debug
-            new InstantCommand(() -> poseEstimatorSubsystem.field2d.getObject("trajectory").setTrajectory(trajectory)), // for debug
-            command,
-            new InstantCommand(() -> RobotContainer.m_PoseEstimatorSubsystem.field2d.setRobotPose(danceMoves[danceMoves.length-1])) // for debug
-            // may need a driveToPose to perfectly position the robot.
-            // will need some arm motion to socre the coral.
-            // could add additional actions to grab an algea and drive to the processor and score there.
-        );
     }
 
     public static List<Pose2d> sanitizeWaypoints(List<Pose2d> waypoints) {

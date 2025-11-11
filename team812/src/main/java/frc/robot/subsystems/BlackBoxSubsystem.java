@@ -60,12 +60,8 @@ public class BlackBoxSubsystem extends SubsystemBase {
     }
     public void printBits() {
     	readBits();
-//		System.out.println("ControlBox bits: " + Integer.toBinaryString(flagBits));
-	//	Robot.nttable.getEntry("Controlbox flagbits").setString(Integer.toBinaryString(flagBits));
     	String prespace = "";
-//    	System.out.print("Switches: ");
     	for (int i = 1; i<=7; i++) {
-//			System.out.print(prespace + i + "=" + (isSet(i) ? "on":"off"));
 			String iString = String.format( prespace + i + "=" + (isSet(i) ? "on":"off") );
 			String eString = String.format("ControlBox bit %d", i);
 			if (debug) SmartDashboard.putString(eString, iString);
@@ -75,28 +71,6 @@ public class BlackBoxSubsystem extends SubsystemBase {
 		if (debug) SmartDashboard.putNumber("Pot 0:", getPotValueScaled(0,0.0,5.0));
 		if (debug) SmartDashboard.putNumber("Pot 1:", getPotValueScaled(1,0.0,0.1));
 
-
-    /*
-    Robot.nttable.getEntry("ControlBox pot 0").setDouble(getPotValue(0));
-		Robot.nttable.getEntry("ControlBox pot 1").setDouble(getPotValue(1));
-		Robot.nttable.getEntry("ControlBox pot 0 scaled 0.0-5.0").setDouble(getPotValueScaled(0,0.0,5.0));
-		Robot.nttable.getEntry("ControlBox pot 1 scaled 0.0-2.0").setDouble(getPotValueScaled(1, 0.0, 2.0));
-
-		Robot.nttable.getEntry("ControlBox sw left").setString((isSwitchLeft() ? "true":"false"));
-		Robot.nttable.getEntry("ControlBox sw center").setString((isSwitchCenter() ? "true":"false"));
-    Robot.nttable.getEntry("ControlBox sw right").setString((isSwitchRight() ? "true":"false"));
-    */
-
-/*
-    	System.out.println("");
-    	System.out.println("ControlBox pot 0:  " + getPotValue(0));
-    	System.out.println("ControlBox pot 1:  " + getPotValue(1));
-    	
-    	System.out.println("Three position switch status:");
-    	System.out.println("\tleft: " + (isSwitchLeft() ? "true":"false"));
-    	System.out.println("\tcenter: " + (isSwitchCenter() ? "true":"false"));
-		System.out.println("\tright: " + (isSwitchRight() ? "true":"false"));
-		*/
     }
     
     /*

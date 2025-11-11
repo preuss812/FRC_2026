@@ -6,18 +6,18 @@ package frc.robot.commands;
 
 import static edu.wpi.first.util.ErrorMessages.requireNonNullParam;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.HolonomicDriveController;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
-import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
-import frc.robot.RobotContainer;
+import frc.robot.RobotContainer; // For simulation check and debugging.
 
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -26,7 +26,7 @@ import java.util.function.Supplier;
  * A command that uses two PID controllers ({@link PIDController}) and a ProfiledPIDController
  * ({@link ProfiledPIDController}) to follow a trajectory {@link Trajectory} with a swerve drive.
  *
- * <p>This command outputs the raw desired Swerve Module States ({@link SwerveModuleState}) in an
+ * <p>This command outputs the raw desired Chassis Speeds ({@link ChasisSpeeds}) in an
  * array. The desired wheel and module rotation velocities should be taken from those and used in
  * velocity PIDs.
  *
@@ -41,15 +41,16 @@ import java.util.function.Supplier;
  */
 public class PreussSwerveControllerCommand extends Command {
   private final Timer m_timer = new Timer();
-  protected Trajectory m_trajectory;
+  private Trajectory m_trajectory;
   private final Supplier<Pose2d> m_pose;
-  private final SwerveDriveKinematics m_kinematics;
   private final HolonomicDriveController m_controller;
-  private final Consumer<SwerveModuleState[]> m_outputModuleStates;
   private final Supplier<Rotation2d> m_desiredRotation;
+  private final Consumer<ChassisSpeeds> m_driveInputs;
+  private double m_count = 0;
+  private double m_speedFactor = 1.0; // Can be used to speed up or slow down the path following  1.0 = speed as defined in path.
 
   /**
-   * Constructs a new PreussSwerveControllerCommand that when executed will follow the provided
+   * Constructs a new PreussSwerveControllerCommand2 that when executed will follow the provided
    * trajectory. This command will not return output voltages but rather raw module states from the
    * position controllers which need to be put into a velocity PID.
    *
@@ -60,40 +61,37 @@ public class PreussSwerveControllerCommand extends Command {
    * @param trajectory The trajectory to follow.
    * @param pose A function that supplies the robot pose - use one of the odometry classes to
    *     provide this.
-   * @param kinematics The kinematics for the robot drivetrain.
    * @param xController The Trajectory Tracker PID controller for the robot's x position.
    * @param yController The Trajectory Tracker PID controller for the robot's y position.
    * @param thetaController The Trajectory Tracker PID controller for angle for the robot.
    * @param desiredRotation The angle that the drivetrain should be facing. This is sampled at each
    *     time step.
-   * @param outputModuleStates The raw output module states from the position controllers.
+   * @param driveInputs The output function to drive the robot [x,y,rot] speeds in meters/sec, meters/sec, and radians/sec
    * @param requirements The subsystems to require.
    */
   public PreussSwerveControllerCommand(
       Trajectory trajectory,
       Supplier<Pose2d> pose,
-      SwerveDriveKinematics kinematics,
       PIDController xController,
       PIDController yController,
       ProfiledPIDController thetaController,
       Supplier<Rotation2d> desiredRotation,
-      Consumer<SwerveModuleState[]> outputModuleStates,
+      Consumer<ChassisSpeeds> driveInputs,
       Subsystem... requirements) {
     this(
         trajectory,
         pose,
-        kinematics,
         new HolonomicDriveController(
-            requireNonNullParam(xController, "xController", "PreussSwerveControllerCommand"),
-            requireNonNullParam(yController, "yController", "PreussSwerveControllerCommand"),
-            requireNonNullParam(thetaController, "thetaController", "PreussSwerveControllerCommand")),
+            requireNonNullParam(xController, "xController", "PreussSwerveControllerCommand2"),
+            requireNonNullParam(yController, "yController", "PreussSwerveControllerCommand2"),
+            requireNonNullParam(thetaController, "thetaController", "PreussSwerveControllerCommand2")),
         desiredRotation,
-        outputModuleStates,
+        driveInputs,
         requirements);
   }
 
   /**
-   * Constructs a new PreussSwerveControllerCommand that when executed will follow the provided
+   * Constructs a new PreussSwerveControllerCommand2 that when executed will follow the provided
    * trajectory. This command will not return output voltages but rather raw module states from the
    * position controllers which need to be put into a velocity PID.
    *
@@ -108,37 +106,33 @@ public class PreussSwerveControllerCommand extends Command {
    * @param trajectory The trajectory to follow.
    * @param pose A function that supplies the robot pose - use one of the odometry classes to
    *     provide this.
-   * @param kinematics The kinematics for the robot drivetrain.
    * @param xController The Trajectory Tracker PID controller for the robot's x position.
    * @param yController The Trajectory Tracker PID controller for the robot's y position.
    * @param thetaController The Trajectory Tracker PID controller for angle for the robot.
-   * @param outputModuleStates The raw output module states from the position controllers.
+   * @param driveInputs The output function to drive the robot [x,y,rot] speeds in meters/sec, meters/sec, and radians/sec
    * @param requirements The subsystems to require.
    */
   public PreussSwerveControllerCommand(
       Trajectory trajectory,
       Supplier<Pose2d> pose,
-      SwerveDriveKinematics kinematics,
       PIDController xController,
       PIDController yController,
       ProfiledPIDController thetaController,
-      Consumer<SwerveModuleState[]> outputModuleStates,
+      Consumer<ChassisSpeeds> driveInputs,
       Subsystem... requirements) {
     this(
         trajectory,
         pose,
-        kinematics,
         xController,
         yController,
         thetaController,
-        () ->
-            trajectory.getStates().get(trajectory.getStates().size() - 1).poseMeters.getRotation(),
-        outputModuleStates,
+        () -> trajectory.getStates().get(trajectory.getStates().size() - 1).poseMeters.getRotation(),
+        driveInputs,
         requirements);
   }
 
   /**
-   * Constructs a new PreussSwerveControllerCommand that when executed will follow the provided
+   * Constructs a new PreussSwerveControllerCommand2 that when executed will follow the provided
    * trajectory. This command will not return output voltages but rather raw module states from the
    * position controllers which need to be put into a velocity PID.
    *
@@ -153,31 +147,27 @@ public class PreussSwerveControllerCommand extends Command {
    * @param trajectory The trajectory to follow.
    * @param pose A function that supplies the robot pose - use one of the odometry classes to
    *     provide this.
-   * @param kinematics The kinematics for the robot drivetrain.
    * @param controller The HolonomicDriveController for the drivetrain.
-   * @param outputModuleStates The raw output module states from the position controllers.
+   * @param driveInputs The output function to drive the robot [x,y,rot] speeds in meters/sec, meters/sec, and radians/sec
    * @param requirements The subsystems to require.
    */
   public PreussSwerveControllerCommand(
       Trajectory trajectory,
       Supplier<Pose2d> pose,
-      SwerveDriveKinematics kinematics,
       HolonomicDriveController controller,
-      Consumer<SwerveModuleState[]> outputModuleStates,
+      Consumer<ChassisSpeeds> driveInputs,
       Subsystem... requirements) {
     this(
         trajectory,
         pose,
-        kinematics,
         controller,
-        () ->
-            trajectory.getStates().get(trajectory.getStates().size() - 1).poseMeters.getRotation(),
-        outputModuleStates,
+        () -> trajectory.getStates().get(trajectory.getStates().size() - 1).poseMeters.getRotation(),
+        driveInputs,
         requirements);
   }
 
   /**
-   * Constructs a new PreussSwerveControllerCommand that when executed will follow the provided
+   * Constructs a new PreussSwerveControllerCommand2 that when executed will follow the provided
    * trajectory. This command will not return output voltages but rather raw module states from the
    * position controllers which need to be put into a velocity PID.
    *
@@ -187,32 +177,28 @@ public class PreussSwerveControllerCommand extends Command {
    * @param trajectory The trajectory to follow.
    * @param pose A function that supplies the robot pose - use one of the odometry classes to
    *     provide this.
-   * @param kinematics The kinematics for the robot drivetrain.
    * @param controller The HolonomicDriveController for the drivetrain.
    * @param desiredRotation The angle that the drivetrain should be facing. This is sampled at each
    *     time step.
-   * @param outputModuleStates The raw output module states from the position controllers.
+   * @param driveInputs The output function to drive the robot [x,y,rot] speeds in meters/sec, meters/sec, and radians/sec
    * @param requirements The subsystems to require.
    */
   @SuppressWarnings("this-escape")
   public PreussSwerveControllerCommand(
       Trajectory trajectory,
       Supplier<Pose2d> pose,
-      SwerveDriveKinematics kinematics,
       HolonomicDriveController controller,
       Supplier<Rotation2d> desiredRotation,
-      Consumer<SwerveModuleState[]> outputModuleStates,
+      Consumer<ChassisSpeeds> driveInputs,
       Subsystem... requirements) {
-    m_trajectory = trajectory; //requireNonNullParam(trajectory, "trajectory", "PreussSwerveControllerCommand");
-    m_pose = requireNonNullParam(pose, "pose", "PreussSwerveControllerCommand");
-    m_kinematics = requireNonNullParam(kinematics, "kinematics", "PreussSwerveControllerCommand");
-    m_controller = requireNonNullParam(controller, "controller", "PreussSwerveControllerCommand");
-
+    m_trajectory = trajectory; //requireNonNullParam(trajectory, "trajectory", "PreussSwerveControllerCommand2");
+    m_pose = requireNonNullParam(pose, "pose", "PreussSwerveControllerCommand2");
+    m_controller = requireNonNullParam(controller, "controller", "PreussSwerveControllerCommand2");
     m_desiredRotation =
-        requireNonNullParam(desiredRotation, "desiredRotation", "PreussSwerveControllerCommand");
+      requireNonNullParam(desiredRotation, "desiredRotation", "PreussSwerveControllerCommand2");
 
-    m_outputModuleStates =
-        requireNonNullParam(outputModuleStates, "outputModuleStates", "PreussSwerveControllerCommand");
+    m_driveInputs =
+      requireNonNullParam(driveInputs, "driveInputs", "PreussSwerveControllerCommand2");
 
     addRequirements(requirements);
   }
@@ -220,42 +206,102 @@ public class PreussSwerveControllerCommand extends Command {
   @Override
   public void initialize() {
     m_timer.restart();
+    m_count = 0;
+    if (m_trajectory != null)
+      RobotContainer.m_PoseEstimatorSubsystem.field2d.getObject("trajectory").setTrajectory(m_trajectory);
   }
 
   @Override
   public void execute() {
     if (m_trajectory == null) return;
-    double curTime = m_timer.get();
-    var desiredState = m_trajectory.sample(curTime);
-    Pose2d desiredPose = desiredState.poseMeters;
 
+    double curTime = m_timer.get() * m_speedFactor;
+
+    // If we are simulating, increment time based on count of executions.
+    // This allows for thinking during breakpoints.  Without this, the time
+    // would likely use up the entire time during a breakpoint.
     if (RobotContainer.isSimulation()) {
-      RobotContainer.m_PoseEstimatorSubsystem.setCurrentPose( new Pose2d(desiredPose.getTranslation(), m_desiredRotation.get()));
-      RobotContainer.m_PoseEstimatorSubsystem.field2d.setRobotPose(new Pose2d(desiredPose.getTranslation(), m_desiredRotation.get()));
+      curTime = m_count++ * 0.02 * m_speedFactor; // simulate a 20ms periodic update
     }
-    var targetChassisSpeeds =
-        m_controller.calculate(m_pose.get(), desiredState, m_desiredRotation.get());
-    var targetModuleStates = m_kinematics.toSwerveModuleStates(targetChassisSpeeds);
 
-    m_outputModuleStates.accept(targetModuleStates);
+    // get the trajectory information.
+    var desiredState = m_trajectory.sample(curTime);
+    Pose2d trajectoryPose = desiredState.poseMeters;
+
+    // get the current robot position and orientation.
+    Pose2d currentPose = m_pose.get();
+
+    // get the desired rotation for the robot from the supplier and the current rotation
+    // and compute the rotation error.
+    Rotation2d desiredRotation = m_desiredRotation.get();
+    Rotation2d currentRotation = currentPose.getRotation();
+    double m_rotationError = MathUtil.angleModulus(desiredRotation.minus(currentRotation).getRadians());
+    
+    /*
+     * Calculate feedforward velocities (field-relative).
+     *The input is a direction stored as the trajectory rotation.
+     * Note that the trajectoryPose.rotation is not the robot's intended rotation.
+     * The rotation comes from the rotation supplier which for 2025 was typically the 
+     * robot rotation which will face the robot's camera at the target april tag.
+     * The *FF values are the FeedForward speeds which ignores the actual field coordiantes
+     * of the robot and uses the ideal position from the trajectory.
+     */
+    double xFF = desiredState.velocityMetersPerSecond * trajectoryPose.getRotation().getCos() * m_speedFactor;
+    double yFF = desiredState.velocityMetersPerSecond * trajectoryPose.getRotation().getSin() * m_speedFactor;
+    double thetaFF = m_controller.getThetaController().calculate(0.0, m_rotationError);
+
+    /*
+     * Calculate feedback velocities (based on position error).
+     * This provides a correction based on the difference between the rubots actual field position
+     * versus the ideal position from the trajectory.  This is what corrects for any error in starting position,
+     * slippage, or other factors that would cause the robot to deviate from the intended path.
+     */
+    double xFeedback = m_controller.getXController().calculate(currentPose.getX(), trajectoryPose.getX());
+    double yFeedback = m_controller.getYController().calculate(currentPose.getY(), trajectoryPose.getY());
+    
+    // Generate the next speeds for the robot
+    ChassisSpeeds speeds = new ChassisSpeeds(
+      xFF + xFeedback,
+      yFF + yFeedback,
+      thetaFF
+    );
+
+    // Drive the robot at the calculated speeds    
+    m_driveInputs.accept( speeds );
   }
 
   @Override
   public void end(boolean interrupted) {
     m_timer.stop();
+    m_driveInputs.accept( new ChassisSpeeds(0.0,0.0,0.0));
+
+    RobotContainer.m_PoseEstimatorSubsystem.field2d.getObject("trajectory").setTrajectory(new Trajectory());
   }
 
   @Override
   public boolean isFinished() {
     if (m_trajectory == null) return true;
-    if (m_timer.hasElapsed(m_trajectory.getTotalTimeSeconds())) {
-      return true;
-    } else {
-      return false;
-    }
+    double curTime = getTime();
+  
+    return (curTime >=m_trajectory.getTotalTimeSeconds());
   }
 
-  public void setTrajectory (Trajectory trajectory) {
+  /*
+   * getTime - helper function to return time possible modified by the speed factor.
+   * m_speedFactor is used to speed up or slow down the path following  1.0 = speed as defined in path.
+   * isSimulation check is used to simulate time in a way that allows for breakpoints during simulation.
+   * @return time to be used for trajectory sampling.
+   */
+  private double getTime() {
+    double curTime = m_timer.get() * m_speedFactor;
+    if (RobotContainer.isSimulation()) {
+      curTime = m_count * 0.02 * m_speedFactor; // simulate a 20ms periodic update
+    }
+    return curTime;
+  }
+
+  // 
+  public void setTrajectory(Trajectory trajectory) {
     m_trajectory = trajectory;
   }
 }

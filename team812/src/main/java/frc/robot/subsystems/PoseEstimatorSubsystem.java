@@ -143,6 +143,10 @@ public class PoseEstimatorSubsystem extends SubsystemBase {
     return poseEstimator.getEstimatedPosition();
   }
 
+  public Pose2d getCurrentPoseFakeRotation() {
+    return new Pose2d(poseEstimator.getEstimatedPosition().getTranslation(), drivetrainSubsystem.getRotation());
+  }
+
   /**
    * Resets the current pose to the specified pose. This should ONLY be called
    * when the robot's position on the field is known, like at the beginning of
