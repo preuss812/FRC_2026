@@ -132,9 +132,6 @@ public class RobotContainer {
 
     // Configure the button bindings
     configureButtonBindings();
-    if (debug) {
-      SmartDashboard.putString("OS", System.getProperty("os.name")); // temporary to find out the os on the roborio - dh 2025-10-30
-    }
 
     // Configure default commands
 

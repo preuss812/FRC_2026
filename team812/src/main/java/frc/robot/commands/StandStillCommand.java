@@ -24,7 +24,7 @@ public class StandStillCommand extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    robotDrive.drive(0,0,0,true,true);
+    robotDrive.drive(0,0,0,true,false);
   }
 
   // Called once the command ends or is interrupted.

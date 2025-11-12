@@ -1,7 +1,5 @@
 package frc.utils;
 
-import static edu.wpi.first.units.Units.Kilo;
-
 import edu.wpi.first.math.geometry.Translation2d;
 
 public class Line {

@@ -20,11 +20,9 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.SerialPort;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.ModifiedSlewRateLimiter;
 import frc.robot.Utilities;
 import frc.utils.DrivingConfig;
-import frc.utils.PreussDriveSimulation;
-import frc.robot.Autonomous;
+import frc.utils.ModifiedSlewRateLimiter;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.RobotContainer;
 

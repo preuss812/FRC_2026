@@ -15,11 +15,7 @@ import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.subsystems.DriveSubsystemSRX.DrivingMode;
-//import frc.robot.Constants.OIConstants;
-//import frc.robot.subsystems.DriveSubsystemSRX;
 import edu.wpi.first.cameraserver.CameraServer;
-
-// import frc.robot.RobotContainer;
 
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to
@@ -32,17 +28,9 @@ public class Robot extends TimedRobot {
 
   private RobotContainer m_robotContainer;
   public static NetworkTable nttable;
-  static int i = 0;
-  private static boolean debug = true;
-  private static boolean usingCameraServer = true; // Set to true to enable the usb camera plugged into the roboRIO.
+  private static boolean debug = false;
+  private static boolean usingCameraServer = false; // Set to true to enable the usb camera plugged into the roboRIO.
   public static SendableChooser<Integer> autoChooser = new SendableChooser<>();
-
-  /*
-  private boolean drivingSwitchPosition = false; // Assume the switch is not set (SPEED mode).
-  private boolean endGameSwitchPosition = false; // Assume we are not starting in endgame.
-  private boolean blackBox = false; // For now we are not using the black box.
-  private boolean powerDistribution = false; // For now we are not tracking power distribution.
-  */
 
   /**
    * This function is run when the robot is first started up and should be used for any
@@ -63,10 +51,6 @@ public class Robot extends TimedRobot {
     if (debug) SmartDashboard.putData(CommandScheduler.getInstance()); // This puts running commands on the shuffleboard.
     addPeriodic(() -> Utilities.setAlliance(), 1.0 );
 
-    // Add a dropdown menu to select the autonomous plan.
-
-    //SmartDashboard.putNumber("AutoStartDelay", 0.0);  // This puts up a place on the dashboard we can use to modify autonomous.
-    
   }
 
   /**
@@ -78,15 +62,7 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void robotPeriodic() {
-    //try {
-      //int autoMode = autoChooser.getSelected();
     
-      // These next 2 are redundant and just for debug:
-      //SmartDashboard.putNumber("AutoMode", autoMode);
-      //SmartDashboard.putString("AutoModeText", TrajectoryPlans.autoNames.get(autoMode));
-    //}
-    //catch (Exception e) {}
-
     // Runs the Scheduler.  This is responsible for polling buttons, adding newly-scheduled
     // commands, running already-scheduled commands, removing finished or interrupted commands,
     // and running subsystem periodic() methods.  This must be called from the robot's periodic

@@ -7,43 +7,18 @@
 
 package frc.robot;
 
-import org.photonvision.PhotonCamera;
-
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.util.Units;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
-import edu.wpi.first.wpilibj2.command.WaitCommand;
-import edu.wpi.first.wpilibj2.command.ParallelDeadlineGroup;
-import edu.wpi.first.wpilibj2.command.ParallelRaceGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
-
-import frc.robot.subsystems.*;
+import frc.robot.subsystems.DriveSubsystemSRX;
 import frc.robot.subsystems.DriveSubsystemSRX.DrivingMode;
-import frc.robot.commands.SwerveToProcessorCommand;
-import frc.robot.commands.VerifyStartingPositionCommand;
-import frc.robot.commands.WaitToSeeAprilTagCommand;
+import frc.robot.subsystems.PoseEstimatorSubsystem;
 import frc.robot.commands.AutoDriveToReefCommand;
-import frc.robot.commands.AutonomousStartDelayCommand;
-import frc.robot.commands.DriveRobotCommand;
 import frc.robot.commands.DriveWithoutVisionCommand;
-import frc.robot.commands.FindAprilTagCommand;
-import frc.robot.commands.GotoAprilTagCommand;
-import frc.robot.commands.GotoPoseCommand;
-import frc.robot.commands.GotoProcessorCommand;
-//mport frc.robot.commands.RotateRobotAutoCommand;
-import frc.robot.commands.PushTowardsWallUltrasonic;
-import frc.robot.Constants.ElbowConstants;
-import frc.robot.Constants.AutoConstants;
-import frc.robot.Constants.DriveConstants;
 import frc.robot.Constants.FieldConstants;
-import frc.robot.Constants.ShoulderConstants;
 import frc.robot.Constants.VisionConstants;
 
 /**
@@ -60,7 +35,6 @@ public class Autonomous extends SequentialCommandGroup {
    * Creates a new Autonomous.
    */
   private final DriveSubsystemSRX m_robotDrive;
-  private final PingResponseUltrasonicSubsystem m_PingResponseUltrasonicSubsystem;
   private final PoseEstimatorSubsystem m_PoseEstimatorSubsystem;
   public static boolean reefCenterSet = false;
   public static double myReefX;
@@ -130,7 +104,6 @@ public class Autonomous extends SequentialCommandGroup {
     // get the required subsystems for constructing the plans below.
     m_robotDrive = RobotContainer.m_robotDrive;
     m_PoseEstimatorSubsystem = RobotContainer.m_PoseEstimatorSubsystem;
-    m_PingResponseUltrasonicSubsystem = RobotContainer.m_PingResponseUltrasonicSubsystem;
 
     // Set up the alliance first.  Other commands need to know which alliance to operate correctly.
     Utilities.setAlliance();
@@ -167,7 +140,7 @@ public class Autonomous extends SequentialCommandGroup {
     if (getAutoMode() == TrajectoryPlans.AUTO_MODE_CENTER_STRAIGHT)
       timeout = 8;
     addCommands(
-      new AutoDriveToReefCommand(m_robotDrive, m_PoseEstimatorSubsystem) // .withTimeout(timeout)
+      new AutoDriveToReefCommand(m_robotDrive, m_PoseEstimatorSubsystem).withTimeout(timeout)
     );
 
     

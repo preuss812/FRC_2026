@@ -23,16 +23,13 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.SwerveControllerCommand;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.Constants.FieldConstants;
 import frc.robot.commands.GotoPoseCommand;
 import frc.robot.commands.PreussSwerveControllerCommand;
-import frc.robot.commands.PreussSwerveControllerCommand;
 import frc.robot.subsystems.DriveSubsystemSRX;
 import frc.robot.subsystems.PoseEstimatorSubsystem;
-import frc.robot.subsystems.DriveSubsystemSRX.DrivingMode;
 
 /** 
  * This class supplies data to create trajectories from any point on the field to the Processor 

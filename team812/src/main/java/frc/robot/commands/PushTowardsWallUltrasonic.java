@@ -41,7 +41,7 @@ public class PushTowardsWallUltrasonic extends Command {
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    robotDrive.drive(0,0,0, true, true);
+    robotDrive.drive(0,0,0, true, false);
   }
 
   // Returns true when the command should end.
