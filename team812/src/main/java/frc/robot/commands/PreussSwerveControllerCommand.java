@@ -215,14 +215,8 @@ public class PreussSwerveControllerCommand extends Command {
   public void execute() {
     if (m_trajectory == null) return;
 
-    double curTime = m_timer.get() * m_speedFactor;
-
-    // If we are simulating, increment time based on count of executions.
-    // This allows for thinking during breakpoints.  Without this, the time
-    // would likely use up the entire time during a breakpoint.
-    if (RobotContainer.isSimulation()) {
-      curTime = m_count++ * 0.02 * m_speedFactor; // simulate a 20ms periodic update
-    }
+    // get the time (or simulated time)
+    double curTime = getTime();
 
     // get the trajectory information.
     var desiredState = m_trajectory.sample(curTime);
@@ -268,6 +262,7 @@ public class PreussSwerveControllerCommand extends Command {
 
     // Drive the robot at the calculated speeds    
     m_driveInputs.accept( speeds );
+    m_count++; // For debugging simulation.
   }
 
   @Override
@@ -293,10 +288,16 @@ public class PreussSwerveControllerCommand extends Command {
    * @return time to be used for trajectory sampling.
    */
   private double getTime() {
-    double curTime = m_timer.get() * m_speedFactor;
+
+    double curTime = m_timer.get() * m_speedFactor;  // Slow down time if requested.
+
+    // If we are simulating, increment time based on count of executions.
+    // This allows for thinking during breakpoints.  Without this, the time
+    // would likely use up the entire time during a breakpoint.
     if (RobotContainer.isSimulation()) {
       curTime = m_count * 0.02 * m_speedFactor; // simulate a 20ms periodic update
     }
+    
     return curTime;
   }
 

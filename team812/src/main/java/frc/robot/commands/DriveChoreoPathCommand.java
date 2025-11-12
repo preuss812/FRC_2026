@@ -11,6 +11,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.RobotContainer;
 import frc.robot.subsystems.DriveSubsystemSRX;
 import frc.robot.subsystems.PoseEstimatorSubsystem;
 import frc.utils.DrivingConfig;
@@ -29,8 +30,9 @@ public class DriveChoreoPathCommand extends Command {
   private final DriveSubsystemSRX robotDrive;
   private final PoseEstimatorSubsystem poseEstimatorSubsystem;
   private Optional<Trajectory<SwerveSample>> trajectory;
-  private final Timer timer = new Timer();
-  private final double speedFactor; // Can be used to speed up or slow down the path following  1.0 = speed as defined in path.
+  private final Timer m_timer = new Timer();
+  private final double m_speedFactor; // Can be used to speed up or slow down the path following  1.0 = speed as defined in path.
+  private int m_count = 0; // Used for simulating time in a way that allows for breakpoints during simulation.
   private PIDController[] pidControllers = new PIDController[3]; // X, Y, and Rotation
 
   /** Creates a new DriveChoreoPathCommand. */
@@ -44,7 +46,7 @@ public class DriveChoreoPathCommand extends Command {
     this.robotDrive = robotDrive;
     this.poseEstimatorSubsystem = poseEstimatorSubsystem;
     this.trajectoryName = trajectoryName;
-    this.speedFactor = speedFactor;
+    this.m_speedFactor = speedFactor;
     trajectory  = Choreo.loadTrajectory(trajectoryName);
     pidControllers[0] = new PIDController(10.0 * pidCorrectionFactor, 0.0, 0.0);
     pidControllers[1] = new PIDController(10.0 * pidCorrectionFactor, 0.0, 0.0);
@@ -58,8 +60,8 @@ public class DriveChoreoPathCommand extends Command {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-   
-   if (trajectory.isPresent()) {
+    m_count = 0;
+    if (trajectory.isPresent()) {
      //RobotContainer.m_PoseEstimatorSubsystem.field2d.getObject("trajectory").setTrajectory(trajectory.get());// wrong class of trajectory
             // Get the initial pose of the trajectory
             Optional<Pose2d> initialPose = trajectory.get().getInitialPose(isRedAlliance());
@@ -87,7 +89,7 @@ public class DriveChoreoPathCommand extends Command {
           }
 
         // Reset and start the timer when the autonomous period begins
-        timer.restart();
+        m_timer.restart();
     
   }
 
@@ -97,12 +99,13 @@ public class DriveChoreoPathCommand extends Command {
 
    if (trajectory.isPresent()) {
       // Sample the trajectory at the current time into the autonomous period
-      Optional<SwerveSample> sample = trajectory.get().sampleAt(timer.get() * speedFactor, isRedAlliance());
+      Optional<SwerveSample> sample = trajectory.get().sampleAt(getTime(), isRedAlliance());
 
       if (sample.isPresent()) {
-          robotDrive.followTrajectory(sample.get(),pidControllers, speedFactor);
+          robotDrive.followTrajectory(sample.get(),pidControllers, m_speedFactor);
       }
     }
+    m_count++;
   
   }
 
@@ -113,10 +116,25 @@ public class DriveChoreoPathCommand extends Command {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return trajectory.isPresent() && (timer.get() * speedFactor >= trajectory.get().getTotalTime());
+    return trajectory.isPresent() && (getTime() >= trajectory.get().getTotalTime());
   }
 
   private boolean isRedAlliance() {
-        return DriverStation.getAlliance().orElse(Alliance.Blue).equals(Alliance.Red);
+    return DriverStation.getAlliance().orElse(Alliance.Blue).equals(Alliance.Red);
+  }
+
+  /*
+   * getTime - helper function to return time possible modified by the speed factor.
+   * m_speedFactor is used to speed up or slow down the path following  1.0 = speed as defined in path.
+   * isSimulation check is used to simulate time in a way that allows for breakpoints during simulation.
+   * @return time to be used for trajectory sampling.
+   */
+  private double getTime() {
+    double curTime = m_timer.get() * m_speedFactor;
+    if (RobotContainer.isSimulation()) {
+      curTime = m_count * 0.02 * m_speedFactor; // simulate a 20ms periodic update
     }
+    return curTime;
+  }
+
 }
