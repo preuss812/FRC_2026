@@ -254,7 +254,7 @@ public class RobotContainer {
    public void setGyroAngleToStartMatch() {
     boolean isBlueAlliance = Utilities.isBlueAlliance(); // From the Field Management system.
     if (isBlueAlliance) {
-      startingHeading = 180.0;
+      startingHeading = 0.0;
       m_robotDrive.setAngleDegrees(startingHeading);
       m_robotDrive.resetOdometry(
         new Pose2d(
@@ -264,7 +264,7 @@ public class RobotContainer {
         )
       );
     } else {
-      startingHeading = 0.0;
+      startingHeading = 180.0;
       m_robotDrive.setAngleDegrees(startingHeading);
       m_robotDrive.resetOdometry(
         new Pose2d(
