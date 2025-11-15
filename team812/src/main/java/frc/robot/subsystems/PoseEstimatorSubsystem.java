@@ -95,7 +95,7 @@ public class PoseEstimatorSubsystem extends SubsystemBase {
 
   @Override
   public void periodic() {
-    Utilities.toSmartDashboard("PE CurrentPose", getCurrentPose());
+    Utilities.toSmartDashboard("CurrentPose", getCurrentPose());
 
     // Check each camera for new vision measurements.
     int fiducialId = VisionConstants.NO_TAG_FOUND;
@@ -128,6 +128,8 @@ public class PoseEstimatorSubsystem extends SubsystemBase {
     if (debug) {
       SmartDashboard.putNumber("Pose X", getCurrentPose().getX());
       SmartDashboard.putNumber("Pose Y", getCurrentPose().getY());
+      SmartDashboard.putNumber("Pose R", getCurrentPose().getRotation().getDegrees());
+
     }
   }
 

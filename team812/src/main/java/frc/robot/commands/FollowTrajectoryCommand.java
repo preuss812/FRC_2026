@@ -99,6 +99,8 @@ public class FollowTrajectoryCommand extends SequentialCommandGroup {
       thetaController.enableContinuousInput(-Math.PI, Math.PI);
 
     PreussSwerveControllerCommand debugSwerveControllerCommand = new PreussSwerveControllerCommand(
+      robotDrive,
+      poseEstimatorSubsystem,
       trajectory,
       poseEstimatorSubsystem::getCurrentPose, // Functional interface to feed supplier
       // Position controllers

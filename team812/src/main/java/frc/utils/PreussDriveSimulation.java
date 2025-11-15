@@ -7,9 +7,10 @@ import frc.robot.subsystems.PoseEstimatorSubsystem;
 
 /**
  * This class is useful for autonomous or semi autonomous commands
- * It supplies x,y,theta pid controllers and supports viewing the dirving on the shuffleboard
- * in simulation mode for faster debugging.
- * 
+ * It accepts x,y,theta speeds and updates the poseEstimator so that the motion can
+ * be viewed in the shuffleboard or other visualization tools.
+ * Note that the simulated motion does not take into account physics but instead 
+ * simply updates the robot position based on the commanded speeds.
  */
 public class PreussDriveSimulation {
 
@@ -27,7 +28,13 @@ public class PreussDriveSimulation {
         simulatedRobotPose = poseEstimatorSubsystem.getCurrentPose();
     }
 
-    public  void drive(double xSpeed, double ySpeed, double rotationSpeed) {
+    /*
+    * Drive method for simulation mode.
+    * @param xSpeed - speed in the x direction (meters per second)
+    * @param ySpeed - speed in the y direction (meters per second)
+    * @param rotationSpeed - rotational speed (radians per second)
+    */
+    public void drive(double xSpeed, double ySpeed, double rotationSpeed) {
         if (RobotContainer.isSimulation()) {
             // For debug, update the forced robot location based on the x,y,theta applied.
             double seconds=0.020; // Rate that the simulation applies the changes to the robot's position.
@@ -38,15 +45,23 @@ public class PreussDriveSimulation {
             , simulatedRobotPose.getRotation().plus(new Rotation2d(rotationSpeed*seconds)));
 
             poseEstimatorSubsystem.setCurrentPose(simulatedRobotPose);
+
+            /*
+             * TODO:implement simulation of the gyro angle.
+             * I wanted to update the drivetrain pose and the gyro angle for a more complete simulation
+             * but that functionality is not currently implemented.
+             * As a consequence, reliance on the gyro angle direclly will not work as the gyro angle will likely always be zero.
+             */
             //RobotContainer.m_robotDrive.setAngleDegrees(simulatedRobotPose.getRotation().getDegrees());
-            RobotContainer.m_robotDrive.m_gyro.getAngle();
+            //RobotContainer.m_robotDrive.m_gyro.getAngle();
         }
     }
 
     public void setCurrentPose(Pose2d pose) {
         simulatedRobotPose = pose;
         poseEstimatorSubsystem.setCurrentPose(simulatedRobotPose);
-    } 
+    }
+
     public Pose2d getCurrentPose() {
         return poseEstimatorSubsystem.getCurrentPose();
     }

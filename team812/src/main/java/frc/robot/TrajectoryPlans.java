@@ -568,6 +568,8 @@ public class TrajectoryPlans {
         Command command;
         if (trajectory != null) {
             command = new PreussSwerveControllerCommand(
+            driveTrain,
+            poseEstimatorSubsystem,
             trajectory,
             poseEstimatorSubsystem::getCurrentPose, // Functional interface to feed supplier
             // Position controllers
@@ -612,6 +614,8 @@ public class TrajectoryPlans {
             ProfiledPIDController thetaController = new ProfiledPIDController(AutoConstants.kPThetaController, 0, 0, AutoConstants.kThetaControllerConstraints);
             thetaController.enableContinuousInput(-Math.PI, Math.PI);
             command = new PreussSwerveControllerCommand(
+            driveTrain,
+            poseEstimatorSubsystem,
             trajectory,
             poseEstimatorSubsystem::getCurrentPose, // Functional interface to feed supplier
 

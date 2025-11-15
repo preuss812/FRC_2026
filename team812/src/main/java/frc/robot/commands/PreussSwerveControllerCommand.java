@@ -17,7 +17,11 @@ import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
+import frc.robot.Constants;
 import frc.robot.RobotContainer; // For simulation check and debugging.
+import frc.robot.Utilities;
+import frc.robot.subsystems.DriveSubsystemSRX;
+import frc.robot.subsystems.PoseEstimatorSubsystem;
 
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -40,11 +44,13 @@ import java.util.function.Supplier;
    *
  */
 public class PreussSwerveControllerCommand extends Command {
+  private final DriveSubsystemSRX m_robotDrive;
+  private final PoseEstimatorSubsystem m_poseEstimatorSubsystem;
   private final Timer m_timer = new Timer();
   private Trajectory m_trajectory;
   private final Supplier<Pose2d> m_pose;
   private final HolonomicDriveController m_controller;
-  private final Supplier<Rotation2d> m_desiredRotation;
+  private Supplier<Rotation2d> m_rotationSupplier;
   private final Consumer<ChassisSpeeds> m_driveInputs;
   private double m_count = 0;
   private double m_speedFactor = 1.0; // Can be used to speed up or slow down the path following  1.0 = speed as defined in path.
@@ -70,6 +76,8 @@ public class PreussSwerveControllerCommand extends Command {
    * @param requirements The subsystems to require.
    */
   public PreussSwerveControllerCommand(
+      DriveSubsystemSRX robotDrive,
+      PoseEstimatorSubsystem poseEstimatorSubsystem,
       Trajectory trajectory,
       Supplier<Pose2d> pose,
       PIDController xController,
@@ -79,6 +87,8 @@ public class PreussSwerveControllerCommand extends Command {
       Consumer<ChassisSpeeds> driveInputs,
       Subsystem... requirements) {
     this(
+        robotDrive,
+        poseEstimatorSubsystem,
         trajectory,
         pose,
         new HolonomicDriveController(
@@ -113,6 +123,8 @@ public class PreussSwerveControllerCommand extends Command {
    * @param requirements The subsystems to require.
    */
   public PreussSwerveControllerCommand(
+      DriveSubsystemSRX robotDrive,
+      PoseEstimatorSubsystem poseEstimatorSubsystem,
       Trajectory trajectory,
       Supplier<Pose2d> pose,
       PIDController xController,
@@ -121,7 +133,8 @@ public class PreussSwerveControllerCommand extends Command {
       Consumer<ChassisSpeeds> driveInputs,
       Subsystem... requirements) {
     this(
-        trajectory,
+        robotDrive,
+        poseEstimatorSubsystem,trajectory,
         pose,
         xController,
         yController,
@@ -152,13 +165,16 @@ public class PreussSwerveControllerCommand extends Command {
    * @param requirements The subsystems to require.
    */
   public PreussSwerveControllerCommand(
+      DriveSubsystemSRX robotDrive,
+      PoseEstimatorSubsystem poseEstimatorSubsystem,
       Trajectory trajectory,
       Supplier<Pose2d> pose,
       HolonomicDriveController controller,
       Consumer<ChassisSpeeds> driveInputs,
       Subsystem... requirements) {
     this(
-        trajectory,
+        robotDrive,
+        poseEstimatorSubsystem,trajectory,
         pose,
         controller,
         () -> trajectory.getStates().get(trajectory.getStates().size() - 1).poseMeters.getRotation(),
@@ -178,24 +194,28 @@ public class PreussSwerveControllerCommand extends Command {
    * @param pose A function that supplies the robot pose - use one of the odometry classes to
    *     provide this.
    * @param controller The HolonomicDriveController for the drivetrain.
-   * @param desiredRotation The angle that the drivetrain should be facing. This is sampled at each
+   * @param rotationSupplier The angle that the drivetrain should be facing. This is sampled at each
    *     time step.
    * @param driveInputs The output function to drive the robot [x,y,rot] speeds in meters/sec, meters/sec, and radians/sec
    * @param requirements The subsystems to require.
    */
   @SuppressWarnings("this-escape")
   public PreussSwerveControllerCommand(
+      DriveSubsystemSRX robotDrive,
+      PoseEstimatorSubsystem poseEstimatorSubsystem,
       Trajectory trajectory,
       Supplier<Pose2d> pose,
       HolonomicDriveController controller,
-      Supplier<Rotation2d> desiredRotation,
+      Supplier<Rotation2d> rotationSupplier,
       Consumer<ChassisSpeeds> driveInputs,
       Subsystem... requirements) {
+    m_robotDrive = robotDrive;
+    m_poseEstimatorSubsystem = poseEstimatorSubsystem;
     m_trajectory = trajectory; //requireNonNullParam(trajectory, "trajectory", "PreussSwerveControllerCommand2");
     m_pose = requireNonNullParam(pose, "pose", "PreussSwerveControllerCommand2");
     m_controller = requireNonNullParam(controller, "controller", "PreussSwerveControllerCommand2");
-    m_desiredRotation =
-      requireNonNullParam(desiredRotation, "desiredRotation", "PreussSwerveControllerCommand2");
+    m_rotationSupplier =
+      requireNonNullParam(rotationSupplier, "desiredRotation", "PreussSwerveControllerCommand2");
 
     m_driveInputs =
       requireNonNullParam(driveInputs, "driveInputs", "PreussSwerveControllerCommand2");
@@ -205,7 +225,7 @@ public class PreussSwerveControllerCommand extends Command {
 
   @Override
   public void initialize() {
-    m_timer.restart();
+    if (!RobotContainer.isSimulation()) m_timer.restart();
     m_count = 0;
     if (m_trajectory != null)
       RobotContainer.m_PoseEstimatorSubsystem.field2d.getObject("trajectory").setTrajectory(m_trajectory);
@@ -220,6 +240,17 @@ public class PreussSwerveControllerCommand extends Command {
 
     // get the trajectory information.
     var desiredState = m_trajectory.sample(curTime);
+    /*if (Utilities.isRedAlliance()) {
+      desiredState = new Trajectory.State(
+        desiredState.timeSeconds,
+        desiredState.velocityMetersPerSecond,
+        desiredState.accelerationMetersPerSecondSq,
+        Constants.FieldConstants.BlueToRedPose(desiredState.poseMeters),
+        desiredState.curvatureRadPerMeter
+      );
+
+    }*/
+
     Pose2d trajectoryPose = desiredState.poseMeters;
 
     // get the current robot position and orientation.
@@ -227,7 +258,7 @@ public class PreussSwerveControllerCommand extends Command {
 
     // get the desired rotation for the robot from the supplier and the current rotation
     // and compute the rotation error.
-    Rotation2d desiredRotation = m_desiredRotation.get();
+    Rotation2d desiredRotation = m_rotationSupplier.get();
     Rotation2d currentRotation = currentPose.getRotation();
     double m_rotationError = MathUtil.angleModulus(desiredRotation.minus(currentRotation).getRadians());
     
@@ -305,4 +336,29 @@ public class PreussSwerveControllerCommand extends Command {
   public void setTrajectory(Trajectory trajectory) {
     m_trajectory = trajectory;
   }
+  public PoseEstimatorSubsystem getPoseEstimatorSubsystem() {
+    return m_poseEstimatorSubsystem;
+  }
+
+  public void setRotationSupplier(Supplier<Rotation2d> rotationSupplier) {
+    m_rotationSupplier =  rotationSupplier;
+  }
+
+  // The following method is AI generated to reverse a trajectory for red alliance use.
+  public Trajectory reverseTrajectory(Trajectory trajectory) {
+    int nStates = trajectory.getStates().size();
+    Trajectory.State[] reversedStates = new Trajectory.State[nStates];
+    for (int i = 0; i < nStates; i++) {
+      Trajectory.State state = trajectory.getStates().get(nStates - 1 - i);
+      reversedStates[i] = new Trajectory.State(
+        state.timeSeconds,
+        state.velocityMetersPerSecond,
+        state.accelerationMetersPerSecondSq,
+        Constants.FieldConstants.BlueToRedPose(state.poseMeters),
+        state.curvatureRadPerMeter
+      );
+    }
+    return new Trajectory(java.util.List.of(reversedStates));
+  }
+  
 }
