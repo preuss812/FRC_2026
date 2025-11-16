@@ -16,14 +16,12 @@ import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.Constants.AutoConstants;
 import frc.robot.Constants.DriveConstants;
-import frc.robot.Constants.FieldConstants;
-import frc.robot.Constants.VisionConstants;
 import frc.robot.Constants.VisionConstants.AprilTag;
 import frc.robot.TrajectoryPlans;
 import frc.robot.Utilities;
+import frc.robot.subsystems.AllianceConfigurationSubsystem;
 import frc.robot.subsystems.DriveSubsystemSRX;
 import frc.robot.subsystems.PoseEstimatorSubsystem;
 
@@ -32,7 +30,7 @@ import frc.robot.subsystems.PoseEstimatorSubsystem;
 // https://docs.wpilib.org/en/stable/docs/software/commandbased/convenience-features.html
 public class SwerveToProcessorCommand extends PreussSwerveControllerCommand {
 
-  private AprilTag destination;
+  private AprilTag processorAprilTag;
   private static Rotation2d robotRotationToFaceProcessor;
   private final boolean faceReef = false;
   private Pose2d aprilTagPose;
@@ -70,43 +68,19 @@ public class SwerveToProcessorCommand extends PreussSwerveControllerCommand {
   public void initialize() {
     Trajectory trajectory;
     Pose2d startingPose = getPoseEstimatorSubsystem().getCurrentPose();
-    int allianceID = Utilities.getAllianceID();
   
-    if (allianceID == FieldConstants.BlueAlliance) {
-      destination = VisionConstants.AprilTag.BLUE_PROCESSOR;
-    } else {
-      destination = VisionConstants.AprilTag.RED_PROCESSOR;
-    }
+    processorAprilTag = AllianceConfigurationSubsystem.getProcessorAprilTag();
 
     List<Pose2d> waypoints = new ArrayList<>();
     aprilTagPose = null;
     Pose2d nearTargetPose = null;
-    //Pose2d targetPose = null;
-    SmartDashboard.putString("TT","Running");
-    //commands = new SequentialCommandGroup();
 
-    if (destination == AprilTag.BLUE_PROCESSOR) {
-      waypoints = TrajectoryPlans.planTrajectory(TrajectoryPlans.BlueProcessorPlan, startingPose);
-      aprilTagPose = getPoseEstimatorSubsystem().getAprilTagPose(AprilTag.BLUE_PROCESSOR.id());
-      super.setRotationSupplier(() -> aprilTagPose.getRotation().plus(new Rotation2d(Math.PI)));
-      nearTargetPose = DriveConstants.robotFrontAtPose(aprilTagPose, Units.inchesToMeters(12.0));
-      robotRotationToFaceProcessor = aprilTagPose.getRotation().plus(new Rotation2d(Math.PI));
-      waypoints.add(nearTargetPose);
-      //targetPose = Utilities.backToPose(aprilTagPose, 0.5);
-    } else if (destination == AprilTag.RED_PROCESSOR) {
-      waypoints = TrajectoryPlans.planTrajectory(TrajectoryPlans.RedProcessorPlan, startingPose);
-      aprilTagPose = getPoseEstimatorSubsystem().getAprilTagPose(AprilTag.RED_PROCESSOR.id());
-      super.setRotationSupplier(() -> aprilTagPose.getRotation().plus(new Rotation2d(Math.PI)));
-      nearTargetPose = DriveConstants.robotFrontAtPose(aprilTagPose, Units.inchesToMeters(12.0));
-      robotRotationToFaceProcessor = aprilTagPose.getRotation().plus(new Rotation2d(Math.PI));
-      waypoints.add(nearTargetPose);
-      //targetPose = Utilities.backToPose(aprilTagPose, 0.5);
-    } else {
-      //targetPose = startingPose; // This will end up doing nothing.
-      nearTargetPose = startingPose;
-    }
-    //if (waypoints.size() > 0)
-      Utilities.toSmartDashboard("TT Plan", waypoints);
+    waypoints = TrajectoryPlans.planTrajectory(AllianceConfigurationSubsystem.getProcessorWaypoints(), startingPose);
+    aprilTagPose = getPoseEstimatorSubsystem().getAprilTagPose(processorAprilTag.id());
+    super.setRotationSupplier(() -> aprilTagPose.getRotation().plus(new Rotation2d(Math.PI)));
+    nearTargetPose = DriveConstants.robotFrontAtPose(aprilTagPose, Units.inchesToMeters(12.0));
+    robotRotationToFaceProcessor = aprilTagPose.getRotation().plus(new Rotation2d(Math.PI));
+    waypoints.add(nearTargetPose);
     
     if (waypoints.size() > 0 && !startingPose.equals(nearTargetPose)) {
         List<Pose2d> sanitizedWaypoints = TrajectoryPlans.sanitizeWaypoints(waypoints);

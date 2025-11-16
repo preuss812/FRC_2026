@@ -28,7 +28,7 @@ public class PointCameraTowardReefCommand extends GotoPoseCommand {
     Pose2d currentPose = poseEstimatorSubsystem.getCurrentPose();
     targetPose = new Pose2d(
       currentPose.getTranslation(),
-      new Rotation2d(Autonomous.robotHeadingForCameraToReefCenter(currentPose.getX(), currentPose.getY()))
+      new Rotation2d(Autonomous.robotHeadingForCameraToReefCenter(currentPose.getTranslation()))
     );
     super.initialize();
   }

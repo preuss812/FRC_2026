@@ -10,6 +10,7 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Utilities;
+import frc.robot.subsystems.AllianceConfigurationSubsystem;
 import frc.robot.subsystems.DriveSubsystemSRX;
 
 /**
@@ -111,7 +112,7 @@ public class RotateRobotCommand extends Command {
       targetTheta = MathUtil.inputModulus(startingTheta + theta, -Math.PI, Math.PI);
       
     } else {
-      if (Utilities.isBlueAlliance()){
+      if (AllianceConfigurationSubsystem.isBlueAlliance()){
          targetTheta =  MathUtil.inputModulus(theta, -Math.PI, Math.PI);
          if (debug) SmartDashboard.putNumber("RR 1", targetTheta);
       } else {

@@ -32,9 +32,7 @@ public class PushTowardsReefCommand extends Command {
   @Override
   public void initialize() {
     autoDrive.reset();
-    // For debug, initialize the reef center if Autonomous was not started.
-    Autonomous.setReefCenter();
-    }
+  }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
@@ -43,7 +41,7 @@ public class PushTowardsReefCommand extends Command {
     // the reef so the force toward the reef will rotate the robot to butt up against the reef. 
     double throttle = 0.11; // Minimal throttle
     Pose2d currentPose = poseEstimatorSubsystem.getCurrentPose();
-    double heading = Autonomous.robotHeadingForCameraToReefCenter(currentPose.getX(), currentPose.getY())+ VisionConstants.rearCameraHeading;
+    double heading = Autonomous.robotHeadingForCameraToReefCenter(currentPose.getTranslation())+ VisionConstants.rearCameraHeading;
     double xDrive = Math.cos(heading) * throttle;
     double yDrive = Math.sin(heading) * throttle;
     autoDrive.drive(xDrive, yDrive, 0, true, true);

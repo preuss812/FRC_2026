@@ -37,6 +37,8 @@ import frc.robot.subsystems.DriveSubsystemSRX;
 import frc.robot.commands.DriveChoreoPathCommand;
 import frc.robot.commands.DriveCircle;
 import frc.robot.commands.DriveCircleThrottle;
+import frc.robot.commands.PointCameraTowardApriltagCommand;
+import frc.robot.commands.PointCameraTowardReefCommand;
 import frc.robot.commands.RandomRobotPosition;
 import frc.robot.commands.RotateRobotCommand;
 import frc.robot.commands.SwerveToProcessorCommand;
@@ -70,7 +72,7 @@ public class RobotContainer {
   public static final PoseEstimatorCamera[] cameras = new PoseEstimatorCamera[]{m_rearCamera/*,m_frontCamera*/};
   public static PoseEstimatorSubsystem m_PoseEstimatorSubsystem = new PoseEstimatorSubsystem( cameras, m_robotDrive);
   public final static AllianceConfigurationSubsystem m_allianceConfigurationSubsystem = new AllianceConfigurationSubsystem(m_robotDrive, m_PoseEstimatorSubsystem);
-  private static  boolean isSimulation = (System.getProperty("os.name").equals("Mac OS X"));
+  private static  boolean isSimulation = !(System.getProperty("os.name").equals("Linux")); // Assuming roborio is the only Linux system.
   public static PreussDriveSimulation m_preussDriveSimulation = new PreussDriveSimulation(m_PoseEstimatorSubsystem);
   private static boolean debug = true; // To enable debugging in this module, change false to true.
 
@@ -132,8 +134,8 @@ public class RobotContainer {
     // By default this is not a simulation.
     // For convenience, set the simulation mode to true if this is not linux (ie if it is MacOS or Windows).
     RobotContainer.isSimulation = !(System.getProperty("os.name").equals("Linux"));
-    TrajectoryPlans.buildAutoTrajectories(DriverStation.getAlliance().isPresent() ? DriverStation.getAlliance().get() : Alliance.Blue); 
-
+    
+    ;
     // Configure the button bindings
     configureButtonBindings();
 
@@ -216,6 +218,7 @@ public class RobotContainer {
       SmartDashboard.putData("Z", new InstantCommand(()->m_PoseEstimatorSubsystem.setCurrentPose(new Pose2d(5.5 + 0.145916,4, Rotation2d.kZero))));
       SmartDashboard.putData("TT", new SwerveToProcessorCommand(m_robotDrive, m_PoseEstimatorSubsystem).withTimeout(15.0));
       SmartDashboard.putData("R", new RandomRobotPosition(m_PoseEstimatorSubsystem));
+      SmartDashboard.putData("PR", new PointCameraTowardReefCommand(m_robotDrive, m_PoseEstimatorSubsystem));
 
     } // (isSimulation()
   } // (configureButtonBindings)
@@ -256,7 +259,7 @@ public class RobotContainer {
    * PoseEstimator once an april tag is captured by the vision system.
    */
    public void setGyroAngleToStartMatch() {
-    boolean isBlueAlliance = Utilities.isBlueAlliance(); // From the Field Management system.
+    boolean isBlueAlliance = AllianceConfigurationSubsystem.isBlueAlliance(); // From the Field Management system.
     if (isBlueAlliance) {
       startingHeading = 0.0;
       m_robotDrive.setAngleDegrees(startingHeading);
@@ -292,7 +295,7 @@ public class RobotContainer {
     double startingRobotCenterY = FieldConstants.yMax - ProcessorZoneDepth - DriveConstants.kBackToCenterDistance;
     double startingRobotCenterX = FieldConstants.xMin + startingBoxDepth - DriveConstants.kRobotWidth/2.0 - Units.inchesToMeters(2.0)/* tape */;
 
-    boolean isBlueAlliance = Utilities.isBlueAlliance(); // From the Field Management system.
+    boolean isBlueAlliance = AllianceConfigurationSubsystem.isBlueAlliance(); // From the Field Management system.
     if (isBlueAlliance) {
       startingHeading = 90; // Facing source wall
       m_robotDrive.setAngleDegrees(startingHeading);

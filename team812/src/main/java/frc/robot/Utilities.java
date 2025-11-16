@@ -8,37 +8,20 @@
 package frc.robot;
 
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.Constants.FieldConstants;
-import frc.robot.Constants.VisionConstants;
-import frc.robot.subsystems.PoseEstimatorSubsystem;
-
-import java.io.IOException;
 import java.util.List;
 import java.util.function.BooleanSupplier;
-
-import org.json.simple.parser.ParseException;
-
-import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.trajectory.Trajectory;
-
-import com.pathplanner.lib.path.*;
-import com.pathplanner.lib.util.FileVersionException;
-
 
 /**
  * Add your docs here.
  */
 public class Utilities {
     
-    private static boolean m_isBlueAlliance = false;
-    private static boolean m_isRedAlliance = false;
-    private static boolean m_isAutonomous = true;
 
     public static double scaleDouble(final double input, final double to_min, final double to_max) {
         return scaleDouble(input, to_min, to_max, -1.0, 1.0);
@@ -56,39 +39,6 @@ public class Utilities {
                         to_min;
         }
         return scaled_x;    
-    }
-
-    public static void setAutonomous() {
-        m_isAutonomous = DriverStation.isAutonomous();
-    }
-
-    
-    public static boolean isAutonomous() {
-        return m_isAutonomous;
-    }
-
-    public static boolean setAlliance() {
-        boolean result = false;
-        var alliance = DriverStation.getAlliance();
-        if (alliance.isPresent()) {
-            m_isBlueAlliance = (alliance.get() == Alliance.Blue);  // Remember which alliance we are in.
-            m_isRedAlliance =  (alliance.get() == Alliance.Red);
-            result = true;
-        }
-        SmartDashboard.putBoolean("BlueAlliance", m_isBlueAlliance);
-        return result; 
-    }
-    
-    public static int getAllianceID() {
-        return isBlueAlliance() ? FieldConstants.BlueAlliance : FieldConstants.RedAlliance;
-    }
-     
-     public static boolean isRedAlliance() {
-        return m_isRedAlliance;
-    }
-
-    public static boolean isBlueAlliance() {
-        return m_isBlueAlliance;
     }
 
     public static void toSmartDashboard(String label, Pose2d pose) {
@@ -189,101 +139,10 @@ public class Utilities {
         // For debug, display whether we did reset the coordinate or not.
         SmartDashboard.putBoolean("refineY", reset);
     }
-
-    public static void allianceSetCurrentPose(Pose2d newPose) {
-        if (isBlueAlliance()) {
-            RobotContainer.m_PoseEstimatorSubsystem.setCurrentPose(newPose);
-         } else { 
-            // For the red alliance translate the X coordinates and mirror the rotation
-            double x = FieldConstants.xMax - newPose.getX();
-            double rotation = MathUtil.inputModulus(
-                Math.PI - newPose.getRotation().getRadians(),
-                -Math.PI,
-                Math.PI
-            );
-            RobotContainer.m_PoseEstimatorSubsystem.setCurrentPose(new Pose2d(x, newPose.getY(), new Rotation2d(rotation)));
-        }
-    }
-    
-    public static Pose2d getAllianceRobotAmpPose(PoseEstimatorSubsystem poseEstimatorSubsystem) {
-        Pose2d robotPose = null;
-        if (isBlueAlliance()) {
-            Pose2d tag = poseEstimatorSubsystem.getAprilTagPose(VisionConstants.AprilTag.BLUE_PROCESSOR.id());
-            // This should position the robot back to the AMP touching the wall.
-            robotPose = new Pose2d(tag.getX(), tag.getY() - DriveConstants.kBackToCenterDistance, tag.getRotation());
-    
-        } else if (isRedAlliance()) {
-            Pose2d tag = poseEstimatorSubsystem.getAprilTagPose(VisionConstants.AprilTag.RED_PROCESSOR.id());
-            // This should position the robot back to the AMP touching the wall.
-            robotPose = new Pose2d(tag.getX(), tag.getY() - DriveConstants.kBackToCenterDistance, tag.getRotation());
-        }
-        else {
-            robotPose = null; // Hack:: if we dont know the alliance. Dont move. 
-        }
-        
-        return robotPose;
-    }
-
-    /**
-     * resetPoseAtAmp - set the pose estimator's pose to be at the alliance amp.
-     * This is to help keep the pose estimator's result up to date as reading april
-     * tags it not working well when the robot is moving quickly and due to 
-     * the steep angle of the camera limiting the location on the field where
-     * the robot can see an april tag.
-    */
-    public static void resetPoseAtAmp() {
-        boolean reset = false;
-        double ultrasonicRange = RobotContainer.m_PingResponseUltrasonicSubsystem.getRange();
-        // Verify we are up against the wall.
-        if (ultrasonicRange < 0.030 /* Meters */) { // Ie 3 centimeters
-            // Trusting the gyro most so dont reset rotation instead, use the current pose's rotation.
-            Pose2d currentPose = RobotContainer.m_PoseEstimatorSubsystem.getCurrentPose();
-            if (Math.abs(currentPose.getRotation().getDegrees() -  -90.0) < 5.0 /* degrees */) {
-                Pose2d robotPoseAtAmp = getAllianceRobotAmpPose(RobotContainer.m_PoseEstimatorSubsystem);
-                // If the alliance is unknown, this cant be used.
-                if (robotPoseAtAmp != null) {
-                    reset = true;
-                    // It seems safe, set the pose to be the proper pose for the robot
-                    // perfectly positioned in front of the amp, touching the wall.
-                    RobotContainer.m_PoseEstimatorSubsystem.setCurrentPose(
-                    new Pose2d(
-                        robotPoseAtAmp.getTranslation(),
-                        currentPose.getRotation()
-                    )
-                    );
-                }
-            }
-            
-        }
-        // For debug, display whether we did reset the coordinate or not.
-        SmartDashboard.putBoolean("PoseReset", reset);
-    }
     
     // Boolean Supplier to return true if we are within 45 seconds of the end of the match.
     public static BooleanSupplier endGame = ()->DriverStation.getMatchTime() >= 2.5*60.0 - 45.0;
     
-    public static void loadChoreoPathsForAutonomous()
-    {
-        Trajectory Autonomous_Trajetory_1;
-        // Load a full Choreo trajectory as a PathPlannerPath
-        try {
-            PathPlannerPath exampleChoreoTraj = PathPlannerPath.fromChoreoTrajectory("A1.traj");
-            // TODO: Autonomous_Trajetory_1 = exampleChoreoTraj.get;
-
-        } catch (FileVersionException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (ParseException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } //PathPlannerPath.fromChoreoTrajectory("Blue Low to AT17.traj");
-        //PathPlannerPath exampleChoreoTrajSplit = PathPlannerPath.fromChoreoTrajectory("Example Choreo Traj", 1);// Load a split Choreo trajectory as a PathPlannerPath, using the split point with index 1
-
-    }
-
     // Check april tag coordinates for complementray tags.
     public static boolean comparePoses(Pose2d pose1, Pose2d pose2, double deltaXY, double deltaR) {
         Pose2d pose2Transformed = FieldConstants.BlueToRedPose(pose2);
@@ -297,16 +156,7 @@ public class Utilities {
         double result;
         double dx = b.getX() - a.getX();
         double dy = b.getY() - a.getY();
-        if (dx > 0) {
-            result = Math.atan(dy/dx);
-        } else if (dx < 0) {
-            result = MathUtil.angleModulus(Math.PI + Math.atan(dy/dx));
-        } else if (dy > 0) {
-            result = Math.PI/2;
-        } else {
-            result = -Math.PI/2;
-        }
-
+        result = Math.atan2(dy, dx);
         return result;
       }
 

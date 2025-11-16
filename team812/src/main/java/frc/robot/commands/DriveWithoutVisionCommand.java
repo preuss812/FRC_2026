@@ -12,6 +12,7 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Utilities;
+import frc.robot.subsystems.AllianceConfigurationSubsystem;
 import frc.robot.subsystems.DriveSubsystemSRX;
 import frc.robot.subsystems.PoseEstimatorSubsystem;
 import frc.utils.DrivingConfig;
@@ -50,7 +51,7 @@ public class DriveWithoutVisionCommand extends Command {
     autoDrive.reset();
 
     Pose2d initialPose = robotDrive.getPose();
-    if (Utilities.isBlueAlliance()) {
+    if (AllianceConfigurationSubsystem.isBlueAlliance()) {
       targetPose = new Pose2d(
         initialPose.getX() + relativeMove.getX()
         , initialPose.getY() + relativeMove.getY()

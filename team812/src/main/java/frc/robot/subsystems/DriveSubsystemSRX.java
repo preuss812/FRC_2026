@@ -208,7 +208,7 @@ public class DriveSubsystemSRX extends SubsystemBase {
    */
   public void allianceRelativeDrive(double xSpeed, double ySpeed, double rot, boolean fieldRelative, boolean rateLimit) {
       
-      if (Utilities.isBlueAlliance())
+      if (AllianceConfigurationSubsystem.isBlueAlliance())
         drive(xSpeed, ySpeed, rot, fieldRelative, rateLimit); // The coordinates are fine if the 
       else
         drive(-xSpeed, -ySpeed, rot, fieldRelative, rateLimit); // Rotate the joystick inputs 180 degrees if we are on the Red Alliance.

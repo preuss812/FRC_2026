@@ -8,6 +8,7 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.trajectory.Trajectory;
 import frc.robot.Autonomous;
+import frc.robot.AutonomousPlans;
 import frc.robot.Constants.AutoConstants;
 import frc.robot.TrajectoryPlans;
 import frc.robot.subsystems.DriveSubsystemSRX;
@@ -45,9 +46,9 @@ public class AutoSwerveToReefCommand extends PreussSwerveControllerCommand {
   public void initialize() {
     // Note: potential for a null pointer issue here if getAutoMode does not return a valid index.
     try {
-      super.setTrajectory(TrajectoryPlans.trajectories.get(Autonomous.getAutoMode()));
+      super.setTrajectory(AutonomousPlans.trajectories.get(Autonomous.getAutoMode()));
       // Reposition the robot logically to the ideal starting position based on the current autonomous mode.
-      m_poseEstimatorSubsystem.setCurrentPose(TrajectoryPlans.startingPoses.get(Autonomous.getAutoMode()));
+      m_poseEstimatorSubsystem.setCurrentPose(AutonomousPlans.startingPoses.get(Autonomous.getAutoMode()));
     }
     catch(Exception e) {
       super.setTrajectory(new Trajectory()); 

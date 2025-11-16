@@ -10,6 +10,7 @@ package frc.robot;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
@@ -39,9 +40,6 @@ public class Autonomous extends SequentialCommandGroup {
    */
   private final DriveSubsystemSRX m_robotDrive;
   private final PoseEstimatorSubsystem m_PoseEstimatorSubsystem;
-  public static boolean reefCenterSet = false;
-  public static double myReefX;
-  public static double myReefY;
   public static int m_autoMode = 1; // Default to move 1 meter and stop;
 
   /**
@@ -50,9 +48,10 @@ public class Autonomous extends SequentialCommandGroup {
    * @param y - (double) robot y field coordinate.
    * @return  - (double) the heading in radians from the robot to the reef center.
    */
-  public static double robotHeadingForCameraToReefCenter(double x, double y) {
+  public static double robotHeadingForCameraToReefCenter(Translation2d location) {
+    Translation2d reefCenter = AllianceConfigurationSubsystem.getReefCenter();
     return MathUtil.angleModulus(
-        Math.atan2(myReefY - y,myReefX - x) + VisionConstants.rearCameraHeading);
+        Math.atan2(reefCenter.getY() - location.getY(),reefCenter.getX() - location.getX()) + VisionConstants.rearCameraHeading);
   }
 
   public static double robotHeadingForCameraToPose(Pose2d currentPose, Pose2d targetPose) {
@@ -78,7 +77,7 @@ public class Autonomous extends SequentialCommandGroup {
     catch(Exception d) {
       m_autoMode = 1;
     }
-    if (!(m_autoMode >= 0 && m_autoMode < TrajectoryPlans.autoNames.size()))
+    if (!(m_autoMode >= 0 && m_autoMode < AutonomousPlans.autoNames.size()))
       m_autoMode = 1;
   }
 
@@ -87,32 +86,14 @@ public class Autonomous extends SequentialCommandGroup {
     return m_autoMode;
   }
 
-  /**
-   * set up the reef center for autonomous driving based on the alliance color.
-   */
-  public static void setReefCenter() {
-    if (Utilities.isBlueAlliance()) {
-      myReefX = FieldConstants.blueReefCenter.getX();
-      myReefY = FieldConstants.blueReefCenter.getY();
-      reefCenterSet = true;
-    } else if (Utilities.isRedAlliance()) {
-      myReefX = FieldConstants.redReefCenter.getX();
-      myReefY = FieldConstants.redReefCenter.getY();
-      reefCenterSet = true;
-    }
-  }
-
   public Autonomous(RobotContainer robotContainer) {
     
     // get the required subsystems for constructing the plans below.
     m_robotDrive = RobotContainer.m_robotDrive;
     m_PoseEstimatorSubsystem = RobotContainer.m_PoseEstimatorSubsystem;
-    Utilities.setAlliance();
 
-    AllianceConfigurationSubsystem.refreshAllianceConfiguration(DriverStation.getAlliance().get());
     // Set up the alliance first.  Other commands need to know which alliance to operate correctly.
     setAutoMode();
-    setReefCenter();
 
     // set up for the current alliance
     addCommands(new InstantCommand(() -> AllianceConfigurationSubsystem.refreshAllianceConfiguration(DriverStation.getAlliance().get())));
@@ -120,33 +101,28 @@ public class Autonomous extends SequentialCommandGroup {
     //addCommands(new InstantCommand(() -> setAutoMode()));
 
     // Initialize the robot before moving.
-    addCommands(new ParallelCommandGroup(
-      //new InstantCommand(() -> robotContainer.setGyroAngleToStartMatch()),
-      new InstantCommand(() -> RobotContainer.m_robotDrive.setDrivingMode(DrivingMode.SPEED)) // TODO Should be SPEED, not PRECISION
-      //new ElbowHomeCommand(m_ElbowRotationSubsystem),
-      //new ShoulderHomeCommand(m_ShoulderRotationSubsystem),
-      //new InstantCommand(() -> setReefCenter()),
-      //new InstantCommand(() -> setAutoMode())
+    addCommands(new SequentialCommandGroup(
+      new InstantCommand(() -> AllianceConfigurationSubsystem.setStartingPose(AutonomousPlans.startingPoses.get(getAutoMode()))),
+      //new InstantCommand(() -> RobotContainer.m_robotDrive.setAngleDegrees(AutonomousPlans.startingPoses.get(getAutoMode()).getRotation().getDegrees())),
+      new InstantCommand(() -> RobotContainer.m_robotDrive.setDrivingMode(DrivingMode.SPEED))
     ));
    
     // For these first 2 modes, just drive 1 meter and wait.
-    if (getAutoMode() == TrajectoryPlans.AUTO_MODE_ROBOT_DECIDES || getAutoMode() == TrajectoryPlans.AUTO_MODE_MOVE_OFF_LINE_AND_STOP) {
+    if (getAutoMode() == AutonomousPlans.AUTO_MODE_ROBOT_DECIDES || getAutoMode() == AutonomousPlans.AUTO_MODE_MOVE_OFF_LINE_AND_STOP) {
       addCommands(new DriveWithoutVisionCommand(m_robotDrive, m_PoseEstimatorSubsystem, null, new Pose2d(-1.0, 0, new Rotation2d(0.0))));
       return;
     }
 
     // For the do-nothing mode, do not move or take any further action.  
-    if (getAutoMode() == TrajectoryPlans.AUTO_MODE_DO_NOTHING) {
+    if (getAutoMode() == AutonomousPlans.AUTO_MODE_DO_NOTHING) {
       return;
     }
 
-   
-
     // Perform the initial driving to get from the start line to the reef.
     double timeout = 15;
-    if (getAutoMode() == TrajectoryPlans.AUTO_MODE_MY_BARGE_TO_OPPOSITE)
+    if (getAutoMode() == AutonomousPlans.AUTO_MODE_MY_BARGE_TO_OPPOSITE)
       timeout = 12;
-    if (getAutoMode() == TrajectoryPlans.AUTO_MODE_CENTER_STRAIGHT)
+    if (getAutoMode() == AutonomousPlans.AUTO_MODE_CENTER_STRAIGHT)
       timeout = 8;
     addCommands(
       new AutoSwerveToReefCommand(m_robotDrive, m_PoseEstimatorSubsystem).withTimeout(timeout), // Should get us to the reef.

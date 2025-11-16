@@ -227,7 +227,7 @@ public class PreussSwerveControllerCommand extends Command {
   public void initialize() {
     if (!RobotContainer.isSimulation()) m_timer.restart();
     m_count = 0;
-    if (m_trajectory != null)
+    if (m_trajectory != null && m_trajectory.getStates().size() > 0)
       RobotContainer.m_PoseEstimatorSubsystem.field2d.getObject("trajectory").setTrajectory(m_trajectory);
     // Make sure we are wrapping the angles
     m_controller.getThetaController().enableContinuousInput(-Math.PI, Math.PI);
@@ -236,7 +236,7 @@ public class PreussSwerveControllerCommand extends Command {
 
   @Override
   public void execute() {
-    if (m_trajectory == null) return;
+    if (m_trajectory == null || m_trajectory.getStates().size() == 0 ) return;
 
     // get the time (or simulated time)
     double curTime = getTime();
@@ -299,7 +299,7 @@ public class PreussSwerveControllerCommand extends Command {
 
   @Override
   public boolean isFinished() {
-    if (m_trajectory == null) return true;
+    if (m_trajectory == null || m_trajectory.getStates().size() == 0) return true;
     double curTime = getTime();
   
     return (curTime >=m_trajectory.getTotalTimeSeconds());

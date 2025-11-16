@@ -8,6 +8,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import frc.robot.subsystems.AllianceConfigurationSubsystem;
 import frc.robot.subsystems.DriveSubsystemSRX;
 import frc.robot.RobotContainer;
 import frc.robot.Utilities;
@@ -22,7 +23,7 @@ public class ResetDriveTrainCommand extends SequentialCommandGroup {
       new SequentialCommandGroup(
         new StopAllMotorsCommand(),
         //new ArmHomeCommand(RobotContainer.m_ArmRotationSubsystem),
-        new InstantCommand(()->RobotContainer.m_PoseEstimatorSubsystem.setCurrentPose(new Pose2d(RobotContainer.m_PoseEstimatorSubsystem.getCurrentPose().getTranslation(), new Rotation2d(Utilities.isBlueAlliance() ? 0.0 : Math.PI)))),
+        new InstantCommand(()->RobotContainer.m_PoseEstimatorSubsystem.setCurrentPose(new Pose2d(RobotContainer.m_PoseEstimatorSubsystem.getCurrentPose().getTranslation(), new Rotation2d(AllianceConfigurationSubsystem.isBlueAlliance() ? 0.0 : Math.PI)))),
         new InstantCommand(()->robotContainer.setGyroAngleToStartMatch()),
         new InstantCommand(()->RobotContainer.m_robotDrive.setDrivingMode(DriveSubsystemSRX.DrivingMode.PRECISION), RobotContainer.m_robotDrive)
       )

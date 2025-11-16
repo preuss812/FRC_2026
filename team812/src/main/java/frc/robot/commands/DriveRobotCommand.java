@@ -7,6 +7,7 @@ package frc.robot.commands;
 import edu.wpi.first.math.geometry.Pose2d;
 import frc.robot.RobotContainer;
 import frc.robot.Utilities;
+import frc.robot.subsystems.AllianceConfigurationSubsystem;
 import frc.robot.subsystems.DriveSubsystemSRX;
 import frc.robot.subsystems.PoseEstimatorSubsystem;
 import frc.utils.DrivingConfig;
@@ -40,14 +41,14 @@ public class DriveRobotCommand extends GotoPoseCommand {
     
     // add the relativeMove to the startingPose // There is an alliance component to this.   
     // I'm assuming the caller has handled it in the relativeMove.
-    if (Utilities.isBlueAlliance()) {
+    if (AllianceConfigurationSubsystem.isBlueAlliance()) {
       targetPose = new Pose2d(
         startingPose.getX() + relativeMove.getX(),
         startingPose.getY() + relativeMove.getY(),
         startingPose.getRotation().rotateBy(relativeMove.getRotation())
       );
 
-    } else if (Utilities.isRedAlliance()) {
+    } else if (AllianceConfigurationSubsystem.isRedAlliance()) {
       // This just inverts the X and Y moves as the field this year is rotated about the center of the field.
       targetPose = new Pose2d(
         startingPose.getX() - relativeMove.getX(),

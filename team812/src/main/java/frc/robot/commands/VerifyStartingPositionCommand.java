@@ -5,9 +5,10 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
-import frc.robot.TrajectoryPlans;
 import frc.robot.Utilities;
+import frc.robot.AutonomousPlans;
 import frc.robot.Constants.FieldConstants;
+import frc.robot.subsystems.AllianceConfigurationSubsystem;
 import frc.robot.subsystems.PoseEstimatorSubsystem;
 
 /**
@@ -30,9 +31,9 @@ public class VerifyStartingPositionCommand extends SequentialCommandGroup {
         double closeEnoughXY = Units.inchesToMeters(12.0); // Accept a starting position within 1 foot of expected.
         double closeEnoughTheta = Units.degreesToRadians(10.0); // Accept a starting rotation within 10 degrees of expected.
 
-        final Pose2d expectedPose = Utilities.isBlueAlliance() ? 
-            TrajectoryPlans.waypoints.get(autoMode)[0] :
-            FieldConstants.BlueToRedPose(TrajectoryPlans.waypoints.get(autoMode)[0]) ;
+        final Pose2d expectedPose = AllianceConfigurationSubsystem.isBlueAlliance() ? 
+            AutonomousPlans.waypoints.get(autoMode)[0] :
+            FieldConstants.BlueToRedPose(AutonomousPlans.waypoints.get(autoMode)[0]) ;
 
         addCommands(
             new ConditionalCommand(

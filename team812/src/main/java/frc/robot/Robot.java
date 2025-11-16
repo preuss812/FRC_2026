@@ -49,7 +49,6 @@ public class Robot extends TimedRobot {
 
     m_robotContainer = new RobotContainer();
     if (debug) SmartDashboard.putData(CommandScheduler.getInstance()); // This puts running commands on the shuffleboard.
-    addPeriodic(() -> Utilities.setAlliance(), 1.0 );
 
   }
 

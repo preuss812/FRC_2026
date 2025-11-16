@@ -4,18 +4,16 @@
 
 package frc.robot.subsystems;
 
-import javax.imageio.plugins.tiff.TIFFDirectory;
-
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Constants.DriveConstants;
 import frc.robot.Constants.FieldConstants;
+import frc.robot.Constants.VisionConstants;
+import frc.robot.Constants.VisionConstants.AprilTag;
+import frc.robot.AutonomousPlans;
 import frc.robot.TrajectoryPlans;
-import frc.robot.Utilities;
 
 /*
  * AllianceConfigurationSubsystem
@@ -34,7 +32,13 @@ public class AllianceConfigurationSubsystem extends SubsystemBase {
   private static boolean initialized = false;
   private static Alliance currentAlliance = Alliance.Blue;
   private static Translation2d reefCenter;
-  private static boolean reefCenterSet = false;
+  private static AprilTag processorAprilTag;
+  private static Pose2d[][] m_processorWaypoints ;
+  private static boolean m_isAutonomous = true;
+  private static double m_startLine;
+
+
+  //private static boolean reefCenterSet = false;
 
   /** Creates a new AllianceConfigurationSubsystem. */
   public AllianceConfigurationSubsystem(DriveSubsystemSRX robotDrive, PoseEstimatorSubsystem poseEstimatorSubsystem) {
@@ -46,6 +50,8 @@ public class AllianceConfigurationSubsystem extends SubsystemBase {
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
+    setAutonomous();
+
     var alliance = DriverStation.getAlliance();
     if (alliance.isPresent()) {
       if (!initialized || currentAlliance != alliance.get()) {
@@ -60,11 +66,30 @@ public class AllianceConfigurationSubsystem extends SubsystemBase {
     }
   }
 
+  public static void setAutonomous() {
+    m_isAutonomous = DriverStation.isAutonomous();
+  }
+
+  public static boolean isAutonomous() {
+    return m_isAutonomous;
+  }
+
+  public static boolean isBlueAlliance() {
+    return currentAlliance == Alliance.Blue;
+  }
+
+  public static boolean isRedAlliance() {
+    return currentAlliance == Alliance.Red;
+  }
+
   public static void refreshAllianceConfiguration(Alliance alliance) {
     // Set the reef center location for the current alliance.
     setReefCenter(alliance);
-    setStartingHeading(alliance);
-    TrajectoryPlans.buildAutoTrajectories(alliance);
+    setProcessorAprilTag(alliance);
+    //if (isAutonomous()) setStartingHeading(alliance); // Problems with debug switching from auto -> teleop -> auto
+    setProcessorWaypoints(alliance);
+    setStartLine(alliance);
+    AutonomousPlans.buildAutoPlans(alliance);
   }
 
   /*
@@ -74,18 +99,66 @@ public class AllianceConfigurationSubsystem extends SubsystemBase {
    * @param - alliance blue or red as the current alliance
    */
   public static void setReefCenter(Alliance alliance) {
-    if (Utilities.isBlueAlliance()) {
-      reefCenter = new Translation2d(
-        FieldConstants.blueReefCenter.getX(),
-        FieldConstants.blueReefCenter.getY()
-      );
-    } else if (Utilities.isRedAlliance()) {
-      reefCenter = new Translation2d(
-        FieldConstants.redReefCenter.getX(),
-        FieldConstants.redReefCenter.getY()
-      );
+    if (alliance == Alliance.Blue) {
+      reefCenter = FieldConstants.blueReefCenter;
+    } else if (alliance == Alliance.Red) {
+      reefCenter = FieldConstants.redReefCenter;
+    } else {
+      reefCenter = FieldConstants.blueReefCenter;
     }
-    reefCenterSet = true;
+  }
+
+  /*
+   * getReefCenter - return the location of the center of the reef for the current robot alliance
+   */
+  public static Translation2d getReefCenter() {
+    return reefCenter;
+  }
+
+  /*
+   * setProcessorAprilTag - memorize the april tag associated with the processor for the current alliance.
+   * This allows for easy access to the processor location without having to check alliance
+   * for vision tracking or autonomous driving.
+   * @param - alliance blue or red as the current alliance
+   */
+  public static void setProcessorAprilTag(Alliance alliance) {
+    if (alliance == Alliance.Blue) {
+      processorAprilTag = VisionConstants.AprilTag.BLUE_PROCESSOR;
+    } else if (alliance == Alliance.Red) {
+      processorAprilTag = VisionConstants.AprilTag.RED_PROCESSOR;
+    } else {
+      processorAprilTag = VisionConstants.AprilTag.BLUE_PROCESSOR;
+    }
+  }
+
+  /*
+   * getProcessorAprilTag - return the april tag associated with the processor for the current robot alliance
+   */
+  public static AprilTag getProcessorAprilTag() {
+    return processorAprilTag;
+  }
+
+  public static void setProcessorWaypoints(Alliance alliance) {
+    if (alliance != Alliance.Red) {
+      m_processorWaypoints = TrajectoryPlans.blueProcessorWaypoints;
+    } else {
+      m_processorWaypoints = TrajectoryPlans.redProcessorWaypoints;
+    }
+  }
+
+  public static Pose2d[][] getProcessorWaypoints() {
+    return m_processorWaypoints;
+  }
+  
+  public static void setStartLine(Alliance alliance) {
+    if (alliance != Alliance.Red) {
+      m_startLine = FieldConstants.blueStartLine;
+    } else 
+      m_startLine = FieldConstants.redStartLine;
+    }
+  
+  public static double getStartLine() {
+    return m_startLine;
   }
 
   /*
@@ -94,18 +167,7 @@ public class AllianceConfigurationSubsystem extends SubsystemBase {
    * drives with the correct heading based on alliance color.
    * @param - alliance blue or red as the current alliance
    */
-  public static void setStartingHeading(Alliance alliance) {
-    // Assume blue start
-    Pose2d startingPose = new Pose2d(
-      FieldConstants.xCenter, // Not perfect but close enough.
-      FieldConstants.yCenter,
-      new Rotation2d(0.0)
-    );
-      
-    // If red, transform the starting pose to the red side of the field.
-    if (Alliance.Red == alliance) {
-      startingPose = FieldConstants.BlueToRedPose(startingPose);
-    }
+  public static void setStartingPose(Pose2d startingPose) {
     
     // Initialize the gyro and drivetrain odometry.
     m_robotDrive.setAngleDegrees(startingPose.getRotation().getDegrees());

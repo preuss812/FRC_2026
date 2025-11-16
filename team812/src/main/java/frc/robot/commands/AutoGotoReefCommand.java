@@ -6,7 +6,7 @@ package frc.robot.commands;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import frc.robot.Autonomous;
-import frc.robot.TrajectoryPlans;
+import frc.robot.AutonomousPlans;
 import frc.robot.subsystems.DriveSubsystemSRX;
 import frc.robot.subsystems.PoseEstimatorSubsystem;
 
@@ -28,7 +28,7 @@ public class AutoGotoReefCommand  extends GotoPoseCommand {
   @Override
   public void initialize() {
     try{
-      super.targetPose = TrajectoryPlans.finalPoses.get(Autonomous.getAutoMode());
+      super.targetPose = AutonomousPlans.finalPoses.get(Autonomous.getAutoMode());
     }
     catch(Exception e){
       super.targetPose = m_poseEstimatorSubsystem.getCurrentPose();

@@ -171,4 +171,9 @@ public class GotoPoseCommand extends Command {
   public boolean isFinished() {
     return onTarget;
   }
+
+  protected void setTargetPose(Pose2d newTargetPose) {
+    this.targetPose = newTargetPose;
+  }
+  
 } // GotoPoseCommand class

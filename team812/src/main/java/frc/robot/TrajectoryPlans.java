@@ -45,13 +45,7 @@ public class TrajectoryPlans {
     public static int numYSquares = 4;
     public static double dx = FieldConstants.xMax/numXSquares;
     public static double dy = FieldConstants.yMax/numYSquares;
-    public static ArrayList<Trajectory> autoPaths = new ArrayList<Trajectory>();
-    public static ArrayList<String>     autoNames = new ArrayList<String>();
-    public static ArrayList<Pose2d[]>   waypoints = new ArrayList<Pose2d[]>();
-    public static ArrayList<Integer>    expectedAprilTags = new ArrayList<Integer>();
-    public static ArrayList<Trajectory> trajectories = new ArrayList<Trajectory>();
-    public static ArrayList<Pose2d>     finalPoses = new ArrayList<Pose2d>();
-    public static ArrayList<Pose2d>     startingPoses = new ArrayList<Pose2d>();
+    
     public static int AUTO_MODE_ROBOT_DECIDES;
     public static int AUTO_MODE_MOVE_OFF_LINE_AND_STOP;
     public static int AUTO_MODE_DO_NOTHING;
@@ -88,7 +82,7 @@ public class TrajectoryPlans {
 
     // Define a gridded map of the field to define a path from each square to the blue alliance processor.
     // Currently these paths are crude and need some refinement if they are to be used during a match.
-    public static final Pose2d[][] BlueProcessorPlan = new Pose2d[][]
+    public static final Pose2d[][] blueProcessorWaypoints = new Pose2d[][]
     {
         // column 0
         {
@@ -149,7 +143,7 @@ public class TrajectoryPlans {
     };
 
     // Create a red alliance version of the plans by transforming the blue alliance plans
-    public static final Pose2d[][] RedProcessorPlan = transformPlan(BlueProcessorPlan, FieldConstants.blueToRedTransform);
+    public static final Pose2d[][] redProcessorWaypoints = transformPoses(blueProcessorWaypoints, FieldConstants.blueToRedTransform);
 
     /**
      * Construct a Trajectory plans object.  Currently this does nothing as the whole class is static.
@@ -163,7 +157,7 @@ public class TrajectoryPlans {
      * @param transformPose - The Transform2d to be used.
      * @return Pose2d[][] containing the transformed Pose2d objects.
      */
-    public static Pose2d[][] transformPlan(Pose2d[][] trajectoryPlan, Pose2d transformPose) {
+    public static Pose2d[][] transformPoses(Pose2d[][] trajectoryPlan, Pose2d transformPose) {
         Pose2d[][] newPlan = new Pose2d[numXSquares][numYSquares];
         for (int i = 0; i < numXSquares; i++) {
             for (int j = 0; j < numYSquares; j++) {
@@ -284,8 +278,8 @@ public class TrajectoryPlans {
                     config != null ? config : m_reverseTrajectoryConfig
                 ); // use default config is none was specified.
             }
-            if (debug)
-                RobotContainer.m_PoseEstimatorSubsystem.field2d.getObject("trajectory").setTrajectory(trajectory);
+            //if (debug)
+                //RobotContainer.m_PoseEstimatorSubsystem.field2d.getObject("trajectory").setTrajectory(trajectory);
         }
         catch (Exception e) {
             // Let null return as the trajectory and the caller must handle it.
@@ -294,46 +288,6 @@ public class TrajectoryPlans {
     }
     
     
-
-    /**
-     * 
-     * @param name       - the display name for this autonomous mode.
-     * @param waypoints  - an array of poses to be used to generate the driving path
-     * @param config     - the trajectory configuration to be used to generate the driving path.
-     * @param aprilTagID - the apriltag expected to be seen when the driving begins.
-     *                     This is used to verify the starting position and possibly terminate the
-     *                     autonomous mode if the robot is not where it is expected to be.
-     *                     For now, the checking is done in the VerifyStartingPositionCommand which
-     *                     is added to a sequential command group which would prevent this command from
-     *                     being executed.
-     * 
-     * Note: the grouping of commands here and in Autonomous.java is not ideal and should be refactored.
-     */
-    public static void addAutoMode(
-        String name,
-        Pose2d[] waypoints,
-        Pose2d finalPose,
-        TrajectoryConfig config,
-        int aprilTagID,
-        Alliance alliance) {
-
-        autoNames.add(name);
-        Robot.autoChooser.addOption(autoNames.get(autoNames.size()-1), autoNames.size()-1);
-        if (Alliance.Blue == alliance) {
-            startingPoses.add(waypoints[0]);
-            trajectories.add(createTrajectory(waypoints, config));
-            finalPoses.add(finalPose);
-            expectedAprilTags.add(aprilTagID);
-
-        } else  {
-            startingPoses.add(FieldConstants.BlueToRedPose(waypoints[0]));
-            trajectories.add(createRedTrajectory(waypoints, config));
-            finalPoses.add(FieldConstants.BlueToRedPose(finalPose));
-            expectedAprilTags.add(Constants.FieldConstants.complementaryAprilTag[aprilTagID]);
-        }
-        
-    }
-
     /**
      * Pose facing reef, create a pose that rotates the robot so the camera faces the center of the reef.
      * @param x - a double that is the x field coordinate.
@@ -347,195 +301,7 @@ public class TrajectoryPlans {
             return new Pose2d(x, y, new Rotation2d(FieldConstants.robotHeadingForCameraToBlueReefCenter(x,y)));
         }
     }
-    /**
-     * Create predefined autonomous routines for use during the autonomous period.
-     * For now, 6 routines are defined.  One for each april tag on the reef.
-     * It creates paths for either blue and red alliances depending on the argument.
-     * Data is entered in blue alliance and transformed to red if we are in the red alliance.
-     * 
-     * Note: Path numbering is problematic so be careful when adding new options to keep the
-     * numbering consistent.
-     * 
-     */
-    public static void buildAutoTrajectories(Alliance alliance) {
-        // In case we get called multiple times, clear out the arraylists.
-        // Just for debugging and will not happen in a match.
-        autoNames.clear();
-        waypoints.clear();
-        expectedAprilTags.clear();
-        trajectories.clear();
-        finalPoses.clear();
-        startingPoses.clear();
     
-        // The staring poses will be on the blue starting line facing back toward the blue drive station
-        Rotation2d startingRotation = new Rotation2d(0.0);
-        double offsetFromAprilTag = Units.inchesToMeters(40); // 0.5 meters from the april tag
-        double offsetToTouchReef = Units.inchesToMeters(0.0); // -5 inches meters from the april tag Note: this should be 0.0 so something is off somewhere.
-        if (debug) checkAllTrajectories();
-        // Get/create poses for each Reef April tag and barge april tag
-        // for omre concise coding below.
-        Pose2d AT14 = RobotContainer.m_PoseEstimatorSubsystem.getAprilTagPose(14);
-        Pose2d AT15 = RobotContainer.m_PoseEstimatorSubsystem.getAprilTagPose(15);
-        Pose2d AT17 = RobotContainer.m_PoseEstimatorSubsystem.getAprilTagPose(17);
-        Pose2d AT18 = RobotContainer.m_PoseEstimatorSubsystem.getAprilTagPose(18);
-        Pose2d AT19 = RobotContainer.m_PoseEstimatorSubsystem.getAprilTagPose(19);
-        Pose2d AT20 = RobotContainer.m_PoseEstimatorSubsystem.getAprilTagPose(20);
-        Pose2d AT21 = RobotContainer.m_PoseEstimatorSubsystem.getAprilTagPose(21);
-        Pose2d AT22 = RobotContainer.m_PoseEstimatorSubsystem.getAprilTagPose(22);
-
-        Pose2d nearAT17 = DriveConstants.robotRearAtPose(AT17, offsetFromAprilTag);
-        Pose2d nearAT18 = DriveConstants.robotRearAtPose(AT18, offsetFromAprilTag);
-        Pose2d nearAT19 = DriveConstants.robotRearAtPose(AT19, offsetFromAprilTag);
-        Pose2d nearAT20 = DriveConstants.robotRearAtPose(AT20, offsetFromAprilTag);
-        Pose2d nearAT21 = DriveConstants.robotRearAtPose(AT21, offsetFromAprilTag);
-        Pose2d nearAT22 = DriveConstants.robotRearAtPose(AT22, offsetFromAprilTag);
-        Pose2d atAT17 = DriveConstants.robotRearAtPose(AT17, offsetToTouchReef);
-        Pose2d atAT18 = DriveConstants.robotRearAtPose(AT18, offsetToTouchReef);
-        Pose2d atAT19 = DriveConstants.robotRearAtPose(AT19, offsetToTouchReef);
-        Pose2d atAT20 = DriveConstants.robotRearAtPose(AT20, offsetToTouchReef);
-        Pose2d atAT21 = DriveConstants.robotRearAtPose(AT21, offsetToTouchReef);
-        Pose2d atAT22 = DriveConstants.robotRearAtPose(AT22, offsetToTouchReef);
-        //TrajectoryConfig config = m_debugTrajectoryConfig;
-        TrajectoryConfig config = m_reverseTrajectoryConfig;
-
-        // Add the defualt plan which is not yet defined, for now do nothing.
-        AUTO_MODE_ROBOT_DECIDES = autoNames.size();
-        autoNames.add("Robot Makes the Plan");
-        Robot.autoChooser.addOption(autoNames.get(autoNames.size()-1), autoNames.size()-1);
-        waypoints.add(new Pose2d[]{}); // Empty array.
-        trajectories.add(null);
-        finalPoses.add(null);
-        startingPoses.add(null);
-        expectedAprilTags.add(0);
-
-        // Add the defualt plan which is not yet defined, for now do nothing.
-        AUTO_MODE_MOVE_OFF_LINE_AND_STOP = autoNames.size();
-        autoNames.add("Drive off Line and Stop");
-        Robot.autoChooser.addOption(autoNames.get(autoNames.size()-1), autoNames.size()-1);
-        waypoints.add(new Pose2d[]{}); // Empty array.
-        trajectories.add(null);
-        finalPoses.add(null);
-        startingPoses.add(null);
-        expectedAprilTags.add(0);
-
-        // Add the defualt plan which is not yet defined, for now do nothing.
-        AUTO_MODE_DO_NOTHING = autoNames.size();
-        autoNames.add("Do Nothing");
-        Robot.autoChooser.addOption(autoNames.get(autoNames.size()-1), autoNames.size()-1);
-        waypoints.add(new Pose2d[]{}); // Empty array.
-        trajectories.add(null);
-        finalPoses.add(null);
-        startingPoses.add(null);
-        expectedAprilTags.add(0);
-
-        // Build a path adding it to the autoChooser which will select the autonomous routine
-        AUTO_MODE_MY_BARGE_TO_OPPOSITE = autoNames.size();
-        addAutoMode(
-            "My Barge to Opposite"
-            ,new Pose2d[] {
-                new Pose2d(FieldConstants.blueStartLine,AT14.getY(), startingRotation),
-                //new Pose2d(AT20.getX(),AT14.getY(), startingRotation),
-                //new Pose2d(AT19.getX(),AT14.getY(), startingRotation),
-                new Pose2d(FieldConstants.zeroToReef,AT14.getY(), startingRotation),
-                new Pose2d(FieldConstants.zeroToReef * 0.66 - 1,AT18.getY()+1.0, new Rotation2d(Math.PI*0.5)),
-                nearAT18
-            },
-            atAT18,
-            config,
-            20,
-            alliance);
-
-        // Build a path adding it to the autoChooser which will select the autonomous routine
-        AUTO_MODE_MY_BARGE_TO_FAR_SIDE = autoNames.size();
-        addAutoMode("My Barge to Far Side"
-            ,new Pose2d[] {
-                new Pose2d(FieldConstants.blueStartLine,AT14.getY(), startingRotation),
-                new Pose2d(AT19.getX()-0.5, AT14.getY()-0.2, startingRotation.plus(new Rotation2d(Units.degreesToRadians(30)))),
-                //new Pose2d(AT19.getX()-0.6, AT14.getY()-0.2, AT19.getRotation()),
-                //new Pose2d(AT19.getX(),AT14.getY(), startingRotation),
-                //nearAT19           
-            }
-            ,atAT19
-            ,config
-            ,20
-            ,alliance
-        );
-
-        AUTO_MODE_MY_BARGE_TO_NEAR_SIDE = autoNames.size();
-        addAutoMode(
-            "My Barge to Near Side"
-            , new Pose2d[] {
-                new Pose2d(FieldConstants.blueStartLine,AT14.getY(), startingRotation)
-                //new Pose2d(AT21.getX()+0.5,AT14.getY(), startingRotation.plus(new Rotation2d(Units.degreesToRadians(0)))),
-                //poseWithCameraFacingTheReef((AT20.getX()+FieldConstants.blueStartLine)/2.0,AT14.getY()),  Adds extra squiggles to the path
-                //nearAT20
-            }
-            ,atAT20
-            , config
-            , 20
-            , alliance
-        );
-        
-        // Build a path adding it to the autoChooser which will select the autonomous routine
-        AUTO_MODE_CENTER_STRAIGHT = autoNames.size();
-        addAutoMode(
-            "Center Straight"
-            , new Pose2d[] {
-                new Pose2d(FieldConstants.blueStartLine ,FieldConstants.yCenter, startingRotation),
-                new Pose2d((AT21.getX()+FieldConstants.blueStartLine)/2.0,FieldConstants.yCenter, startingRotation),
-                //nearAT21
-            }
-            ,atAT21
-            , config
-            , 21
-            , alliance
-            );
-
-        // Build a path adding it to the autoChooser which will select the autonomous routine
-        AUTO_MODE_THEIR_BARGE_TO_NEAR_SIDE = autoNames.size();
-        addAutoMode(
-            "Their Barge to Near Side"  
-            , new Pose2d[] {
-                new Pose2d(FieldConstants.blueStartLine,AT15.getY(), startingRotation),
-                new Pose2d(AT21.getX()+0.5,AT15.getY(), startingRotation),
-            nearAT22
-            }
-            ,atAT22
-            , config
-            , 22
-            , alliance
-        );
-
-        // Build a path adding it to the autoChooser which will select the autonomous routine
-        AUTO_MODE_THEIR_BARGE_TO_FAR_SIDE = autoNames.size();
-        addAutoMode("Their Barge to Far Side"
-            , new Pose2d[] {
-                new Pose2d(FieldConstants.blueStartLine,AT15.getY(), startingRotation),
-                new Pose2d(AT22.getX()-1.1,AT15.getY()+0.2, startingRotation.plus(new Rotation2d(Units.degreesToRadians(-30)))),               
-            }
-            ,atAT17
-            , config
-            , 22
-            , alliance
-        );
-
-        // Build a path adding it to the autoChooser which will select the autonomous routine
-        AUTO_MODE_MY_BARGE_TO_CENTER = autoNames.size();
-        addAutoMode("Right 45 Degrees"
-            , new Pose2d[] {
-                poseWithCameraFacingTheReef(false, FieldConstants.blueStartLine, AT14.getY()),
-                //poseWithCameraFacingTheReef(FieldConstants.blueStartLine-0.2, FieldConstants.yCenter + 1),
-                nearAT21
-            }
-            ,atAT21
-            , config
-            , 20
-            , alliance
-        );
-
-        SmartDashboard.putData("AutoSelector", Robot.autoChooser);
-    }
-
     /**
      * Returns a rotation for the robot to face the reef.  Used as a lambda function to supply the rotation to the SwerveControllerCommand.
      * @param poseEstimatorSubsystem
@@ -544,44 +310,13 @@ public class TrajectoryPlans {
     public static Rotation2d reefFacingRotationSupplier(PoseEstimatorSubsystem poseEstimatorSubsystem) {
         Rotation2d rotation = new Rotation2d(
                 Autonomous.robotHeadingForCameraToReefCenter(
-                    poseEstimatorSubsystem.getCurrentPose().getX()
-                    , poseEstimatorSubsystem.getCurrentPose().getY()
+                    poseEstimatorSubsystem.getCurrentPose().getTranslation()
                 ) 
         );
         return rotation;
     } 
 
-    public static Command getReefFacingSwerveCommand(
-        DriveSubsystemSRX driveTrain
-        ,PoseEstimatorSubsystem poseEstimatorSubsystem
-     ) {
-        Command command;
-        Trajectory trajectory;
-        trajectory = trajectories.get(Autonomous.getAutoMode());
-        
-        if (trajectory != null) {
-            ProfiledPIDController thetaController = new ProfiledPIDController(AutoConstants.kPThetaController, 0, 0, AutoConstants.kThetaControllerConstraints);
-            thetaController.enableContinuousInput(-Math.PI, Math.PI);
-            command = new PreussSwerveControllerCommand(
-            driveTrain,
-            poseEstimatorSubsystem,
-            trajectory,
-            poseEstimatorSubsystem::getCurrentPose, // Functional interface to feed supplier
-
-            // Position controllers
-            new PIDController(AutoConstants.kPXController, 0, 0),
-            new PIDController(AutoConstants.kPYController, 0, 0),
-            thetaController,
-            () -> reefFacingRotationSupplier(poseEstimatorSubsystem),
-            driveTrain::driveFieldRelative,
-            driveTrain);
-        } else {
-            command = Commands.none();
-        }
-        return command;
-    }
     
-
     /**
      * redTrajectory - create a trajectory for the red alliance from blue alliance waypoints
      * @param - Pose2d[] the blue alliance waypoints
@@ -598,23 +333,6 @@ public class TrajectoryPlans {
         }
         Trajectory trajectory = createTrajectory(redWaypoints, config);
         return trajectory;
-    }
-
-    /**
-     * setStartingPose() - initialize the robot position on the field based on the auto plan and alliance
-     * @param PoseEstimatorSubsystem - the pose estimator subsystem.
-     */
-    public static Command setStartingPoseCommand(PoseEstimatorSubsystem poseEstimatorSubsystem) {
-       return new InstantCommand(() -> poseEstimatorSubsystem.setCurrentPose(startingPoses.get(Autonomous.getAutoMode())));   
-    }
-
-    /**
-     * setStartingPose() - initialize the robot position on the field based on the auto plan and alliance
-     * @param PoseEstimatorSubsystem - the pose estimator subsystem.
-     */
-    public static Command gotoFinalPoseCommand(DriveSubsystemSRX robotDrive, PoseEstimatorSubsystem poseEstimatorSubsystem) {
-        boolean driveFacingFinalPose = true;
-        return new GotoPoseCommand(robotDrive, poseEstimatorSubsystem, finalPoses.get(Autonomous.getAutoMode()), driveFacingFinalPose, null);
     }
 
     /**
@@ -660,7 +378,7 @@ public class TrajectoryPlans {
             SmartDashboard.putNumber("J", j);
             
             List<Pose2d> blueProcessorPlan = TrajectoryPlans.planTrajectory(
-                TrajectoryPlans.BlueProcessorPlan, TrajectoryPlans.fieldSquareToPose(i, j)
+                TrajectoryPlans.blueProcessorWaypoints, TrajectoryPlans.fieldSquareToPose(i, j)
             );
             }
         }
@@ -670,7 +388,7 @@ public class TrajectoryPlans {
             SmartDashboard.putNumber("I", i);
             SmartDashboard.putNumber("J", j);
             List<Pose2d> redProcessorPlan = TrajectoryPlans.planTrajectory(
-                TrajectoryPlans.RedProcessorPlan, TrajectoryPlans.fieldSquareToPose(i, j)
+                TrajectoryPlans.redProcessorWaypoints, TrajectoryPlans.fieldSquareToPose(i, j)
             );
             }
         }

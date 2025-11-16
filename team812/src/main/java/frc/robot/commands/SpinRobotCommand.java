@@ -5,6 +5,7 @@
 package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.subsystems.AllianceConfigurationSubsystem;
 import frc.robot.subsystems.DriveSubsystemSRX;
 import frc.robot.Utilities;
 
@@ -25,7 +26,7 @@ public class SpinRobotCommand extends Command {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    if (Utilities.isBlueAlliance()) {
+    if (AllianceConfigurationSubsystem.isBlueAlliance()) {
       allianceSpeed = speed;
     } else {
       allianceSpeed = -speed;
