@@ -11,9 +11,11 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.XboxController.Button;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -26,6 +28,7 @@ import frc.robot.Constants.FieldConstants;
 import frc.robot.Constants.OIConstants;
 import frc.robot.Constants.UltrasonicConstants;
 import frc.robot.Constants.VisionConstants;
+import frc.robot.subsystems.AllianceConfigurationSubsystem;
 import frc.robot.subsystems.BlackBoxSubsystem;
 import frc.robot.subsystems.DriveSubsystemSRX.DrivingMode;
 import frc.robot.subsystems.PingResponseUltrasonicSubsystem;
@@ -66,6 +69,7 @@ public class RobotContainer {
 
   public static final PoseEstimatorCamera[] cameras = new PoseEstimatorCamera[]{m_rearCamera/*,m_frontCamera*/};
   public static PoseEstimatorSubsystem m_PoseEstimatorSubsystem = new PoseEstimatorSubsystem( cameras, m_robotDrive);
+  public final static AllianceConfigurationSubsystem m_allianceConfigurationSubsystem = new AllianceConfigurationSubsystem(m_robotDrive, m_PoseEstimatorSubsystem);
   private static  boolean isSimulation = (System.getProperty("os.name").equals("Mac OS X"));
   public static PreussDriveSimulation m_preussDriveSimulation = new PreussDriveSimulation(m_PoseEstimatorSubsystem);
   private static boolean debug = true; // To enable debugging in this module, change false to true.
@@ -128,7 +132,7 @@ public class RobotContainer {
     // By default this is not a simulation.
     // For convenience, set the simulation mode to true if this is not linux (ie if it is MacOS or Windows).
     RobotContainer.isSimulation = !(System.getProperty("os.name").equals("Linux"));
-    TrajectoryPlans.buildAutoTrajectories(); 
+    TrajectoryPlans.buildAutoTrajectories(DriverStation.getAlliance().isPresent() ? DriverStation.getAlliance().get() : Alliance.Blue); 
 
     // Configure the button bindings
     configureButtonBindings();

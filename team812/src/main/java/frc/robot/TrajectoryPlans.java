@@ -16,6 +16,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.trajectory.TrajectoryConfig;
 import edu.wpi.first.math.trajectory.TrajectoryGenerator;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants.AutoConstants;
 import edu.wpi.first.math.trajectory.Trajectory;
@@ -47,13 +48,10 @@ public class TrajectoryPlans {
     public static ArrayList<Trajectory> autoPaths = new ArrayList<Trajectory>();
     public static ArrayList<String>     autoNames = new ArrayList<String>();
     public static ArrayList<Pose2d[]>   waypoints = new ArrayList<Pose2d[]>();
-    public static ArrayList<Integer> expectedAprilTag = new ArrayList<Integer>();
-    public static ArrayList<Trajectory> blueTrajectories = new ArrayList<Trajectory>();
-    public static ArrayList<Trajectory> redTrajectories = new ArrayList<Trajectory>();
-    public static ArrayList<Pose2d>     blueFinalPose = new ArrayList<Pose2d>();
-    public static ArrayList<Pose2d>     redFinalPose = new ArrayList<Pose2d>();
-    public static ArrayList<Pose2d>     blueStartingPose = new ArrayList<Pose2d>();
-    public static ArrayList<Pose2d>     redStartingPose = new ArrayList<Pose2d>();
+    public static ArrayList<Integer>    expectedAprilTags = new ArrayList<Integer>();
+    public static ArrayList<Trajectory> trajectories = new ArrayList<Trajectory>();
+    public static ArrayList<Pose2d>     finalPoses = new ArrayList<Pose2d>();
+    public static ArrayList<Pose2d>     startingPoses = new ArrayList<Pose2d>();
     public static int AUTO_MODE_ROBOT_DECIDES;
     public static int AUTO_MODE_MOVE_OFF_LINE_AND_STOP;
     public static int AUTO_MODE_DO_NOTHING;
@@ -295,40 +293,7 @@ public class TrajectoryPlans {
         return trajectory;
     }
     
-    /**
-     * Create a SwerveControllerCommand to drive following a path
-     * @param driveTrain - the robot's drive train subsystem.
-     * @param poseEstimatorSubsystem - the robot's pose estimator subsystem.
-     * @param waypoints - an array of Pose2d the is the path to be driven.
-     * @param config - driving parameters (e.g. max speed, max acceleration, etc )
-     * @return - (SwerveControllerCommand) command to run that will drive the robot following the path (or null if no path found)
-     */
-    public static SwerveControllerCommand swerveControllerCommandFactory(DriveSubsystemSRX driveTrain, PoseEstimatorSubsystem poseEstimatorSubsystem, Pose2d[] waypoints, TrajectoryConfig config) {
-        SwerveControllerCommand command = null;
-        // The SwerveControllerCommand needs a holonomic set of pid controllers.
-        // Create the rotatation controller here and the x,y controllers in-line below.
-        ProfiledPIDController thetaController = new ProfiledPIDController(AutoConstants.kPThetaController, 0, 0, AutoConstants.kThetaControllerConstraints);
-        thetaController.enableContinuousInput(-Math.PI, Math.PI); // angles will be converted to be within the range +/- pi. (e.g. 361 degrees will be converted to 1 degree)
-
-        // Calculate the smoothed path through the waypoints.
-        Trajectory trajectory = createTrajectory(waypoints, config);
-
-        // If we got a path, create the driving command.
-        if (trajectory != null) {
-            command = new SwerveControllerCommand(
-            trajectory,
-            poseEstimatorSubsystem::getCurrentPose, // Functional interface to feed supplier
-            DriveConstants.kDriveKinematics,
-
-            // Position controllers
-            new PIDController(AutoConstants.kPXController, 0, 0),
-            new PIDController(AutoConstants.kPYController, 0, 0),
-            thetaController,
-            driveTrain::setModuleStates,
-            driveTrain);
-        }
-        return command;
-    }
+    
 
     /**
      * 
@@ -349,18 +314,24 @@ public class TrajectoryPlans {
         Pose2d[] waypoints,
         Pose2d finalPose,
         TrajectoryConfig config,
-        int aprilTagID) {
+        int aprilTagID,
+        Alliance alliance) {
 
         autoNames.add(name);
         Robot.autoChooser.addOption(autoNames.get(autoNames.size()-1), autoNames.size()-1);
-        blueStartingPose.add(waypoints[0]);
-        blueTrajectories.add(createTrajectory(waypoints, config));
-        blueFinalPose.add(finalPose);
+        if (Alliance.Blue == alliance) {
+            startingPoses.add(waypoints[0]);
+            trajectories.add(createTrajectory(waypoints, config));
+            finalPoses.add(finalPose);
+            expectedAprilTags.add(aprilTagID);
+
+        } else  {
+            startingPoses.add(FieldConstants.BlueToRedPose(waypoints[0]));
+            trajectories.add(createRedTrajectory(waypoints, config));
+            finalPoses.add(FieldConstants.BlueToRedPose(finalPose));
+            expectedAprilTags.add(Constants.FieldConstants.complementaryAprilTag[aprilTagID]);
+        }
         
-        redStartingPose.add(FieldConstants.BlueToRedPose(waypoints[0]));
-        redTrajectories.add(createRedTrajectory(waypoints, config));
-        redFinalPose.add(FieldConstants.BlueToRedPose(finalPose));
-        expectedAprilTag.add(aprilTagID);
     }
 
     /**
@@ -379,16 +350,23 @@ public class TrajectoryPlans {
     /**
      * Create predefined autonomous routines for use during the autonomous period.
      * For now, 6 routines are defined.  One for each april tag on the reef.
-     * It creates paths for both blue and red alliances.
-     * Both paths are generated at startup so that it will be certain that the
-     * required path (red or blue) can be selected at autonomousInit when the alliance
-     * is sure to be known.
+     * It creates paths for either blue and red alliances depending on the argument.
+     * Data is entered in blue alliance and transformed to red if we are in the red alliance.
      * 
      * Note: Path numbering is problematic so be careful when adding new options to keep the
      * numbering consistent.
      * 
      */
-    public static void buildAutoTrajectories() {
+    public static void buildAutoTrajectories(Alliance alliance) {
+        // In case we get called multiple times, clear out the arraylists.
+        // Just for debugging and will not happen in a match.
+        autoNames.clear();
+        waypoints.clear();
+        expectedAprilTags.clear();
+        trajectories.clear();
+        finalPoses.clear();
+        startingPoses.clear();
+    
         // The staring poses will be on the blue starting line facing back toward the blue drive station
         Rotation2d startingRotation = new Rotation2d(0.0);
         double offsetFromAprilTag = Units.inchesToMeters(40); // 0.5 meters from the april tag
@@ -425,39 +403,30 @@ public class TrajectoryPlans {
         autoNames.add("Robot Makes the Plan");
         Robot.autoChooser.addOption(autoNames.get(autoNames.size()-1), autoNames.size()-1);
         waypoints.add(new Pose2d[]{}); // Empty array.
-        blueTrajectories.add(null);
-        redTrajectories.add(null);
-        blueFinalPose.add(null);
-        redFinalPose.add(null);
-        blueStartingPose.add(null);
-        redStartingPose.add(null);
-        expectedAprilTag.add(0);
+        trajectories.add(null);
+        finalPoses.add(null);
+        startingPoses.add(null);
+        expectedAprilTags.add(0);
 
         // Add the defualt plan which is not yet defined, for now do nothing.
         AUTO_MODE_MOVE_OFF_LINE_AND_STOP = autoNames.size();
         autoNames.add("Drive off Line and Stop");
         Robot.autoChooser.addOption(autoNames.get(autoNames.size()-1), autoNames.size()-1);
         waypoints.add(new Pose2d[]{}); // Empty array.
-        blueTrajectories.add(null);
-        redTrajectories.add(null);
-        blueFinalPose.add(null);
-        redFinalPose.add(null);
-        blueStartingPose.add(null);
-        redStartingPose.add(null);
-        expectedAprilTag.add(0);
+        trajectories.add(null);
+        finalPoses.add(null);
+        startingPoses.add(null);
+        expectedAprilTags.add(0);
 
         // Add the defualt plan which is not yet defined, for now do nothing.
         AUTO_MODE_DO_NOTHING = autoNames.size();
         autoNames.add("Do Nothing");
         Robot.autoChooser.addOption(autoNames.get(autoNames.size()-1), autoNames.size()-1);
         waypoints.add(new Pose2d[]{}); // Empty array.
-        blueTrajectories.add(null);
-        redTrajectories.add(null);
-        blueFinalPose.add(null);
-        redFinalPose.add(null);
-        blueStartingPose.add(null);
-        redStartingPose.add(null);
-        expectedAprilTag.add(0);
+        trajectories.add(null);
+        finalPoses.add(null);
+        startingPoses.add(null);
+        expectedAprilTags.add(0);
 
         // Build a path adding it to the autoChooser which will select the autonomous routine
         AUTO_MODE_MY_BARGE_TO_OPPOSITE = autoNames.size();
@@ -473,7 +442,8 @@ public class TrajectoryPlans {
             },
             atAT18,
             config,
-            20);
+            20,
+            alliance);
 
         // Build a path adding it to the autoChooser which will select the autonomous routine
         AUTO_MODE_MY_BARGE_TO_FAR_SIDE = autoNames.size();
@@ -488,6 +458,7 @@ public class TrajectoryPlans {
             ,atAT19
             ,config
             ,20
+            ,alliance
         );
 
         AUTO_MODE_MY_BARGE_TO_NEAR_SIDE = autoNames.size();
@@ -502,6 +473,7 @@ public class TrajectoryPlans {
             ,atAT20
             , config
             , 20
+            , alliance
         );
         
         // Build a path adding it to the autoChooser which will select the autonomous routine
@@ -516,6 +488,7 @@ public class TrajectoryPlans {
             ,atAT21
             , config
             , 21
+            , alliance
             );
 
         // Build a path adding it to the autoChooser which will select the autonomous routine
@@ -530,6 +503,7 @@ public class TrajectoryPlans {
             ,atAT22
             , config
             , 22
+            , alliance
         );
 
         // Build a path adding it to the autoChooser which will select the autonomous routine
@@ -542,6 +516,7 @@ public class TrajectoryPlans {
             ,atAT17
             , config
             , 22
+            , alliance
         );
 
         // Build a path adding it to the autoChooser which will select the autonomous routine
@@ -555,33 +530,10 @@ public class TrajectoryPlans {
             ,atAT21
             , config
             , 20
+            , alliance
         );
 
         SmartDashboard.putData("AutoSelector", Robot.autoChooser);
-    }
-
-    public static Command getSwerveCommand(
-        DriveSubsystemSRX driveTrain
-        ,PoseEstimatorSubsystem poseEstimatorSubsystem
-        ,Trajectory trajectory
-     ) {
-        Command command;
-        if (trajectory != null) {
-            command = new PreussSwerveControllerCommand(
-            driveTrain,
-            poseEstimatorSubsystem,
-            trajectory,
-            poseEstimatorSubsystem::getCurrentPose, // Functional interface to feed supplier
-            // Position controllers
-            new PIDController(AutoConstants.kPXController, 0, 0),
-            new PIDController(AutoConstants.kPYController, 0, 0),
-            new ProfiledPIDController(AutoConstants.kPThetaController, 0, 0, AutoConstants.kThetaControllerConstraints),
-            driveTrain::driveFieldRelative,
-            driveTrain);
-        } else {
-            command = Commands.none();
-        }
-        return command;
     }
 
     /**
@@ -605,11 +557,8 @@ public class TrajectoryPlans {
      ) {
         Command command;
         Trajectory trajectory;
-        if (Utilities.isBlueAlliance()) {
-            trajectory = blueTrajectories.get(Autonomous.getAutoMode());
-        } else {
-            trajectory = redTrajectories.get(Autonomous.getAutoMode());
-        }
+        trajectory = trajectories.get(Autonomous.getAutoMode());
+        
         if (trajectory != null) {
             ProfiledPIDController thetaController = new ProfiledPIDController(AutoConstants.kPThetaController, 0, 0, AutoConstants.kThetaControllerConstraints);
             thetaController.enableContinuousInput(-Math.PI, Math.PI);
@@ -656,24 +605,16 @@ public class TrajectoryPlans {
      * @param PoseEstimatorSubsystem - the pose estimator subsystem.
      */
     public static Command setStartingPoseCommand(PoseEstimatorSubsystem poseEstimatorSubsystem) {
-        return new ConditionalCommand(
-            new InstantCommand(() -> poseEstimatorSubsystem.setCurrentPose(blueStartingPose.get(Autonomous.getAutoMode()))),
-            new InstantCommand(() -> poseEstimatorSubsystem.setCurrentPose(redStartingPose.get(Autonomous.getAutoMode()))),
-            () -> Utilities.isBlueAlliance()
-        );
+       return new InstantCommand(() -> poseEstimatorSubsystem.setCurrentPose(startingPoses.get(Autonomous.getAutoMode())));   
     }
 
-/**
+    /**
      * setStartingPose() - initialize the robot position on the field based on the auto plan and alliance
      * @param PoseEstimatorSubsystem - the pose estimator subsystem.
      */
     public static Command gotoFinalPoseCommand(DriveSubsystemSRX robotDrive, PoseEstimatorSubsystem poseEstimatorSubsystem) {
         boolean driveFacingFinalPose = true;
-        return new ConditionalCommand(
-            new GotoPoseCommand(robotDrive, poseEstimatorSubsystem, blueFinalPose.get(Autonomous.getAutoMode()), driveFacingFinalPose, null),
-            new GotoPoseCommand(robotDrive, poseEstimatorSubsystem, redFinalPose.get(Autonomous.getAutoMode()), driveFacingFinalPose, null),
-            () -> Utilities.isBlueAlliance()
-        );
+        return new GotoPoseCommand(robotDrive, poseEstimatorSubsystem, finalPoses.get(Autonomous.getAutoMode()), driveFacingFinalPose, null);
     }
 
     /**

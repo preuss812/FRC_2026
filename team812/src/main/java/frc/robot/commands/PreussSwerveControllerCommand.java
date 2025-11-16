@@ -229,6 +229,9 @@ public class PreussSwerveControllerCommand extends Command {
     m_count = 0;
     if (m_trajectory != null)
       RobotContainer.m_PoseEstimatorSubsystem.field2d.getObject("trajectory").setTrajectory(m_trajectory);
+    // Make sure we are wrapping the angles
+    m_controller.getThetaController().enableContinuousInput(-Math.PI, Math.PI);
+    // Do we need a reset? m_controller.getThetaController().reset(0.0);
   }
 
   @Override
@@ -240,16 +243,6 @@ public class PreussSwerveControllerCommand extends Command {
 
     // get the trajectory information.
     var desiredState = m_trajectory.sample(curTime);
-    /*if (Utilities.isRedAlliance()) {
-      desiredState = new Trajectory.State(
-        desiredState.timeSeconds,
-        desiredState.velocityMetersPerSecond,
-        desiredState.accelerationMetersPerSecondSq,
-        Constants.FieldConstants.BlueToRedPose(desiredState.poseMeters),
-        desiredState.curvatureRadPerMeter
-      );
-
-    }*/
 
     Pose2d trajectoryPose = desiredState.poseMeters;
 

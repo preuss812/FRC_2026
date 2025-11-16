@@ -10,13 +10,16 @@ package frc.robot;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import frc.robot.subsystems.AllianceConfigurationSubsystem;
 import frc.robot.subsystems.DriveSubsystemSRX;
 import frc.robot.subsystems.DriveSubsystemSRX.DrivingMode;
 import frc.robot.subsystems.PoseEstimatorSubsystem;
-import frc.robot.commands.AutoDriveToReefCommand;
+import frc.robot.commands.AutoSwerveToReefCommand;
+import frc.robot.commands.AutoGotoReefCommand;
 import frc.robot.commands.DriveWithoutVisionCommand;
 import frc.robot.Constants.FieldConstants;
 import frc.robot.Constants.VisionConstants;
@@ -104,15 +107,21 @@ public class Autonomous extends SequentialCommandGroup {
     // get the required subsystems for constructing the plans below.
     m_robotDrive = RobotContainer.m_robotDrive;
     m_PoseEstimatorSubsystem = RobotContainer.m_PoseEstimatorSubsystem;
-
-    // Set up the alliance first.  Other commands need to know which alliance to operate correctly.
     Utilities.setAlliance();
+
+    AllianceConfigurationSubsystem.refreshAllianceConfiguration(DriverStation.getAlliance().get());
+    // Set up the alliance first.  Other commands need to know which alliance to operate correctly.
     setAutoMode();
     setReefCenter();
 
+    // set up for the current alliance
+    addCommands(new InstantCommand(() -> AllianceConfigurationSubsystem.refreshAllianceConfiguration(DriverStation.getAlliance().get())));
+
+    //addCommands(new InstantCommand(() -> setAutoMode()));
+
     // Initialize the robot before moving.
     addCommands(new ParallelCommandGroup(
-      new InstantCommand(() -> robotContainer.setGyroAngleToStartMatch()),
+      //new InstantCommand(() -> robotContainer.setGyroAngleToStartMatch()),
       new InstantCommand(() -> RobotContainer.m_robotDrive.setDrivingMode(DrivingMode.SPEED)) // TODO Should be SPEED, not PRECISION
       //new ElbowHomeCommand(m_ElbowRotationSubsystem),
       //new ShoulderHomeCommand(m_ShoulderRotationSubsystem),
@@ -140,7 +149,8 @@ public class Autonomous extends SequentialCommandGroup {
     if (getAutoMode() == TrajectoryPlans.AUTO_MODE_CENTER_STRAIGHT)
       timeout = 8;
     addCommands(
-      new AutoDriveToReefCommand(m_robotDrive, m_PoseEstimatorSubsystem).withTimeout(timeout)
+      new AutoSwerveToReefCommand(m_robotDrive, m_PoseEstimatorSubsystem).withTimeout(timeout), // Should get us to the reef.
+      new AutoGotoReefCommand(m_robotDrive,m_PoseEstimatorSubsystem).withTimeout(timeout) // this one makes sure we get to the reef.
     );
 
     

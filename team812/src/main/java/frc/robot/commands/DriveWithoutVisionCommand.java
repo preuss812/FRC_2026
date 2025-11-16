@@ -25,7 +25,7 @@ public class DriveWithoutVisionCommand extends Command {
   private final DrivingConfig config;
   private Pose2d targetPose;
   private boolean onTarget = true;
-  private boolean debug = false;
+  private boolean debug = true;
   
   /** Creates a new DriveWithoutVisionCommand. */
   public DriveWithoutVisionCommand(
@@ -53,7 +53,7 @@ public class DriveWithoutVisionCommand extends Command {
     if (Utilities.isBlueAlliance()) {
       targetPose = new Pose2d(
         initialPose.getX() + relativeMove.getX()
-        , initialPose.getX() + relativeMove.getY()
+        , initialPose.getY() + relativeMove.getY()
         , new Rotation2d(MathUtil.angleModulus(initialPose.getRotation().getRadians()+relativeMove.getRotation().getRadians())));
 
     } else {
@@ -79,7 +79,9 @@ public class DriveWithoutVisionCommand extends Command {
 
     // get the robot's position on the field.
     robotPose = robotDrive.getPose();
-
+    Utilities.toSmartDashboard("GP", robotPose);
+    Utilities.toSmartDashboard("TP", targetPose);
+    
     // Calculate the X and Y offsets to the target location
     //translationErrorToTarget = new Translation2d( targetPose.getX() - robotPose.getX(), targetPose.getY() - robotPose.getY());
     translationErrorToTarget = new Translation2d( robotPose.getX() - targetPose.getX(), robotPose.getY() - targetPose.getY());
