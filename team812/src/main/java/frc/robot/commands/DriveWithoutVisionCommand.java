@@ -52,7 +52,7 @@ public class DriveWithoutVisionCommand extends Command {
     Pose2d startingPose = m_robotDrive.getPose();
     Pose2d  allianceAdjustedRelativeMove = AllianceConfigurationSubsystem.allianceAdjustedMove(m_relativeMove);
     // add the relativeMove to the startingPose accounting for alliance color.
-    new Pose2d(
+    m_targetPose = new Pose2d(
       startingPose.getX() + allianceAdjustedRelativeMove.getX(),
       startingPose.getY() + allianceAdjustedRelativeMove.getY(),
       startingPose.getRotation().rotateBy(allianceAdjustedRelativeMove.getRotation())

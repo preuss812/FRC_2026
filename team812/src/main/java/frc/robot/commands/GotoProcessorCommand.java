@@ -20,13 +20,18 @@ import frc.utils.DrivingConfig;
  */
 public class GotoProcessorCommand extends GotoPoseCommand {
 
-  /** Creates a new GotoProcessorCommand. */
+  /*
+   * GotoProcessorCommand Creates a new GotoProcessorCommand.
+   * @param robotDrive - the drivetrain syubsystem.
+   * @param poseEstimatorSubsystem - the pose estimator subsystem.
+   * @param config - the driving speed configuration or null for the default config.
+   */
   public GotoProcessorCommand(
-      DriveSubsystemSRX DriveSubsystemSRXSubsystem
-    , PoseEstimatorSubsystem PoseEstimatorSubsystem
+      DriveSubsystemSRX robotDrive
+    , PoseEstimatorSubsystem poseEstimatorSubsystem
     , DrivingConfig config
     ) { 
-    super(DriveSubsystemSRXSubsystem, PoseEstimatorSubsystem, new Pose2d(), false, config); // Pose is a place holder.
+    super(robotDrive, poseEstimatorSubsystem, new Pose2d(), false, config); // Pose is a place holder.
   }
 
   // Called when the command is initially scheduled.

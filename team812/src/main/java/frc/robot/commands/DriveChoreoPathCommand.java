@@ -26,10 +26,10 @@ import choreo.trajectory.Trajectory;
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
 public class DriveChoreoPathCommand extends Command {
 
-  private final String trajectoryName;
-  private final DriveSubsystemSRX robotDrive;
-  private final PoseEstimatorSubsystem poseEstimatorSubsystem;
-  private Optional<Trajectory<SwerveSample>> trajectory;
+  private final String m_trajectoryName;
+  private final DriveSubsystemSRX m_robotDrive;
+  private final PoseEstimatorSubsystem m_poseEstimatorSubsystem;
+  private Optional<Trajectory<SwerveSample>> m_trajectory;
   private final Timer m_timer = new Timer();
   private final double m_speedFactor; // Can be used to speed up or slow down the path following  1.0 = speed as defined in path.
   private int m_count = 0; // Used for simulating time in a way that allows for breakpoints during simulation.
@@ -43,11 +43,11 @@ public class DriveChoreoPathCommand extends Command {
   , DrivingConfig config
   , double speedFactor
   , double pidCorrectionFactor) {
-    this.robotDrive = robotDrive;
-    this.poseEstimatorSubsystem = poseEstimatorSubsystem;
-    this.trajectoryName = trajectoryName;
+    this.m_robotDrive = robotDrive;
+    this.m_poseEstimatorSubsystem = poseEstimatorSubsystem;
+    this.m_trajectoryName = trajectoryName;
     this.m_speedFactor = speedFactor;
-    trajectory  = Choreo.loadTrajectory(trajectoryName);
+    m_trajectory  = Choreo.loadTrajectory(trajectoryName);
     pidControllers[0] = new PIDController(10.0 * pidCorrectionFactor, 0.0, 0.0);
     pidControllers[1] = new PIDController(10.0 * pidCorrectionFactor, 0.0, 0.0);
     pidControllers[2] = new PIDController(7.5  * pidCorrectionFactor, 0.0, 0.0);
@@ -61,28 +61,28 @@ public class DriveChoreoPathCommand extends Command {
   @Override
   public void initialize() {
     m_count = 0;
-    if (trajectory.isPresent()) {
+    if (m_trajectory.isPresent()) {
      //RobotContainer.m_PoseEstimatorSubsystem.field2d.getObject("trajectory").setTrajectory(trajectory.get());// wrong class of trajectory
             // Get the initial pose of the trajectory
-            Optional<Pose2d> initialPose = trajectory.get().getInitialPose(isRedAlliance());
+            Optional<Pose2d> initialPose = m_trajectory.get().getInitialPose(isRedAlliance());
 
             if (initialPose.isPresent()) {
                 // Reset odometry to the start of the trajectory
                 //robotDrive.resetOdometry(initialPose.get());
 
-                poseEstimatorSubsystem.setCurrentPose(initialPose.get());
+                m_poseEstimatorSubsystem.setCurrentPose(initialPose.get());
                 //robotDrive.setAngleDegrees(initialPose.get().getRotation().getDegrees()+(Utilities.isRedAlliance() ? 180 : 0.0));
 
-                if (trajectoryName == "PID test")
+                if (m_trajectoryName == "PID test")
                 {
                   // Set up at the wrong start location to see if the robot can correct itself
                   Pose2d  offsetPose = initialPose.get();
                   //poseEstimatorSubsystem.setCurrentPose(initialPose.get());
-                  poseEstimatorSubsystem.setCurrentPose(new Pose2d(offsetPose.getX(), offsetPose.getY() + 2.0, new Rotation2d(Math.PI/2.0))); //offsetPose.getRotation()));
+                  m_poseEstimatorSubsystem.setCurrentPose(new Pose2d(offsetPose.getX(), offsetPose.getY() + 2.0, new Rotation2d(Math.PI/2.0))); //offsetPose.getRotation()));
                 }
                 else              
                 {  // Set the pose estimator to the start of the traject
-                  poseEstimatorSubsystem.setCurrentPose(initialPose.get());
+                  m_poseEstimatorSubsystem.setCurrentPose(initialPose.get());
                 
                 }
             }
@@ -97,12 +97,12 @@ public class DriveChoreoPathCommand extends Command {
   @Override
   public void execute() {
 
-   if (trajectory.isPresent()) {
+   if (m_trajectory.isPresent()) {
       // Sample the trajectory at the current time into the autonomous period
-      Optional<SwerveSample> sample = trajectory.get().sampleAt(getTime(), isRedAlliance());
+      Optional<SwerveSample> sample = m_trajectory.get().sampleAt(getTime(), isRedAlliance());
 
       if (sample.isPresent()) {
-          robotDrive.followTrajectory(sample.get(),pidControllers, m_speedFactor);
+          m_robotDrive.followTrajectory(sample.get(),pidControllers, m_speedFactor);
       }
     }
     m_count++;
@@ -111,12 +111,14 @@ public class DriveChoreoPathCommand extends Command {
 
   // Called once the command ends or is interrupted.
   @Override
-  public void end(boolean interrupted) {}
+  public void end(boolean interrupted) {
+    m_timer.stop();
+  }
 
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return trajectory.isPresent() && (getTime() >= trajectory.get().getTotalTime());
+    return m_trajectory.isPresent() && (getTime() >= m_trajectory.get().getTotalTime());
   }
 
   private boolean isRedAlliance() {

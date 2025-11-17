@@ -37,6 +37,7 @@ import frc.robot.commands.DriveCircle;
 import frc.robot.commands.DriveCircleThrottle;
 import frc.robot.commands.DriveRobotCommand;
 import frc.robot.commands.DriveWithoutVisionCommand;
+import frc.robot.commands.GotoProcessorCommand;
 import frc.robot.commands.PointCameraTowardReefCommand;
 import frc.robot.commands.RandomRobotPosition;
 import frc.robot.commands.RotateRobotCommand;
@@ -225,7 +226,8 @@ public class RobotContainer {
       SmartDashboard.putData("R90", new RotateRobotCommand(m_robotDrive, Units.degreesToRadians(90),false));
       SmartDashboard.putData("R180", new RotateRobotCommand(m_robotDrive, Units.degreesToRadians(180),false));
       SmartDashboard.putData("RG", new RotateRobotG2PCommand(m_robotDrive, m_poseEstimatorSubsystem, Units.degreesToRadians(180),false, null));
-
+      SmartDashboard.putData("GP", new GotoProcessorCommand(m_robotDrive, m_poseEstimatorSubsystem, null));
+      
     } // (isSimulation()
   } // (configureButtonBindings)
 

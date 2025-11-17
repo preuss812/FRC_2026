@@ -8,28 +8,16 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.trajectory.TrajectoryConfig;
 import edu.wpi.first.math.trajectory.TrajectoryGenerator;
-import edu.wpi.first.math.util.Units;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants.AutoConstants;
 import edu.wpi.first.math.trajectory.Trajectory;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.ConditionalCommand;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.SwerveControllerCommand;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.Constants.FieldConstants;
-import frc.robot.commands.GotoPoseCommand;
-import frc.robot.commands.PreussSwerveControllerCommand;
-import frc.robot.subsystems.DriveSubsystemSRX;
 import frc.robot.subsystems.PoseEstimatorSubsystem;
 
 /** 
@@ -182,7 +170,6 @@ public class TrajectoryPlans {
         int[] ij = poseToFieldSquare(startingPose);
         int i = ij[0];
         int j = ij[1];
-        int n = 0;
         boolean done = false;
         list.add(startingPose);
         while (!done) {
@@ -193,7 +180,6 @@ public class TrajectoryPlans {
                 done = true;
             } else {
                 list.add(nextPose);
-                n++;
                 i = nextid[0];
                 j = nextid[1];
                 //if (n > 8) 

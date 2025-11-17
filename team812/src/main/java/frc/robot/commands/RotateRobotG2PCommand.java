@@ -9,8 +9,6 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.commands.RotateRobotCommand.RotateRobotConfig;
 import frc.robot.subsystems.AllianceConfigurationSubsystem;
 import frc.robot.subsystems.DriveSubsystemSRX;
 import frc.robot.subsystems.PoseEstimatorSubsystem;
@@ -34,12 +32,12 @@ public class RotateRobotG2PCommand extends GotoPoseCommand {
    */
   public RotateRobotG2PCommand(
       DriveSubsystemSRX robotDrive
-    , PoseEstimatorSubsystem m_poseEstimatorSubsystem
+    , PoseEstimatorSubsystem poseEstimatorSubsystem
     , double theta
     , boolean relative
     , DrivingConfig config
     ) {
-    super(robotDrive, m_poseEstimatorSubsystem, new Pose2d(), false, config); // Pose is a place holder.
+    super(robotDrive, poseEstimatorSubsystem, new Pose2d(), false, config); // Pose is a place holder.
     m_theta = theta;
     m_relative = relative;
     // Use addRequirements() here to declare subsystem dependencies.
