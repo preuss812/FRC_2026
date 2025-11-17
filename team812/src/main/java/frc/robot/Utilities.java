@@ -123,10 +123,10 @@ public class Utilities {
         boolean reset = false;
         double ultrasonicRange = RobotContainer.m_PingResponseUltrasonicSubsystem.getRange();
         if (ultrasonicRange < 2.0 /* Meters */) {
-            Pose2d currentPose = RobotContainer.m_PoseEstimatorSubsystem.getCurrentPose();
+            Pose2d currentPose = RobotContainer.m_poseEstimatorSubsystem.getCurrentPose();
             if (Math.abs(currentPose.getRotation().getDegrees() -  -90.0) < 5.0 /* degrees */) {
                 reset = true;
-                RobotContainer.m_PoseEstimatorSubsystem.setCurrentPose(
+                RobotContainer.m_poseEstimatorSubsystem.setCurrentPose(
                 new Pose2d(
                     currentPose.getX(),
                     FieldConstants.yMax - ultrasonicRange - DriveConstants.kBackToCenterDistance,

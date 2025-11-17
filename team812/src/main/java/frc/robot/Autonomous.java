@@ -90,7 +90,7 @@ public class Autonomous extends SequentialCommandGroup {
     
     // get the required subsystems for constructing the plans below.
     m_robotDrive = RobotContainer.m_robotDrive;
-    m_PoseEstimatorSubsystem = RobotContainer.m_PoseEstimatorSubsystem;
+    m_PoseEstimatorSubsystem = RobotContainer.m_poseEstimatorSubsystem;
 
     // Set up the alliance first.  Other commands need to know which alliance to operate correctly.
     setAutoMode();
@@ -109,7 +109,7 @@ public class Autonomous extends SequentialCommandGroup {
    
     // For these first 2 modes, just drive 1 meter and wait.
     if (getAutoMode() == AutonomousPlans.AUTO_MODE_ROBOT_DECIDES || getAutoMode() == AutonomousPlans.AUTO_MODE_MOVE_OFF_LINE_AND_STOP) {
-      addCommands(new DriveWithoutVisionCommand(m_robotDrive, m_PoseEstimatorSubsystem, null, new Pose2d(-1.0, 0, new Rotation2d(0.0))));
+      addCommands(new DriveWithoutVisionCommand(m_robotDrive, m_PoseEstimatorSubsystem,  new Pose2d(-1.0, 0, new Rotation2d(0.0)), null));
       return;
     }
 

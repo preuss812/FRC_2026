@@ -15,11 +15,11 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import frc.robot.Constants;
 import frc.robot.RobotContainer; // For simulation check and debugging.
-import frc.robot.Utilities;
 import frc.robot.subsystems.DriveSubsystemSRX;
 import frc.robot.subsystems.PoseEstimatorSubsystem;
 
@@ -44,7 +44,6 @@ import java.util.function.Supplier;
    *
  */
 public class PreussSwerveControllerCommand extends Command {
-  private final DriveSubsystemSRX m_robotDrive;
   private final PoseEstimatorSubsystem m_poseEstimatorSubsystem;
   private final Timer m_timer = new Timer();
   private Trajectory m_trajectory;
@@ -209,7 +208,6 @@ public class PreussSwerveControllerCommand extends Command {
       Supplier<Rotation2d> rotationSupplier,
       Consumer<ChassisSpeeds> driveInputs,
       Subsystem... requirements) {
-    m_robotDrive = robotDrive;
     m_poseEstimatorSubsystem = poseEstimatorSubsystem;
     m_trajectory = trajectory; //requireNonNullParam(trajectory, "trajectory", "PreussSwerveControllerCommand2");
     m_pose = requireNonNullParam(pose, "pose", "PreussSwerveControllerCommand2");
@@ -228,7 +226,7 @@ public class PreussSwerveControllerCommand extends Command {
     if (!RobotContainer.isSimulation()) m_timer.restart();
     m_count = 0;
     if (m_trajectory != null && m_trajectory.getStates().size() > 0)
-      RobotContainer.m_PoseEstimatorSubsystem.field2d.getObject("trajectory").setTrajectory(m_trajectory);
+      RobotContainer.m_poseEstimatorSubsystem.field2d.getObject("trajectory").setTrajectory(m_trajectory);
     // Make sure we are wrapping the angles
     m_controller.getThetaController().enableContinuousInput(-Math.PI, Math.PI);
     // Do we need a reset? m_controller.getThetaController().reset(0.0);
@@ -252,6 +250,7 @@ public class PreussSwerveControllerCommand extends Command {
     // get the desired rotation for the robot from the supplier and the current rotation
     // and compute the rotation error.
     Rotation2d desiredRotation = m_rotationSupplier.get();
+    SmartDashboard.putNumber("SWT", desiredRotation.getDegrees());
     Rotation2d currentRotation = currentPose.getRotation();
     double m_rotationError = MathUtil.angleModulus(desiredRotation.minus(currentRotation).getRadians());
     
@@ -294,7 +293,7 @@ public class PreussSwerveControllerCommand extends Command {
     m_timer.stop();
     m_driveInputs.accept( new ChassisSpeeds(0.0,0.0,0.0));
 
-    RobotContainer.m_PoseEstimatorSubsystem.field2d.getObject("trajectory").setTrajectory(new Trajectory());
+    RobotContainer.m_poseEstimatorSubsystem.field2d.getObject("trajectory").setTrajectory(new Trajectory());
   }
 
   @Override
@@ -338,6 +337,7 @@ public class PreussSwerveControllerCommand extends Command {
   }
 
   // The following method is AI generated to reverse a trajectory for red alliance use.
+  // It is currently unused as we handle trajectory reversal elsewhere.
   public Trajectory reverseTrajectory(Trajectory trajectory) {
     int nStates = trajectory.getStates().size();
     Trajectory.State[] reversedStates = new Trajectory.State[nStates];

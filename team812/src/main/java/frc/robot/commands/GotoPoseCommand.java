@@ -20,11 +20,11 @@ import frc.robot.Utilities;
 public class GotoPoseCommand extends Command {
   
   /** Creates a new command to move the robot to the specified pose. */
-  protected final DriveSubsystemSRX robotDrive;
-  protected final PoseEstimatorSubsystem poseEstimatorSubsystem;
-  protected Pose2d targetPose;
-  protected final boolean driveFacingFinalPose;
-  final DrivingConfig config;
+  private final DriveSubsystemSRX m_robotDrive;
+  private final PoseEstimatorSubsystem m_poseEstimatorSubsystem;
+  private Pose2d targetPose;
+  private final boolean driveFacingFinalPose;
+  private final DrivingConfig config;
   protected final PreussAutoDrive autoDrive;
   ;
   protected boolean onTarget;
@@ -46,8 +46,8 @@ public class GotoPoseCommand extends Command {
      ) {
     
     // Use addRequirements() here to declare subsystem dependencies.
-    this.robotDrive = robotDrive;
-    this.poseEstimatorSubsystem = poseEstimatorSubsystem;
+    this.m_robotDrive = robotDrive;
+    this.m_poseEstimatorSubsystem = poseEstimatorSubsystem;
     this.targetPose = targetPose;
     this.driveFacingFinalPose = driveFacingFinalPose;
     this.config = config == null ? robotDrive.defaultAutoConfig : config;
@@ -174,6 +174,14 @@ public class GotoPoseCommand extends Command {
 
   protected void setTargetPose(Pose2d newTargetPose) {
     this.targetPose = newTargetPose;
+  }
+
+  protected PoseEstimatorSubsystem getPoseEstimatorSubsystem() {
+    return m_poseEstimatorSubsystem;
+  }
+  
+  protected DriveSubsystemSRX getRobotDrive() {
+    return m_robotDrive;
   }
   
 } // GotoPoseCommand class

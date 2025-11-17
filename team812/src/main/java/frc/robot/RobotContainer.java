@@ -11,11 +11,9 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.XboxController.Button;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -37,10 +35,12 @@ import frc.robot.subsystems.DriveSubsystemSRX;
 import frc.robot.commands.DriveChoreoPathCommand;
 import frc.robot.commands.DriveCircle;
 import frc.robot.commands.DriveCircleThrottle;
-import frc.robot.commands.PointCameraTowardApriltagCommand;
+import frc.robot.commands.DriveRobotCommand;
+import frc.robot.commands.DriveWithoutVisionCommand;
 import frc.robot.commands.PointCameraTowardReefCommand;
 import frc.robot.commands.RandomRobotPosition;
 import frc.robot.commands.RotateRobotCommand;
+import frc.robot.commands.RotateRobotG2PCommand;
 import frc.robot.commands.SwerveToProcessorCommand;
 import frc.robot.commands.ResetDriveTrainCommand;
 import frc.utils.PoseEstimatorCamera;
@@ -65,15 +65,15 @@ public class RobotContainer {
   // The robot's subsystems
   public final static DriveSubsystemSRX m_robotDrive = new DriveSubsystemSRX();
 
-  public static BlackBoxSubsystem m_BlackBox = new BlackBoxSubsystem();
+  public static BlackBoxSubsystem m_blackBox = new BlackBoxSubsystem();
   public static PoseEstimatorCamera m_rearCamera = new PoseEstimatorCamera("pv-812", VisionConstants.ROBOT_TO_REAR_CAMERA);
   //public static PoseEstimatorCamera m_frontCamera = new PoseEstimatorCamera("Microsoft_LifeCam_HD-3000", VisionConstants.ROBOT_TO_FRONT_CAMERA);
 
   public static final PoseEstimatorCamera[] cameras = new PoseEstimatorCamera[]{m_rearCamera/*,m_frontCamera*/};
-  public static PoseEstimatorSubsystem m_PoseEstimatorSubsystem = new PoseEstimatorSubsystem( cameras, m_robotDrive);
-  public final static AllianceConfigurationSubsystem m_allianceConfigurationSubsystem = new AllianceConfigurationSubsystem(m_robotDrive, m_PoseEstimatorSubsystem);
+  public static PoseEstimatorSubsystem m_poseEstimatorSubsystem = new PoseEstimatorSubsystem( cameras, m_robotDrive);
+  public final static AllianceConfigurationSubsystem m_allianceConfigurationSubsystem = new AllianceConfigurationSubsystem(m_robotDrive, m_poseEstimatorSubsystem);
   private static  boolean isSimulation = !(System.getProperty("os.name").equals("Linux")); // Assuming roborio is the only Linux system.
-  public static PreussDriveSimulation m_preussDriveSimulation = new PreussDriveSimulation(m_PoseEstimatorSubsystem);
+  public static PreussDriveSimulation m_preussDriveSimulation = new PreussDriveSimulation(m_poseEstimatorSubsystem);
   private static boolean debug = true; // To enable debugging in this module, change false to true.
 
   public static PingResponseUltrasonicSubsystem m_PingResponseUltrasonicSubsystem =
@@ -178,11 +178,11 @@ public class RobotContainer {
     // Xbox A button drives in a circle
     new JoystickButton(m_driverController, Button.kA.value)
     .whileTrue(
-      new DriveCircleThrottle(m_robotDrive, m_PoseEstimatorSubsystem, m_robotDrive.circleAutoConfig, 1.0));
+      new DriveCircleThrottle(m_robotDrive, m_poseEstimatorSubsystem, m_robotDrive.circleAutoConfig, 1.0));
   
       // Xbox Y button resets the robot coorinate system
     new JoystickButton(m_driverController, Button.kY.value).onTrue(new ResetDriveTrainCommand(this));
-    new JoystickButton(m_driverController, Button.kX.value).onTrue(new InstantCommand(()->m_PoseEstimatorSubsystem.setCurrentPose(new Pose2d(0,0, Rotation2d.kZero))));
+    new JoystickButton(m_driverController, Button.kX.value).onTrue(new InstantCommand(()->m_poseEstimatorSubsystem.setCurrentPose(new Pose2d(0,0, Rotation2d.kZero))));
 
     // Xbox start button puts thte robot in fast/speed driving mode.
     new JoystickButton(m_driverController, Button.kStart.value).onTrue(
@@ -209,16 +209,22 @@ public class RobotContainer {
 
     /* Debugging below */
     if (isSimulation()) {
-      SmartDashboard.putData("Circle", new DriveCircleThrottle(m_robotDrive, m_PoseEstimatorSubsystem, m_robotDrive.circleAutoConfig, 1.0));
-      SmartDashboard.putData("DCG2P", new DriveCircle(m_robotDrive, m_PoseEstimatorSubsystem, m_robotDrive.circleAutoConfig, 1.145916));
-      SmartDashboard.putData("Choreo1", new DriveChoreoPathCommand(m_robotDrive, m_PoseEstimatorSubsystem, "Blue 1 Meter", m_robotDrive.circleAutoConfig, 0.1, 0.0));
-      SmartDashboard.putData("Choreo2", new DriveChoreoPathCommand(m_robotDrive, m_PoseEstimatorSubsystem, "Low to AT22", m_robotDrive.circleAutoConfig, 1.0, 1.0));
-      SmartDashboard.putData("Choreo3", new DriveChoreoPathCommand(m_robotDrive, m_PoseEstimatorSubsystem, "PID test", m_robotDrive.circleAutoConfig, 1.0, 1.0));
+      SmartDashboard.putData("Circle", new DriveCircleThrottle(m_robotDrive, m_poseEstimatorSubsystem, m_robotDrive.circleAutoConfig, 1.0));
+      SmartDashboard.putData("DCG2P", new DriveCircle(m_robotDrive, m_poseEstimatorSubsystem, m_robotDrive.circleAutoConfig, 1.145916));
+      SmartDashboard.putData("Choreo1", new DriveChoreoPathCommand(m_robotDrive, m_poseEstimatorSubsystem, "Blue 1 Meter", m_robotDrive.circleAutoConfig, 0.1, 0.0));
+      SmartDashboard.putData("Choreo2", new DriveChoreoPathCommand(m_robotDrive, m_poseEstimatorSubsystem, "Low to AT22", m_robotDrive.circleAutoConfig, 1.0, 1.0));
+      SmartDashboard.putData("Choreo3", new DriveChoreoPathCommand(m_robotDrive, m_poseEstimatorSubsystem, "PID test", m_robotDrive.circleAutoConfig, 1.0, 1.0));
       SmartDashboard.putData("Y", new ResetDriveTrainCommand(this));
-      SmartDashboard.putData("Z", new InstantCommand(()->m_PoseEstimatorSubsystem.setCurrentPose(new Pose2d(5.5 + 0.145916,4, Rotation2d.kZero))));
-      SmartDashboard.putData("TT", new SwerveToProcessorCommand(m_robotDrive, m_PoseEstimatorSubsystem).withTimeout(15.0));
-      SmartDashboard.putData("R", new RandomRobotPosition(m_PoseEstimatorSubsystem));
-      SmartDashboard.putData("PR", new PointCameraTowardReefCommand(m_robotDrive, m_PoseEstimatorSubsystem));
+      SmartDashboard.putData("Z", new InstantCommand(()->m_poseEstimatorSubsystem.setCurrentPose(new Pose2d(5.5 + 0.145916,4, Rotation2d.kZero))));
+      SmartDashboard.putData("TT", new SwerveToProcessorCommand(m_robotDrive, m_poseEstimatorSubsystem, true).withTimeout(15.0));
+      SmartDashboard.putData("R", new RandomRobotPosition(m_poseEstimatorSubsystem));
+      SmartDashboard.putData("PR", new PointCameraTowardReefCommand(m_robotDrive, m_poseEstimatorSubsystem));
+      SmartDashboard.putData("DR", new DriveRobotCommand(m_robotDrive, m_poseEstimatorSubsystem, new Pose2d(2,1,new Rotation2d(0)), false, null));
+      SmartDashboard.putData("NV", new DriveWithoutVisionCommand(m_robotDrive, m_poseEstimatorSubsystem, new Pose2d(2,1,new Rotation2d(0)), null));
+      SmartDashboard.putData("R0", new RotateRobotCommand(m_robotDrive, Units.degreesToRadians(0),false));
+      SmartDashboard.putData("R90", new RotateRobotCommand(m_robotDrive, Units.degreesToRadians(90),false));
+      SmartDashboard.putData("R180", new RotateRobotCommand(m_robotDrive, Units.degreesToRadians(180),false));
+      SmartDashboard.putData("RG", new RotateRobotG2PCommand(m_robotDrive, m_poseEstimatorSubsystem, Units.degreesToRadians(180),false, null));
 
     } // (isSimulation()
   } // (configureButtonBindings)
@@ -248,7 +254,7 @@ public class RobotContainer {
     );
     */
     // Update the drive trains X, Y, and robot orientation to match the pose estimator.
-    m_robotDrive.resetOdometry(m_PoseEstimatorSubsystem.getCurrentPose());
+    m_robotDrive.resetOdometry(m_poseEstimatorSubsystem.getCurrentPose());
   }
 
   /**
@@ -259,6 +265,7 @@ public class RobotContainer {
    * PoseEstimator once an april tag is captured by the vision system.
    */
    public void setGyroAngleToStartMatch() {
+    // TODO: clean this up.
     boolean isBlueAlliance = AllianceConfigurationSubsystem.isBlueAlliance(); // From the Field Management system.
     if (isBlueAlliance) {
       startingHeading = 0.0;
@@ -282,43 +289,7 @@ public class RobotContainer {
       );
     }
    }
-   /**
-   *  This function sets the gyro angle based on the alliance (blue or red)
-   * and the assumed starting position of the robot on the field.
-   * The current assumption is that the robot will be placed with it's back 
-   * close to the Processor wall. The X coodinate will be calculate based on the
-   * assumption that the robot is just inside the starting box.
-   */
-  public void setGyroAngleToStartMatchProcessor() {
-    double ProcessorZoneDepth = Units.inchesToMeters(13);
-    double startingBoxDepth = Units.inchesToMeters(76.1);
-    double startingRobotCenterY = FieldConstants.yMax - ProcessorZoneDepth - DriveConstants.kBackToCenterDistance;
-    double startingRobotCenterX = FieldConstants.xMin + startingBoxDepth - DriveConstants.kRobotWidth/2.0 - Units.inchesToMeters(2.0)/* tape */;
-
-    boolean isBlueAlliance = AllianceConfigurationSubsystem.isBlueAlliance(); // From the Field Management system.
-    if (isBlueAlliance) {
-      startingHeading = 90; // Facing source wall
-      m_robotDrive.setAngleDegrees(startingHeading);
-      m_robotDrive.resetOdometry(
-        new Pose2d(
-           startingRobotCenterX     // Just inside the starting box near the Processor
-          ,startingRobotCenterY     // Just inside the starting box near the Processor
-          ,new Rotation2d(Units.degreesToRadians(startingHeading)) // Facing toward the field.
-        )
-      );
-    } else {
-      startingHeading = 90.0; // Facing source wall
-      m_robotDrive.setAngleDegrees(startingHeading);
-      m_robotDrive.resetOdometry(
-        new Pose2d(
-           FieldConstants.xMax - startingRobotCenterX     // Just inside the starting box near the Processor
-          ,startingRobotCenterY                           // Just inside the starting box near the Processor
-          ,new Rotation2d(Units.degreesToRadians(startingHeading))    // Facing toward the field.
-        )
-      );
-    }
-   }
-
+   
    /**
     * isSimulation - return true if this is a simulation or false if the robot is running.
     */

@@ -79,7 +79,7 @@ public class FollowTrajectoryCommand extends SequentialCommandGroup {
           translationWaypoints,
           config != null ? config : FollowTrajectoryCommand.config); // use default config is none was specified.
           SmartDashboard.putNumber("PTS", translationWaypoints.size());
-          RobotContainer.m_PoseEstimatorSubsystem.field2d.getObject("trajectory").setTrajectory(trajectory);
+          RobotContainer.m_poseEstimatorSubsystem.field2d.getObject("trajectory").setTrajectory(trajectory);
 
     } catch (Exception e) {
         ListIterator<Pose2d> iter = translationWaypoints.listIterator();

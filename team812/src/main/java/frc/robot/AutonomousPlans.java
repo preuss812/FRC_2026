@@ -121,14 +121,14 @@ public class AutonomousPlans {
         double offsetToTouchReef = Units.inchesToMeters(0.0); // -5 inches meters from the april tag Note: this should be 0.0 so something is off somewhere.
         // Get/create poses for each Reef April tag and barge april tag
         // for omre concise coding below.
-        Pose2d AT14 = RobotContainer.m_PoseEstimatorSubsystem.getAprilTagPose(14);
-        Pose2d AT15 = RobotContainer.m_PoseEstimatorSubsystem.getAprilTagPose(15);
-        Pose2d AT17 = RobotContainer.m_PoseEstimatorSubsystem.getAprilTagPose(17);
-        Pose2d AT18 = RobotContainer.m_PoseEstimatorSubsystem.getAprilTagPose(18);
-        Pose2d AT19 = RobotContainer.m_PoseEstimatorSubsystem.getAprilTagPose(19);
-        Pose2d AT20 = RobotContainer.m_PoseEstimatorSubsystem.getAprilTagPose(20);
-        Pose2d AT21 = RobotContainer.m_PoseEstimatorSubsystem.getAprilTagPose(21);
-        Pose2d AT22 = RobotContainer.m_PoseEstimatorSubsystem.getAprilTagPose(22);
+        Pose2d AT14 = RobotContainer.m_poseEstimatorSubsystem.getAprilTagPose(14);
+        Pose2d AT15 = RobotContainer.m_poseEstimatorSubsystem.getAprilTagPose(15);
+        Pose2d AT17 = RobotContainer.m_poseEstimatorSubsystem.getAprilTagPose(17);
+        Pose2d AT18 = RobotContainer.m_poseEstimatorSubsystem.getAprilTagPose(18);
+        Pose2d AT19 = RobotContainer.m_poseEstimatorSubsystem.getAprilTagPose(19);
+        Pose2d AT20 = RobotContainer.m_poseEstimatorSubsystem.getAprilTagPose(20);
+        Pose2d AT21 = RobotContainer.m_poseEstimatorSubsystem.getAprilTagPose(21);
+        Pose2d AT22 = RobotContainer.m_poseEstimatorSubsystem.getAprilTagPose(22);
 
         Pose2d nearAT17 = DriveConstants.robotRearAtPose(AT17, offsetFromAprilTag);
         Pose2d nearAT18 = DriveConstants.robotRearAtPose(AT18, offsetFromAprilTag);

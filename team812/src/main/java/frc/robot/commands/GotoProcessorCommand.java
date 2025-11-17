@@ -5,10 +5,7 @@
 package frc.robot.commands;
 
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import frc.robot.Constants.DriveConstants;
-import frc.robot.Constants.VisionConstants;
-import frc.robot.Utilities;
 import frc.robot.subsystems.AllianceConfigurationSubsystem;
 import frc.robot.subsystems.DriveSubsystemSRX;
 import frc.robot.subsystems.PoseEstimatorSubsystem;
@@ -39,7 +36,7 @@ public class GotoProcessorCommand extends GotoPoseCommand {
     super.initialize();
     double offsetFromAprilTag = 0.0; // This should result in the robot front touching the wall where the april tag is.
 
-    Pose2d tagPose = poseEstimatorSubsystem.getAprilTagPose(AllianceConfigurationSubsystem.getProcessorAprilTag().id());
+    Pose2d tagPose = getPoseEstimatorSubsystem().getAprilTagPose(AllianceConfigurationSubsystem.getProcessorAprilTag().id());
     // This should position the robot front is touching the wall centered on the processor.
     setTargetPose(DriveConstants.robotFrontAtPose(tagPose, offsetFromAprilTag));
   }

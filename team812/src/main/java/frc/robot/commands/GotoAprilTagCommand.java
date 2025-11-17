@@ -21,17 +21,17 @@ public class GotoAprilTagCommand extends GotoPoseCommand {
   
   /** Creates a new command to move the robot to the specified pose. */
   
-  private final double targetDistance;
-  private Pose2d aprilTagPose;
-  private boolean simulatingRobot = RobotContainer.isSimulation(); // force robot starting position and april tag number for debugging purposes.
-  private int simulationNumber = 0;
-  private int[] simulationAprilTagIDs = new int [] {
+  private final double m_targetDistance;
+  private Pose2d m_aprilTagPose;
+  private boolean m_simulatingRobot = RobotContainer.isSimulation(); // force robot starting position and april tag number for debugging purposes.
+  private int m_simulationNumber = 0;
+  private int[] m_simulationAprilTagIDs = new int [] {
     6,6,6,
     7,7,7,
     19,19,19,
     17,17,17
   };
-  private Pose2d[] simulatedRobotStartingPoses = new Pose2d[] {
+  private Pose2d[] m_simulatedRobotStartingPoses = new Pose2d[] {
   new Pose2d(12.5, 0.60, new Rotation2d(Units.degreesToRadians(-60))),
   new Pose2d(15.5, 0.60, new Rotation2d(Units.degreesToRadians(-60))),
   new Pose2d(15.5, 2.60, new Rotation2d(Units.degreesToRadians(-60))),
@@ -66,8 +66,8 @@ public class GotoAprilTagCommand extends GotoPoseCommand {
     // Use addRequirements() here to declare subsystem dependencies.
     super(robotDrive, poseEstimatorSubsystem, new Pose2d(0,0,new Rotation2d(0.0)), true, config);
     
-    this.targetDistance = targetDistance;
-    simulatingRobot = RobotContainer.isSimulation();
+    this.m_targetDistance = targetDistance;
+    m_simulatingRobot = RobotContainer.isSimulation();
   }
 
   // Called when the command is initially scheduled.
@@ -77,20 +77,20 @@ public class GotoAprilTagCommand extends GotoPoseCommand {
     // If se see an april tag, compute the pose for the camera to be 'targetDistance' away
     // on the projection line from the tag.
     int fiducialId = VisionConstants.NO_TAG_FOUND;
-    if (simulatingRobot) {
+    if (m_simulatingRobot) {
       // For simulation, use the pre-defined staring poses and tags.
-      poseEstimatorSubsystem.setCurrentPose(simulatedRobotStartingPoses[simulationNumber]);
-      fiducialId = simulationAprilTagIDs[simulationNumber++];
-      if (simulationNumber >= simulationAprilTagIDs.length) simulationNumber = 0;
+      getPoseEstimatorSubsystem().setCurrentPose(m_simulatedRobotStartingPoses[m_simulationNumber]);
+      fiducialId = m_simulationAprilTagIDs[m_simulationNumber++];
+      if (m_simulationNumber >= m_simulationAprilTagIDs.length) m_simulationNumber = 0;
     } else {
-      fiducialId = poseEstimatorSubsystem.lastAprilTagSeen();
+      fiducialId = getPoseEstimatorSubsystem().lastAprilTagSeen();
     }
     
     if (fiducialId >= 0) {
-      aprilTagPose = poseEstimatorSubsystem.getAprilTagPose(fiducialId);
-      targetPose = DriveConstants.robotRearAtPose(aprilTagPose, targetDistance);
+      m_aprilTagPose = getPoseEstimatorSubsystem().getAprilTagPose(fiducialId);
+      setTargetPose(DriveConstants.robotRearAtPose(m_aprilTagPose, m_targetDistance));
     } else {
-      targetPose = poseEstimatorSubsystem.getCurrentPose(); // effectively do nothing.
+      setTargetPose(getPoseEstimatorSubsystem().getCurrentPose()); // effectively do nothing.
     }
     super.initialize();
   }

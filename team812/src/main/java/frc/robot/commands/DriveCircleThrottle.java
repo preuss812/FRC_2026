@@ -47,7 +47,7 @@ public class DriveCircleThrottle extends Command {
     double circumference = 360.0/50.0 * speed;
     radius = circumference / (2 * Math.PI);
 
-    startingPose = RobotContainer.m_PoseEstimatorSubsystem.getCurrentPose();
+    startingPose = RobotContainer.m_poseEstimatorSubsystem.getCurrentPose();
 
     // Optional: Offset the center to define where the circle will start (if you want).
     // For example, moving the center by 1 meter on the X-axis:

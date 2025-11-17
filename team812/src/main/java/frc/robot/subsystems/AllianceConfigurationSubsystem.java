@@ -4,7 +4,10 @@
 
 package frc.robot.subsystems;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
@@ -90,6 +93,48 @@ public class AllianceConfigurationSubsystem extends SubsystemBase {
     setProcessorWaypoints(alliance);
     setStartLine(alliance);
     AutonomousPlans.buildAutoPlans(alliance);
+    
+  }
+
+  /*
+   * allianceAdjustedMove - return the transform to convert from blue alliance to red alliance movements
+   */
+  public static Pose2d allianceAdjustedMove(Pose2d pose) {
+    // This is set up for a the red half being rotated 180 degrees from the blue half.
+    if (Alliance.Blue == currentAlliance) {
+      return pose;
+    } else {
+      return new Pose2d(-pose.getX(), -pose.getY(), pose.getRotation());
+    }
+  }
+
+  // adjust relative rotation for alliance.
+  // For 2025, the field was symmetrical with respect to rotation, so no adjustment is needed.
+  // If the field switches to mirroring rotation for red vs blue, this function will need to be updated.
+  public static double allianceAdjustedAutonomousRotation(double rotation) {
+    return rotation;
+  }
+
+  /* 
+   * allianceAdjustedTelopRotation - adjust relative rotation for alliance.
+   * This adds 180 degrees to the angle if it's the red alliance, otherwise
+   * the input value is returned unchanged.
+   * @param radians - rotation in radians to be adjusted
+   */
+  public static double allianceAdjustedTelopRotation(double radians) {
+    if (currentAlliance != Alliance.Red) {
+      return radians;
+     } else {
+      return MathUtil.angleModulus(radians + Math.PI);
+     }
+  }
+
+  public static Rotation2d robotToFieldRotation() {
+    if (Alliance.Blue == currentAlliance) {
+      return new Rotation2d(0.0);
+    } else {
+      return new Rotation2d(Math.PI);
+    }
   }
 
   /*

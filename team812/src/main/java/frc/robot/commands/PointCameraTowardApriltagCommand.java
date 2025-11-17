@@ -14,8 +14,8 @@ import frc.robot.subsystems.PoseEstimatorSubsystem;
  */
 public class PointCameraTowardApriltagCommand extends GotoPoseCommand {
 
-  private final int apriltagId;
-  private final Pose2d apriltagPose;
+  private final int m_apriltagId;
+  private final Pose2d m_apriltagPose;
 
   /**
  * PointCameraTowardApriltagCommand - rotate robot so that the main camera faces the april tag.
@@ -29,19 +29,19 @@ public PointCameraTowardApriltagCommand(
     , int aprilTagID
     ) {
     super(robotDrive, poseEstimatorSubsystem, new Pose2d(), true, null );
-    this.apriltagId = aprilTagID;
-    this.apriltagPose = poseEstimatorSubsystem.getAprilTagPose(apriltagId);
+    this.m_apriltagId = aprilTagID;
+    this.m_apriltagPose = poseEstimatorSubsystem.getAprilTagPose(m_apriltagId);
   }
 
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
       // Calculate the pose to face 
-    Pose2d currentPose = poseEstimatorSubsystem.getCurrentPose();
-    targetPose = new Pose2d(
+    Pose2d currentPose = getPoseEstimatorSubsystem().getCurrentPose();
+    setTargetPose(new Pose2d(
       currentPose.getTranslation(),
-      new Rotation2d(Autonomous.robotHeadingForCameraToPose(currentPose, apriltagPose))
-    );
+      new Rotation2d(Autonomous.robotHeadingForCameraToPose(currentPose, m_apriltagPose))
+    ));
     super.initialize();
   }
 

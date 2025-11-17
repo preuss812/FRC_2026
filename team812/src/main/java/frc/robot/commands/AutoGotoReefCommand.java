@@ -11,8 +11,9 @@ import frc.robot.subsystems.DriveSubsystemSRX;
 import frc.robot.subsystems.PoseEstimatorSubsystem;
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
-public class AutoGotoReefCommand  extends GotoPoseCommand {
+public class AutoGotoReefCommand extends GotoPoseCommand {
   private final PoseEstimatorSubsystem m_poseEstimatorSubsystem;
+
   /** Creates a new AutoGotoReefCommand. */
   public AutoGotoReefCommand(
      DriveSubsystemSRX robotDrive
@@ -28,10 +29,10 @@ public class AutoGotoReefCommand  extends GotoPoseCommand {
   @Override
   public void initialize() {
     try{
-      super.targetPose = AutonomousPlans.finalPoses.get(Autonomous.getAutoMode());
+      setTargetPose(AutonomousPlans.finalPoses.get(Autonomous.getAutoMode()));
     }
     catch(Exception e){
-      super.targetPose = m_poseEstimatorSubsystem.getCurrentPose();
+      setTargetPose(m_poseEstimatorSubsystem.getCurrentPose());
     }
     super.initialize();
   }

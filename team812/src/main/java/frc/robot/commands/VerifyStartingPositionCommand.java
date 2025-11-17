@@ -7,14 +7,13 @@ import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.Utilities;
 import frc.robot.AutonomousPlans;
-import frc.robot.Constants.FieldConstants;
-import frc.robot.subsystems.AllianceConfigurationSubsystem;
 import frc.robot.subsystems.PoseEstimatorSubsystem;
 
 /**
- * This class provide a cpmplex command that verifies that the robot has seen an april tag and
- * has verified that it's calculated posistion is close to the expected position.
- * If the tag is not found, it just sleeps for 15 seconds to prevent any action during autonomous.
+ * This class provide a cpmplex command that verifies that the robot 
+ * posistion is close to the expected position.
+ * If the position is not close, it sleeps for 15 seconds to
+ * run out the clock on the autonomous period without taking any action.
  */
 public class VerifyStartingPositionCommand extends SequentialCommandGroup {
     
@@ -31,9 +30,7 @@ public class VerifyStartingPositionCommand extends SequentialCommandGroup {
         double closeEnoughXY = Units.inchesToMeters(12.0); // Accept a starting position within 1 foot of expected.
         double closeEnoughTheta = Units.degreesToRadians(10.0); // Accept a starting rotation within 10 degrees of expected.
 
-        final Pose2d expectedPose = AllianceConfigurationSubsystem.isBlueAlliance() ? 
-            AutonomousPlans.waypoints.get(autoMode)[0] :
-            FieldConstants.BlueToRedPose(AutonomousPlans.waypoints.get(autoMode)[0]) ;
+        final Pose2d expectedPose = AutonomousPlans.waypoints.get(autoMode)[0];
 
         addCommands(
             new ConditionalCommand(

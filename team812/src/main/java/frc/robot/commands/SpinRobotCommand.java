@@ -7,18 +7,17 @@ package frc.robot.commands;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.AllianceConfigurationSubsystem;
 import frc.robot.subsystems.DriveSubsystemSRX;
-import frc.robot.Utilities;
 
 // This command just starts the robot spinning and keeps rotating at the requested speed.
 // That means that some other outside force has to end this command.
 public class SpinRobotCommand extends Command {
-  private final DriveSubsystemSRX robotDrive;
-  private final double speed;
-  private double allianceSpeed;
+  private final DriveSubsystemSRX m_robotDrive;
+  private final double m_speed;
+  private double m_allianceSpeed;
   /** Creates a new RotateRobotCommand. */
   public SpinRobotCommand(DriveSubsystemSRX robotDrive, double speed) {
-    this.robotDrive = robotDrive;
-    this.speed = speed;
+    this.m_robotDrive = robotDrive;
+    this.m_speed = speed;
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(robotDrive);
   }
@@ -26,23 +25,19 @@ public class SpinRobotCommand extends Command {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    if (AllianceConfigurationSubsystem.isBlueAlliance()) {
-      allianceSpeed = speed;
-    } else {
-      allianceSpeed = -speed;
-    }
+    m_allianceSpeed = AllianceConfigurationSubsystem.allianceAdjustedAutonomousRotation(m_speed);
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    robotDrive.drive(0,0,allianceSpeed, true, true);
+    m_robotDrive.drive(0.0, 0.0, m_allianceSpeed, true, true);
   }
 
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    robotDrive.drive(0,0,0, true, true);
+    m_robotDrive.drive(0.0,0.0,0.0, true, false);
   }
 
   // Returns true when the command should end.

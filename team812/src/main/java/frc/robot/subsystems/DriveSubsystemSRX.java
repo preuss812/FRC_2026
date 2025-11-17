@@ -116,16 +116,6 @@ public class DriveSubsystemSRX extends SubsystemBase {
       .setAngularP(0.5)
       .setAngularIZone(Units.degreesToRadians(10.0))
       .setAngularTolerance(Units.degreesToRadians(2.0));
-      
-      circleAutoConfig = new DrivingConfig()
-      .setMaxThrottle(0.8)
-      .setMaxRotation(0.8)
-      .setLinearP(10.0)
-      .setLinearIZone(Units.inchesToMeters(4.0))
-      .setLinearTolerance(Units.inchesToMeters(2.0))
-      .setAngularP(0.5)
-      .setAngularIZone(Units.degreesToRadians(10.0))
-      .setAngularTolerance(Units.degreesToRadians(2.0));
 
   circleAutoConfig = new DrivingConfig()
     .setMaxThrottle(0.8)
@@ -447,7 +437,7 @@ public class DriveSubsystemSRX extends SubsystemBase {
   public void followTrajectory(SwerveSample sample, PIDController[] pidControllers, double speedFactor) {
     // Get the current pose of the robot
     Pose2d pose; // = getPose();
-    pose = RobotContainer.m_PoseEstimatorSubsystem.getCurrentPose();
+    pose = RobotContainer.m_poseEstimatorSubsystem.getCurrentPose();
     // TODO: reactivate and tune the PID controllers and move to a better location.
     
     // Generate the next speeds for the robot

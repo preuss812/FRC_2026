@@ -6,7 +6,6 @@ package frc.robot.commands;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import frc.robot.RobotContainer;
-import frc.robot.Utilities;
 import frc.robot.subsystems.AllianceConfigurationSubsystem;
 import frc.robot.subsystems.DriveSubsystemSRX;
 import frc.robot.subsystems.PoseEstimatorSubsystem;
@@ -37,29 +36,16 @@ public class DriveRobotCommand extends GotoPoseCommand {
   public void initialize() {
 
     // Calculate the target pose based on the current location and relative move.
-    Pose2d startingPose = RobotContainer.m_PoseEstimatorSubsystem.getCurrentPose();
-    
-    // add the relativeMove to the startingPose // There is an alliance component to this.   
-    // I'm assuming the caller has handled it in the relativeMove.
-    if (AllianceConfigurationSubsystem.isBlueAlliance()) {
-      targetPose = new Pose2d(
-        startingPose.getX() + relativeMove.getX(),
-        startingPose.getY() + relativeMove.getY(),
-        startingPose.getRotation().rotateBy(relativeMove.getRotation())
-      );
+    Pose2d startingPose = RobotContainer.m_poseEstimatorSubsystem.getCurrentPose();
 
-    } else if (AllianceConfigurationSubsystem.isRedAlliance()) {
-      // This just inverts the X and Y moves as the field this year is rotated about the center of the field.
-      targetPose = new Pose2d(
-        startingPose.getX() - relativeMove.getX(),
-        startingPose.getY() - relativeMove.getY(),
-        startingPose.getRotation().rotateBy(relativeMove.getRotation())
-      );
+    Pose2d  allianceAdjustedRelativeMove = AllianceConfigurationSubsystem.allianceAdjustedMove(relativeMove);
+    // add the relativeMove to the startingPose accounting for alliance color.
+    setTargetPose(new Pose2d(
+      startingPose.getX() + allianceAdjustedRelativeMove.getX(),
+      startingPose.getY() + allianceAdjustedRelativeMove.getY(),
+      startingPose.getRotation().rotateBy(allianceAdjustedRelativeMove.getRotation())
+    ));
 
-    } else {
-      targetPose = startingPose; // Do nothing if we dont have an alliance.
-    }
-    
     // Now that we know the target pose, we can initialze the GotoPoseCommand.
     super.initialize();
   }

@@ -6,7 +6,6 @@ package frc.robot.commands;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -20,25 +19,25 @@ import frc.utils.PreussAutoDrive;
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
 public class DriveWithoutVisionCommand extends Command {
-  private final DriveSubsystemSRX robotDrive;
-  private final Pose2d relativeMove;
-  private final PreussAutoDrive autoDrive;
-  private final DrivingConfig config;
-  private Pose2d targetPose;
-  private boolean onTarget = true;
+  private final DriveSubsystemSRX m_robotDrive;
+  private final Pose2d m_relativeMove;
+  private final PreussAutoDrive m_autoDrive;
+  private final DrivingConfig m_config;
+  private Pose2d m_targetPose;
+  private boolean m_onTarget = true;
   private boolean debug = true;
   
   /** Creates a new DriveWithoutVisionCommand. */
   public DriveWithoutVisionCommand(
     DriveSubsystemSRX robotDrive
   , PoseEstimatorSubsystem poseEstimatorSubsystem
-  , DrivingConfig config
   , Pose2d pose
+  , DrivingConfig config
   ) {
-    this.robotDrive = robotDrive;
-    this.relativeMove = pose;
-    this.config = config == null ? robotDrive.defaultAutoConfig : config;
-    autoDrive = new PreussAutoDrive(robotDrive,  poseEstimatorSubsystem, this.config);
+    this.m_robotDrive = robotDrive;
+    this.m_relativeMove = pose;
+    this.m_config = config == null ? robotDrive.defaultAutoConfig : config;
+    m_autoDrive = new PreussAutoDrive(robotDrive,  poseEstimatorSubsystem, this.m_config);
 
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(robotDrive);
@@ -47,29 +46,23 @@ public class DriveWithoutVisionCommand extends Command {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    onTarget = false;
-    autoDrive.reset();
+    m_onTarget = false;
+    m_autoDrive.reset();
 
-    Pose2d initialPose = robotDrive.getPose();
-    if (AllianceConfigurationSubsystem.isBlueAlliance()) {
-      targetPose = new Pose2d(
-        initialPose.getX() + relativeMove.getX()
-        , initialPose.getY() + relativeMove.getY()
-        , new Rotation2d(MathUtil.angleModulus(initialPose.getRotation().getRadians()+relativeMove.getRotation().getRadians())));
-
-    } else {
-      targetPose = new Pose2d(
-        initialPose.getX() - relativeMove.getX(),
-        initialPose.getY() - relativeMove.getY(),
-        initialPose.getRotation().rotateBy(relativeMove.getRotation())
-      );
-    }
+    Pose2d startingPose = m_robotDrive.getPose();
+    Pose2d  allianceAdjustedRelativeMove = AllianceConfigurationSubsystem.allianceAdjustedMove(m_relativeMove);
+    // add the relativeMove to the startingPose accounting for alliance color.
+    new Pose2d(
+      startingPose.getX() + allianceAdjustedRelativeMove.getX(),
+      startingPose.getY() + allianceAdjustedRelativeMove.getY(),
+      startingPose.getRotation().rotateBy(allianceAdjustedRelativeMove.getRotation())
+    );
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    if (onTarget) return; // Prevent code from running if we are there or if there was no apriltag.
+    if (m_onTarget) return; // Prevent code from running if we are there or if there was no apriltag.
 
     Translation2d translationErrorToTarget;
     double rotationError;
@@ -79,15 +72,15 @@ public class DriveWithoutVisionCommand extends Command {
     double rotationSpeed = 0.0;
 
     // get the robot's position on the field.
-    robotPose = robotDrive.getPose();
+    robotPose = m_robotDrive.getPose();
     Utilities.toSmartDashboard("GP", robotPose);
-    Utilities.toSmartDashboard("TP", targetPose);
+    Utilities.toSmartDashboard("TP", m_targetPose);
     
     // Calculate the X and Y offsets to the target location
     //translationErrorToTarget = new Translation2d( targetPose.getX() - robotPose.getX(), targetPose.getY() - robotPose.getY());
-    translationErrorToTarget = new Translation2d( robotPose.getX() - targetPose.getX(), robotPose.getY() - targetPose.getY());
+    translationErrorToTarget = new Translation2d( robotPose.getX() - m_targetPose.getX(), robotPose.getY() - m_targetPose.getY());
 
-    double desiredRotation = targetPose.getRotation().getRadians();
+    double desiredRotation = m_targetPose.getRotation().getRadians();
     rotationError = MathUtil.angleModulus(MathUtil.angleModulus(robotPose.getRotation().getRadians()) - desiredRotation);
 
     // Make sure the rotation error is between -PI and PI
@@ -96,39 +89,39 @@ public class DriveWithoutVisionCommand extends Command {
     if (debug) SmartDashboard.putNumber("AutoDrive Y", translationErrorToTarget.getY());
     
     // Test to see if we have arrived at the requested pose within the specified toleranes
-    if (Math.abs(translationErrorToTarget.getX()) < config.getLinearTolerance()
-    &&  Math.abs(translationErrorToTarget.getY()) < config.getLinearTolerance()
-    &&  (Math.abs(rotationError) < config.getAngularTolerance())) {
+    if (Math.abs(translationErrorToTarget.getX()) < m_config.getLinearTolerance()
+    &&  Math.abs(translationErrorToTarget.getY()) < m_config.getLinearTolerance()
+    &&  (Math.abs(rotationError) < m_config.getAngularTolerance())) {
       // We are close enough.  Stop the robot and the command.
       if (debug) SmartDashboard.putBoolean("AutoDrive OnTarget", true);
       xSpeed = 0.0;
       ySpeed = 0.0;
       rotationSpeed = 0.0;
-      onTarget = true;
+      m_onTarget = true;
     } else {
       // We are not close enough yet./
 
       // Transform the error into targetPose coordinates
-      Translation2d targetPoseErrorVector = translationErrorToTarget.rotateBy(targetPose.getRotation()); //  vector from apriltag to the robot rotated in april tag space
+      Translation2d targetPoseErrorVector = translationErrorToTarget.rotateBy(m_targetPose.getRotation()); //  vector from apriltag to the robot rotated in april tag space
       //Translation2d targetPoseErrorVector = translationErrorToTarget.rotateBy(new Rotation2d(headingToTargetPose)); //  vector from apriltag to the robot rotated in april tag space
 
       // Calculate the speeds in the coordinates system defined by the april tag
       // It is important that clipping occurs here and not below as clipping in the field coordinates 
       // will lead to paths that may initially veer away from the target.
-      double xSpeedTargetPose = autoDrive.calculateX(targetPoseErrorVector.getX());
-      double ySpeedTargetPose = autoDrive.calculateY(targetPoseErrorVector.getY());
+      double xSpeedTargetPose = m_autoDrive.calculateX(targetPoseErrorVector.getX());
+      double ySpeedTargetPose = m_autoDrive.calculateY(targetPoseErrorVector.getY());
       
       // Enforce maThrottle by scaling the magnitude of the error vector.
       // If we clamped instead we would see a slightly off initial angle when clipping happens.
-      if (Math.sqrt(xSpeedTargetPose*xSpeedTargetPose + ySpeedTargetPose*ySpeedTargetPose) > config.getMaxThrottle()) {
-        double scaleFactor =  config.getMaxThrottle() / Math.sqrt(xSpeedTargetPose*xSpeedTargetPose + ySpeedTargetPose*ySpeedTargetPose);
+      if (Math.sqrt(xSpeedTargetPose*xSpeedTargetPose + ySpeedTargetPose*ySpeedTargetPose) > m_config.getMaxThrottle()) {
+        double scaleFactor =  m_config.getMaxThrottle() / Math.sqrt(xSpeedTargetPose*xSpeedTargetPose + ySpeedTargetPose*ySpeedTargetPose);
         xSpeedTargetPose *= scaleFactor;
         ySpeedTargetPose *= scaleFactor;
       }
 
       // Rotate the calculated speeds back to field coordinates.
       Translation2d targetPoseSpeeds = new Translation2d(xSpeedTargetPose,ySpeedTargetPose);
-      Translation2d unrotatedSpeedsPose = targetPoseSpeeds.rotateBy(targetPose.getRotation().times(-1));
+      Translation2d unrotatedSpeedsPose = targetPoseSpeeds.rotateBy(m_targetPose.getRotation().times(-1));
       
       // Use the unrotated speeds to control the robot.  It is possible that these speeds could exceed te max throttle but dont
       // clip them unless absolutely necessary to avoid artifacts in the paths.
@@ -137,23 +130,23 @@ public class DriveWithoutVisionCommand extends Command {
       ySpeed = MathUtil.clamp(unrotatedSpeedsPose.getY(), -1.0, 1.0);
 
       // We are controlling rotation whether we use it for "onTarget" calculations or not.
-      rotationSpeed = autoDrive.calculateClampedRotation(rotationError);
+      rotationSpeed = m_autoDrive.calculateClampedRotation(rotationError);
     }
     if (debug) SmartDashboard.putNumber("AutoDrive xSpeed", xSpeed);
     if (debug) SmartDashboard.putNumber("AutoDrive ySpeed", ySpeed);
     if (debug) SmartDashboard.putNumber("AutoDrive rSpeed", rotationSpeed);
-    autoDrive.drive(xSpeed, ySpeed, rotationSpeed, true, true);
+    m_autoDrive.drive(xSpeed, ySpeed, rotationSpeed, true, true);
   }
 
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    autoDrive.drive(0, 0, 0, true, false);
+    m_autoDrive.drive(0, 0, 0, true, false);
   }
 
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return onTarget;
+    return m_onTarget;
   }
 } // GotoPoseCommand class

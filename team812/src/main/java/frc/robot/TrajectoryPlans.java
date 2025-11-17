@@ -369,7 +369,7 @@ public class TrajectoryPlans {
         if (!debug) return;  // Dont waste time if we are not debugging.
         
         // Verify that the apriltag info matches our expectations
-        SmartDashboard.putBoolean("AprilMirrorCheck", checkAprilTagMirroring(RobotContainer.m_PoseEstimatorSubsystem));
+        SmartDashboard.putBoolean("AprilMirrorCheck", checkAprilTagMirroring(RobotContainer.m_poseEstimatorSubsystem));
         
         // Try all possible plans to makesure there are now obvious bad moves in the plans.
         for (int i = 1; i < 8; i++) {

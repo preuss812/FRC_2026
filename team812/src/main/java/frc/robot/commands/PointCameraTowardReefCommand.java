@@ -25,11 +25,11 @@ public class PointCameraTowardReefCommand extends GotoPoseCommand {
   @Override
   public void initialize() {
     // Calculate the pose to face 
-    Pose2d currentPose = poseEstimatorSubsystem.getCurrentPose();
-    targetPose = new Pose2d(
+    Pose2d currentPose = getPoseEstimatorSubsystem().getCurrentPose();
+    setTargetPose(new Pose2d(
       currentPose.getTranslation(),
       new Rotation2d(Autonomous.robotHeadingForCameraToReefCenter(currentPose.getTranslation()))
-    );
+    ));
     super.initialize();
   }
 

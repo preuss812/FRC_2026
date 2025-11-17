@@ -16,8 +16,6 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.math.trajectory.TrajectoryConfig;
-//import edu.wpi.first.math.trajectory.TrajectoryGenerator;
-//import edu.wpi.first.wpilibj.smartdashboard.FieldObject2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.SwerveControllerCommand;
@@ -82,7 +80,7 @@ public class FollowTrajectoryPoseCommand extends SequentialCommandGroup {
       return;
     }
     if (debug) {
-          RobotContainer.m_PoseEstimatorSubsystem.field2d.getObject("trajectory").setTrajectory(trajectory);
+          RobotContainer.m_poseEstimatorSubsystem.field2d.getObject("trajectory").setTrajectory(trajectory);
     }
     
     var thetaController = new ProfiledPIDController(
