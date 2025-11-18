@@ -84,7 +84,7 @@ public class FollowTrajectoryCommand extends SequentialCommandGroup {
     } catch (Exception e) {
         ListIterator<Pose2d> iter = translationWaypoints.listIterator();
         while (iter.hasNext()) {
-          addCommands(new GotoPoseCommand(robotDrive, poseEstimatorSubsystem, iter.next(), false, null)); // For each waypoint.
+          addCommands(new GotoPoseCommand(robotDrive, poseEstimatorSubsystem, iter.next(), null)); // For each waypoint.
         }
 
         if (debug) SmartDashboard.putString("FT", "catch->gotoPose");

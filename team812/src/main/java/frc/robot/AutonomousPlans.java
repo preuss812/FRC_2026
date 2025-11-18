@@ -21,7 +21,8 @@ import frc.robot.subsystems.AllianceConfigurationSubsystem;
  */
 public class AutonomousPlans {
     private static boolean debug = true;
-   
+    private static final double robotInitialOrientation = Units.degreesToRadians(0.0);  // robot starts on the starting line with rear facing the reef.
+
     public static ArrayList<Trajectory> autoPaths = new ArrayList<Trajectory>();
     public static ArrayList<String>     autoNames = new ArrayList<String>();
     public static ArrayList<Pose2d[]>   waypoints = new ArrayList<Pose2d[]>();
@@ -99,7 +100,7 @@ public class AutonomousPlans {
         startingPoses.clear();
     
         // The staring poses will be on the blue starting line facing back toward the blue drive station
-        Rotation2d startingRotation = new Rotation2d(0.0);
+        Rotation2d startingRotation = new Rotation2d(robotInitialOrientation);
         double offsetFromAprilTag = Units.inchesToMeters(40); // 0.5 meters from the april tag
         double offsetToTouchReef = Units.inchesToMeters(0.0); // -5 inches meters from the april tag Note: this should be 0.0 so something is off somewhere.
         // Get/create poses for each Reef April tag and barge april tag
@@ -253,8 +254,7 @@ public class AutonomousPlans {
         AUTO_MODE_MY_BARGE_TO_CENTER = autoNames.size();
         addAutoMode("Right 45 Degrees"
             , new Pose2d[] {
-                TrajectoryPlans.poseWithCameraFacingTheReef(false, FieldConstants.blueStartLine, AT14.getY()),
-                //poseWithCameraFacingTheReef(FieldConstants.blueStartLine-0.2, FieldConstants.yCenter + 1),
+                new Pose2d(FieldConstants.blueStartLine, AT14.getY(), startingRotation),
                 nearAT21
             }
             ,atAT21

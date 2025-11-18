@@ -37,7 +37,7 @@ public class RotateRobotG2PCommand extends GotoPoseCommand {
     , boolean relative
     , DrivingConfig config
     ) {
-    super(robotDrive, poseEstimatorSubsystem, new Pose2d(), false, config); // Pose is a place holder.
+    super(robotDrive, poseEstimatorSubsystem, new Pose2d(), config); // Pose is a place holder.
     m_theta = theta;
     m_relative = relative;
     // Use addRequirements() here to declare subsystem dependencies.

@@ -31,8 +31,8 @@ public class AutoSwerveToReefCommand extends PreussSwerveControllerCommand {
       new PIDController(AutoConstants.kPXController, 0, 0),
       new PIDController(AutoConstants.kPYController, 0, 0),
       new ProfiledPIDController(
-      AutoConstants.kPThetaController, 0, 0, AutoConstants.kThetaControllerConstraints),
-      () -> TrajectoryPlans.reefFacingRotationSupplier(poseEstimatorSubsystem),
+      AutoConstants.kPThetaController*3, 0, 0, AutoConstants.kThetaControllerConstraints),
+      () -> TrajectoryPlans.robotRearFacingReef(),
       robotDrive::driveFieldRelative,
       robotDrive);
     m_poseEstimatorSubsystem = poseEstimatorSubsystem;

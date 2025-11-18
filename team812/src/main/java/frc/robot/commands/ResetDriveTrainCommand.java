@@ -27,7 +27,7 @@ public class ResetDriveTrainCommand extends SequentialCommandGroup {
             AllianceConfigurationSubsystem.robotToFieldRotation())
           )
         ),
-        new InstantCommand(()->robotContainer.setGyroAngleToStartMatch()),
+        new InstantCommand(()->robotContainer.alignGyroRotationToFieldRotation()),
         new InstantCommand(()->RobotContainer.m_robotDrive.setDrivingMode(DriveSubsystemSRX.DrivingMode.PRECISION), RobotContainer.m_robotDrive)
       )
     );

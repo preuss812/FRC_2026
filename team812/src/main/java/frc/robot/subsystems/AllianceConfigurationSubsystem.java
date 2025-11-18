@@ -29,7 +29,7 @@ import frc.robot.TrajectoryPlans;
  * This is inteneded to be a singleton class.
  */
 public class AllianceConfigurationSubsystem extends SubsystemBase {
-  private static  DriveSubsystemSRX m_robotDrive;
+  private static DriveSubsystemSRX m_robotDrive;
   private static PoseEstimatorSubsystem m_poseEstimatorSubsystem;
   private static boolean initialized = false;
   private static Alliance currentAlliance = Alliance.Blue;
@@ -157,6 +157,16 @@ public class AllianceConfigurationSubsystem extends SubsystemBase {
    */
   public static Translation2d getReefCenter() {
     return reefCenter;
+  }
+
+  /*
+   * robotHeadingToReef() - return the heading from the robot to the reef center for the current alliance.
+   * 
+   */
+  public static double robotHeadingToReef() {
+    Pose2d robotPose = m_poseEstimatorSubsystem.getCurrentPose();
+    return MathUtil.angleModulus(
+        Math.atan2(reefCenter.getY() - robotPose.getY(), reefCenter.getX() - robotPose.getX()));
   }
 
   /*

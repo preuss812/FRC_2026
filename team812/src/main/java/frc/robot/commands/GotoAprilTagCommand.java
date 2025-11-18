@@ -64,7 +64,7 @@ public class GotoAprilTagCommand extends GotoPoseCommand {
     ) {
     
     // Use addRequirements() here to declare subsystem dependencies.
-    super(robotDrive, poseEstimatorSubsystem, new Pose2d(0,0,new Rotation2d(0.0)), true, config);
+    super(robotDrive, poseEstimatorSubsystem, new Pose2d(0,0,new Rotation2d(0.0)), config);
     
     this.m_targetDistance = targetDistance;
     m_simulatingRobot = RobotContainer.isSimulation();

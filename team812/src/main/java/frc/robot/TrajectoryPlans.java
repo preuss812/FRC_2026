@@ -13,11 +13,13 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.trajectory.TrajectoryConfig;
 import edu.wpi.first.math.trajectory.TrajectoryGenerator;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants.AutoConstants;
 import edu.wpi.first.math.trajectory.Trajectory;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.Constants.FieldConstants;
+import frc.robot.subsystems.AllianceConfigurationSubsystem;
 import frc.robot.subsystems.PoseEstimatorSubsystem;
 
 /** 
@@ -275,30 +277,13 @@ public class TrajectoryPlans {
     
     
     /**
-     * Pose facing reef, create a pose that rotates the robot so the camera faces the center of the reef.
-     * @param x - a double that is the x field coordinate.
-     * @param y = a double that is the y field coordinate.
-     * @return - a Pose2d object using the supplied x and y and a rotation that will rotate the robot to face the reef.
+     * robotRearFacingReef 
+     * @return - the rotation in radians for the robot's rear to face the reef in field coordinates.
      */
-    public static Pose2d poseWithCameraFacingTheReef(boolean convertToRed, double x, double y) {
-        if (convertToRed) {
-            return new Pose2d(x, y, new Rotation2d(FieldConstants.robotHeadingForCameraToRedReefCenter(x,y)));
-        } else {
-            return new Pose2d(x, y, new Rotation2d(FieldConstants.robotHeadingForCameraToBlueReefCenter(x,y)));
-        }
-    }
-    
-    /**
-     * Returns a rotation for the robot to face the reef.  Used as a lambda function to supply the rotation to the SwerveControllerCommand.
-     * @param poseEstimatorSubsystem
-     * @return - the rotation in radians for the robot to face the reef in field coordinates.
-     */
-    public static Rotation2d reefFacingRotationSupplier(PoseEstimatorSubsystem poseEstimatorSubsystem) {
+    public static Rotation2d robotRearFacingReef() {
         Rotation2d rotation = new Rotation2d(
-                Autonomous.robotHeadingForCameraToReefCenter(
-                    poseEstimatorSubsystem.getCurrentPose().getTranslation()
-                ) 
-        );
+            AllianceConfigurationSubsystem.robotHeadingToReef()
+        ).rotateBy(new Rotation2d(Math.PI)); // Rotate by 180 degrees to get the rear facing direction.
         return rotation;
     } 
 

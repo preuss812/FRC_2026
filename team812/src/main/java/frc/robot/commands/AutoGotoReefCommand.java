@@ -19,7 +19,7 @@ public class AutoGotoReefCommand extends GotoPoseCommand {
      DriveSubsystemSRX robotDrive
     , PoseEstimatorSubsystem poseEstimatorSubsystem
   ){
-    super(robotDrive, poseEstimatorSubsystem, new Pose2d(), true, robotDrive.defaultAutoConfig);
+    super(robotDrive, poseEstimatorSubsystem, new Pose2d(), robotDrive.defaultAutoConfig);
     m_poseEstimatorSubsystem = poseEstimatorSubsystem;
     // Use addRequirements() here to declare subsystem dependencies.
     // Super adds the requirements

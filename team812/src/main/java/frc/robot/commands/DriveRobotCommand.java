@@ -25,7 +25,7 @@ public class DriveRobotCommand extends GotoPoseCommand {
   , Pose2d relativeMove
   , boolean driveFacingFinalPose
   , DrivingConfig config) {
-    super(robotDrive, poseEstimatorSubsystem, relativeMove, driveFacingFinalPose, config); // The relative movePose will be overwritten in the initialize method.
+    super(robotDrive, poseEstimatorSubsystem, relativeMove, config); // The relative movePose will be overwritten in the initialize method.
     this.relativeMove = relativeMove;
     // Use addRequirements() here to declare subsystem dependencies.
     //addRequirements(robotDrive); // I think the super constructor does this.

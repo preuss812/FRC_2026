@@ -30,7 +30,7 @@ public class DriveCircle extends GotoPoseCommand {
 
   /** Creates a new DriveCircleCommand. */
   public DriveCircle(DriveSubsystemSRX robotDrive, PoseEstimatorSubsystem poseEstimatorSubsystem, DrivingConfig config, double radius) {
-    super(robotDrive, poseEstimatorSubsystem, dummy, false, config); // The relative movePose will be overwritten in the initialize method.
+    super(robotDrive, poseEstimatorSubsystem, dummy, config); // The relative movePose will be overwritten in the initialize method.
     SmartDashboard.putNumber("inits", initcalls);
     SmartDashboard.putNumber("executes", executecalls);
     SmartDashboard.putNumber("isFinished", isFinishedcalls);

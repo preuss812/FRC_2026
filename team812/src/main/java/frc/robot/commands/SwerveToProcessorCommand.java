@@ -47,13 +47,13 @@ public class SwerveToProcessorCommand extends PreussSwerveControllerCommand {
       new PIDController(AutoConstants.kPXController, 0, 0),
       new PIDController(AutoConstants.kPYController, 0, 0),
       new ProfiledPIDController(
-        AutoConstants.kPThetaController,
+        AutoConstants.kPThetaController*3,
         0,
         0,
         new TrapezoidProfile.Constraints(Math.PI, Math.PI)
       ),
       (faceReef)
-        ? () -> TrajectoryPlans.reefFacingRotationSupplier(poseEstimatorSubsystem)
+        ? () -> TrajectoryPlans.robotRearFacingReef()
         : () -> robotRotationToFaceProcessor(),
       robotDrive::driveFieldRelative,
       robotDrive
@@ -76,7 +76,7 @@ public class SwerveToProcessorCommand extends PreussSwerveControllerCommand {
     waypoints = TrajectoryPlans.planTrajectory(AllianceConfigurationSubsystem.getProcessorWaypoints(), startingPose);
     m_aprilTagPose = getPoseEstimatorSubsystem().getAprilTagPose(processorAprilTag.id());
     if (m_faceReef)
-      super.setRotationSupplier(() -> TrajectoryPlans.reefFacingRotationSupplier(getPoseEstimatorSubsystem()));
+      super.setRotationSupplier(() -> TrajectoryPlans.robotRearFacingReef());
     else 
       super.setRotationSupplier(() -> m_aprilTagPose.getRotation().plus(new Rotation2d(Math.PI)));
 

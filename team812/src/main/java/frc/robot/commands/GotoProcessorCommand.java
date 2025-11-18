@@ -31,7 +31,7 @@ public class GotoProcessorCommand extends GotoPoseCommand {
     , PoseEstimatorSubsystem poseEstimatorSubsystem
     , DrivingConfig config
     ) { 
-    super(robotDrive, poseEstimatorSubsystem, new Pose2d(), false, config); // Pose is a place holder.
+    super(robotDrive, poseEstimatorSubsystem, new Pose2d(), config); // Pose is a place holder.
   }
 
   // Called when the command is initially scheduled.

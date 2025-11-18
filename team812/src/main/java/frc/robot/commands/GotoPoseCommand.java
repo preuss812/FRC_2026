@@ -23,7 +23,6 @@ public class GotoPoseCommand extends Command {
   private final DriveSubsystemSRX m_robotDrive;
   private final PoseEstimatorSubsystem m_poseEstimatorSubsystem;
   private Pose2d targetPose;
-  private final boolean driveFacingFinalPose;
   private final DrivingConfig config;
   protected final PreussAutoDrive autoDrive;
   ;
@@ -41,7 +40,6 @@ public class GotoPoseCommand extends Command {
       DriveSubsystemSRX robotDrive
     , PoseEstimatorSubsystem poseEstimatorSubsystem
     , Pose2d targetPose
-    , boolean driveFacingFinalPose
     , DrivingConfig config
      ) {
     
@@ -49,7 +47,6 @@ public class GotoPoseCommand extends Command {
     this.m_robotDrive = robotDrive;
     this.m_poseEstimatorSubsystem = poseEstimatorSubsystem;
     this.targetPose = targetPose;
-    this.driveFacingFinalPose = driveFacingFinalPose;
     this.config = config == null ? robotDrive.defaultAutoConfig : config;
 
     this.autoDrive = new PreussAutoDrive(robotDrive, poseEstimatorSubsystem, this.config);
@@ -96,14 +93,10 @@ public class GotoPoseCommand extends Command {
     // This is to ensure that we get the most updates to our pose estimator for best possitioning accuracy.
     // Calculate the tangent of the translation error.
     double desiredRotation;
-    double errorVectorMagnitude = Math.pow(Math.pow(translationErrorToTarget.getX(),2) + Math.pow(translationErrorToTarget.getY(),2),0.5);
+    //double errorVectorMagnitude = Math.pow(Math.pow(translationErrorToTarget.getX(),2) + Math.pow(translationErrorToTarget.getY(),2),0.5);
 
     // If we are close to the target or not tracking an apriltag, rotate to the final pose.
-    if (errorVectorMagnitude  < 1.0 /* meters */ || !driveFacingFinalPose) {
-      desiredRotation = targetPose.getRotation().getRadians();
-    } else {
-      desiredRotation = MathUtil.angleModulus(Utilities.getHeading(robotPose.getTranslation(), targetPose.getTranslation()))+VisionConstants.rearCameraHeading;
-    }
+    desiredRotation = targetPose.getRotation().getRadians();
     
     rotationError = MathUtil.angleModulus(MathUtil.angleModulus(robotPose.getRotation().getRadians()) - desiredRotation);
 

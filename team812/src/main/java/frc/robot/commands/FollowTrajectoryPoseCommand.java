@@ -74,7 +74,7 @@ public class FollowTrajectoryPoseCommand extends SequentialCommandGroup {
         // use gotoPose to construct the path.
         ListIterator<Pose2d> poseIter = waypointPoses.listIterator();
         while (poseIter.hasNext()) {
-          addCommands(new GotoPoseCommand(robotDrive, poseEstimatorSubsystem, poseIter.next(), false, null)); // For each waypoint.
+          addCommands(new GotoPoseCommand(robotDrive, poseEstimatorSubsystem, poseIter.next(), null)); // For each waypoint.
         }
         SmartDashboard.putString("FT", "catch->gotoPose");
       return;

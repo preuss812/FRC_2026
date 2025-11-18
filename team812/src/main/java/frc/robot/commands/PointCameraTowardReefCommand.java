@@ -15,7 +15,7 @@ public class PointCameraTowardReefCommand extends GotoPoseCommand {
   /** Creates a new PointCameraTowardReefCommand. */
   public PointCameraTowardReefCommand(DriveSubsystemSRX robotDrive, PoseEstimatorSubsystem poseEstimatorSubsystem) {
     
-    super(robotDrive, poseEstimatorSubsystem, new Pose2d(), true, null );
+    super(robotDrive, poseEstimatorSubsystem, new Pose2d(), null );
 
     
     // Use addRequirements() here to declare subsystem dependencies.

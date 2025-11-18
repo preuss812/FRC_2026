@@ -28,7 +28,7 @@ public PointCameraTowardApriltagCommand(
     , PoseEstimatorSubsystem poseEstimatorSubsystem
     , int aprilTagID
     ) {
-    super(robotDrive, poseEstimatorSubsystem, new Pose2d(), true, null );
+    super(robotDrive, poseEstimatorSubsystem, new Pose2d(), null );
     this.m_apriltagId = aprilTagID;
     this.m_apriltagPose = poseEstimatorSubsystem.getAprilTagPose(m_apriltagId);
   }

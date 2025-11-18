@@ -260,36 +260,21 @@ public class RobotContainer {
   }
 
   /**
-   *  This function sets the gyro angle based on the alliance (blue or red)
-   * and the assumed starting position of the robot on the field.
-   * The current assumption is that the robot will be placed with it's back to the
-   * alliance wall.  The "Y" coordinates of the robot will be determined by the
-   * PoseEstimator once an april tag is captured by the vision system.
+   * alignGyroRotationToFieldRotation
+   * This function sets the gyro angle based on the alliance (blue or red)
+   * The robot should be facing down-field when this command is called.
+   * It will set the drive train's location to match the pose estimator.
+   * This is based on the hope that the pose estimator has a good fix on the robot position.
+   * i.e. that an april tag is in sight of the vision processor.
    */
-   public void setGyroAngleToStartMatch() {
-    // TODO: clean this up.
-    boolean isBlueAlliance = AllianceConfigurationSubsystem.isBlueAlliance(); // From the Field Management system.
-    if (isBlueAlliance) {
-      startingHeading = 0.0;
-      m_robotDrive.setAngleDegrees(startingHeading);
-      m_robotDrive.resetOdometry(
-        new Pose2d(
-           DriveConstants.kBackToCenterDistance // Assume robot is back to the starting wall
-          ,FieldConstants.yCenter               // Pick center of the field since we dont know where we will start.
-          ,new Rotation2d(Units.degreesToRadians(startingHeading)) // Facing toward the field.
-        )
-      );
-    } else {
-      startingHeading = 180.0;
-      m_robotDrive.setAngleDegrees(startingHeading);
-      m_robotDrive.resetOdometry(
-        new Pose2d(
-           FieldConstants.xMax - DriveConstants.kBackToCenterDistance // Assume robot is back to the starting wall
-          ,FieldConstants.yCenter                                     // Pick center of the field since we dont know where we will start.
-          ,new Rotation2d(Units.degreesToRadians(startingHeading))    // Facing toward the field.
-        )
-      );
-    }
+   public void alignGyroRotationToFieldRotation() {
+    m_robotDrive.setAngleDegrees(AllianceConfigurationSubsystem.robotToFieldRotation().getDegrees());
+    m_robotDrive.resetOdometry(
+      new Pose2d(
+          m_poseEstimatorSubsystem.getCurrentPose().getTranslation()
+        , AllianceConfigurationSubsystem.robotToFieldRotation()
+      )
+    );
    }
    
    /**

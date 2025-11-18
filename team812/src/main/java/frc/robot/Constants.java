@@ -223,7 +223,6 @@ public final class Constants {
     public static final class FieldConstants {
         // All units in Meters.
         // These values are derived from april tag locations and field drawings in the game manual or cad drawings.
-        public static final double robotInitialOrientation = 180.0;  // Assume robot starts on the starting line facing the reef.
         public static final double fieldLength = Units.inchesToMeters(657.37+33.51); // This is X
         public static final double fieldWidth = Units.inchesToMeters(317.15-0.15); // This is Y
 
@@ -390,8 +389,8 @@ public final class Constants {
         public static double frontCameraHeightToGround = Units.inchesToMeters(15.0);
         public static double frontCameraRoll  = Units.degreesToRadians(0.0);
         public static double frontCameraPitch = Units.degreesToRadians(0.0); 
-        public static double frontCameraYaw   = Units.degreesToRadians(0.0); // Rear facing camera.
-        public static final double frontCameraHeading = Units.degreesToRadians(0.0); // Rear facing camera
+        public static double frontCameraYaw   = Units.degreesToRadians(0.0); // Front facing camera.
+        public static final double frontCameraHeading = Units.degreesToRadians(0.0); // Front facing camera
         public static final Transform3d FRONT_CAMERA_TO_ROBOT = new Transform3d(
             new Translation3d(frontCameraXOffsetToRobot,frontCameraYOffsetToRobot,frontCameraHeightToGround),
             new Rotation3d(frontCameraRoll, frontCameraPitch, frontCameraYaw)
@@ -679,7 +678,7 @@ public final class Constants {
         public static final double kMaxSpeedMetersPerSecond = DriveConstants.kMaxSpeedMetersPerSecond*kAutoSlowdown;
         public static final double kMaxAccelerationMetersPerSecondSquared = DriveConstants.kMagnitudeIncreaseSlewRate*kAutoSlowdown;
         public static final double kMaxAngularSpeedRadiansPerSecond = DriveConstants.kMaxAngularSpeed;
-        public static final double kMaxAngularSpeedRadiansPerSecondSquared = DriveConstants.kRotationalIncreaseSlewRate;
+        public static final double kMaxAngularSpeedRadiansPerSecondSquared = 2.0; // TODO Undo - DriveConstants.kRotationalIncreaseSlewRate;
     
         public static final double kPXController = 1;
         public static final double kPYController = 1;
