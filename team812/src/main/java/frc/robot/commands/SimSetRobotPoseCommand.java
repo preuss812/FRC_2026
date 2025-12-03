@@ -4,39 +4,33 @@
 
 package frc.robot.commands;
 
-import java.util.Random;
-
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.Constants;
-import frc.robot.RobotContainer;
+import frc.robot.subsystems.DriveSubsystemSRX;
 import frc.robot.subsystems.PoseEstimatorSubsystem;
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
-public class RandomRobotPosition extends Command {
-  private Random rnd = new Random();
+public class SimSetRobotPoseCommand extends Command {
+
+  private final DriveSubsystemSRX m_robotDrive;
   private final PoseEstimatorSubsystem m_poseEstimatorSubsystem;
-  /** Creates a new RandomRobotPosition. */
-  public RandomRobotPosition(PoseEstimatorSubsystem poseEstimatorSubsystem) {
+  private final Pose2d m_pose;
+
+  /** Creates a new SimSetRobotPoseCommand. */
+  public SimSetRobotPoseCommand(DriveSubsystemSRX robotDrive, PoseEstimatorSubsystem poseEstimatorSubsystem, Pose2d pose) {
+    m_robotDrive = robotDrive;
     m_poseEstimatorSubsystem = poseEstimatorSubsystem;
+    m_pose = pose;
     // Use addRequirements() here to declare subsystem dependencies.
-    // Intentionally not adding poseEstimatorSubsystem as a requirement to avoid conflicts.
+    addRequirements(m_robotDrive, m_poseEstimatorSubsystem);
   }
 
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    Pose2d randomPose = 
-      new Pose2d(
-        rnd.nextDouble() * (Constants.FieldConstants.fieldLength - 2.0) + 1 // Xposition
-        ,rnd.nextDouble() * (Constants.FieldConstants.fieldWidth - 2.0) + 1 // Xposition
-        ,new Rotation2d( rnd.nextDouble() * Math.PI) // Rotation     
-      )
-    ;
-    SimSetRobotPoseCommand.simSetRobotPose(RobotContainer.m_robotDrive, m_poseEstimatorSubsystem, randomPose);
+    simSetRobotPose(m_robotDrive, m_poseEstimatorSubsystem, m_pose);
   }
-  
+
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {}
@@ -48,6 +42,12 @@ public class RandomRobotPosition extends Command {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return true;
+    return true; // All happens in initialize;
+  }
+
+  public static void simSetRobotPose(DriveSubsystemSRX robotDrive, PoseEstimatorSubsystem poseEstimatorSubsystem, Pose2d pose) {
+    robotDrive.setAngleDegrees(-pose.getRotation().getDegrees());
+    robotDrive.resetOdometry(pose);
+    poseEstimatorSubsystem.setCurrentPose(pose);
   }
 }

@@ -70,8 +70,7 @@ public class DriveChoreoPathCommand extends Command {
                 // Reset odometry to the start of the trajectory
                 //robotDrive.resetOdometry(initialPose.get());
 
-                m_poseEstimatorSubsystem.setCurrentPose(initialPose.get());
-                //robotDrive.setAngleDegrees(initialPose.get().getRotation().getDegrees()+(Utilities.isRedAlliance() ? 180 : 0.0));
+                SimSetRobotPoseCommand.simSetRobotPose(m_robotDrive, m_poseEstimatorSubsystem, initialPose.get());
 
                 if (m_trajectoryName == "PID test")
                 {

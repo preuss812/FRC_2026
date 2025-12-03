@@ -282,10 +282,14 @@ public class PreussSwerveControllerCommand extends Command {
       yFF + yFeedback,
       thetaFF
     );
-
+    SmartDashboard.putNumber("xFeedback", xFeedback);
+    SmartDashboard.putNumber("yFeedback", yFeedback);
+    SmartDashboard.putNumber("thetaFF", thetaFF);
+    SmartDashboard.putNumber("xFF", xFF);
+    SmartDashboard.putNumber("yFF", yFF);
     // Drive the robot at the calculated speeds    
     m_driveInputs.accept( speeds );
-    m_count++; // For debugging simulation.
+    m_count++;
   }
 
   @Override

@@ -37,6 +37,7 @@ import frc.robot.commands.DriveCircle;
 import frc.robot.commands.DriveCircleThrottle;
 import frc.robot.commands.DriveRobotCommand;
 import frc.robot.commands.DriveWithoutVisionCommand;
+import frc.robot.commands.GotoPoseCommand;
 import frc.robot.commands.GotoProcessorCommand;
 import frc.robot.commands.PointCameraTowardReefCommand;
 import frc.robot.commands.RandomRobotPosition;
@@ -216,8 +217,10 @@ public class RobotContainer {
       SmartDashboard.putData("Choreo2", new DriveChoreoPathCommand(m_robotDrive, m_poseEstimatorSubsystem, "Low to AT22", m_robotDrive.circleAutoConfig, 1.0, 1.0));
       SmartDashboard.putData("Choreo3", new DriveChoreoPathCommand(m_robotDrive, m_poseEstimatorSubsystem, "PID test", m_robotDrive.circleAutoConfig, 1.0, 1.0));
       SmartDashboard.putData("Y", new ResetDriveTrainCommand(this));
-      SmartDashboard.putData("Z", new InstantCommand(()->m_poseEstimatorSubsystem.setCurrentPose(new Pose2d(5.5 + 0.145916,4, Rotation2d.kZero))));
-      SmartDashboard.putData("TT", new SwerveToProcessorCommand(m_robotDrive, m_poseEstimatorSubsystem, true).withTimeout(15.0));
+      SmartDashboard.putData("Z", new InstantCommand(()->m_poseEstimatorSubsystem.setCurrentPose(new Pose2d(5.5 + 0.145916,4, Rotation2d.kZero)))
+        .andThen(new InstantCommand(() -> m_robotDrive.setAngleDegrees(0.0)))
+        .andThen(new InstantCommand(()->m_poseEstimatorSubsystem.setCurrentPose(new Pose2d(5.5 + 0.145916,4, Rotation2d.kZero)))));
+      SmartDashboard.putData("TT", new SwerveToProcessorCommand(m_robotDrive, m_poseEstimatorSubsystem, true));
       SmartDashboard.putData("R", new RandomRobotPosition(m_poseEstimatorSubsystem));
       SmartDashboard.putData("PR", new PointCameraTowardReefCommand(m_robotDrive, m_poseEstimatorSubsystem));
       SmartDashboard.putData("DR", new DriveRobotCommand(m_robotDrive, m_poseEstimatorSubsystem, new Pose2d(2,1,new Rotation2d(0)), false, null));
@@ -227,7 +230,11 @@ public class RobotContainer {
       SmartDashboard.putData("R180", new RotateRobotCommand(m_robotDrive, Units.degreesToRadians(180),false));
       SmartDashboard.putData("RG", new RotateRobotG2PCommand(m_robotDrive, m_poseEstimatorSubsystem, Units.degreesToRadians(180),false, null));
       SmartDashboard.putData("GP", new GotoProcessorCommand(m_robotDrive, m_poseEstimatorSubsystem, null));
-      
+      SmartDashboard.putData("RR", new InstantCommand(()->m_robotDrive.drive(0.0, 0.0, 0.1, true)));
+      SmartDashboard.putData(
+        "G1", new GotoPoseCommand(m_robotDrive, m_poseEstimatorSubsystem, new Pose2d(6, 4, new Rotation2d(Math.PI)), null));
+      SmartDashboard.putData(
+        "G2", new GotoPoseCommand(m_robotDrive,  m_poseEstimatorSubsystem, new Pose2d(12, 6, new Rotation2d(0)), null));
     } // (isSimulation()
   } // (configureButtonBindings)
 

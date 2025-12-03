@@ -6,6 +6,7 @@ package frc.robot.subsystems;
 
 import com.kauailabs.navx.frc.AHRS;
 
+import edu.wpi.first.hal.SimDouble;
 import edu.wpi.first.math.MathUtil;
 import choreo.trajectory.SwerveSample;
 import edu.wpi.first.math.controller.PIDController;
@@ -18,6 +19,7 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.SerialPort;
+import edu.wpi.first.wpilibj.simulation.SimDeviceSim;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Utilities;
@@ -55,7 +57,25 @@ public class DriveSubsystemSRX extends SubsystemBase {
 
   // The gyro sensor
   public final AHRS m_gyro = new AHRS(SerialPort.Port.kUSB1);
+  private final SimDeviceSim m_gyroSim = new SimDeviceSim("navX-Sensor", 0); //m_gyro.getPort());
+  private final SimDouble m_gyroSimAngle = m_gyroSim.getDouble("Yaw");
 
+  private SwerveModuleState[] m_statesMeasured =
+  new SwerveModuleState[] {
+    new SwerveModuleState(),
+    new SwerveModuleState(),
+    new SwerveModuleState(),
+    new SwerveModuleState()
+  };
+
+  @SuppressWarnings("unused")
+  private SwerveModuleState[] m_statesRequested = m_statesMeasured;
+
+  @SuppressWarnings("unused")
+  private ChassisSpeeds m_speedsMeasured = new ChassisSpeeds();
+
+  // @SuppressWarnings("unused")
+  private ChassisSpeeds m_speedsRequested = new ChassisSpeeds();
 
   // Slew rate filter variables for controlling lateral acceleration
   private double m_currentRotation = 0.0;
@@ -76,6 +96,8 @@ public class DriveSubsystemSRX extends SubsystemBase {
           m_rearLeft.getPosition(),
           m_rearRight.getPosition()
       });
+
+  private ChassisSpeeds m_robotCentricChassisSpeeds = new ChassisSpeeds();
 
   public enum DrivingMode {
     SPEED,
@@ -143,7 +165,7 @@ public class DriveSubsystemSRX extends SubsystemBase {
   public void periodic() {
     // Update the odometry in the periodic block
     if (debug) {
-      SmartDashboard.putNumber("gyro_angle", MathUtil.inputModulus(m_gyro.getAngle(), -180, 180));
+      SmartDashboard.putNumber("gyro_angle", MathUtil.inputModulus(-m_gyro.getAngle(), -180, 180));
       Utilities.toSmartDashboard("DriveTrain", this.getPose()); 
       SmartDashboard.putNumber("Robot X", this.getPose().getX()); 
       SmartDashboard.putNumber("Robot Y", this.getPose().getY()); 
@@ -250,9 +272,7 @@ public class DriveSubsystemSRX extends SubsystemBase {
         vxMetersPerSec
         ,vyMetersPerSec
         ,omegaRadiansPerSec
-        ,RobotContainer.isSimulation()
-        ? Rotation2d.fromDegrees(0.0 * RobotContainer.startingHeading())
-        : Rotation2d.fromDegrees(-m_gyro.getAngle()))
+        ,Rotation2d.fromDegrees(-m_gyro.getAngle()))
       : new ChassisSpeeds(vxMetersPerSec, vyMetersPerSec, omegaRadiansPerSec);
 
     if (debug) {
@@ -263,25 +283,26 @@ public class DriveSubsystemSRX extends SubsystemBase {
     }
 
     // For simulation, update the position of the robot based on the requested speeds.
-    if (RobotContainer.isSimulation()) {
+    /*if (RobotContainer.isSimulation()) {
       RobotContainer.m_preussDriveSimulation.drive(
         chassisSpeeds.vxMetersPerSecond
         , chassisSpeeds.vyMetersPerSecond
         , chassisSpeeds.omegaRadiansPerSecond
       );
-    }
+    }*/
     // Calculate the swerve module states from the chassis speeds
       var swerveModuleStates = DriveConstants.kDriveKinematics.toSwerveModuleStates(chassisSpeeds);
         
+    // Remember the latest chassis speeds to support simulation.
+    m_robotCentricChassisSpeeds = chassisSpeeds;
+      
+
     // Enforce the maximum speed of the robot
     SwerveDriveKinematics.desaturateWheelSpeeds(
         swerveModuleStates, maxSpeedMetersPerSecond);
 
     // Set the swerve module states
-    m_frontLeft.setDesiredState(swerveModuleStates[0]);
-    m_frontRight.setDesiredState(swerveModuleStates[1]);
-    m_rearLeft.setDesiredState(swerveModuleStates[2]);
-    m_rearRight.setDesiredState(swerveModuleStates[3]);
+    setModuleStates(swerveModuleStates);
 
   }
 
@@ -323,12 +344,12 @@ public class DriveSubsystemSRX extends SubsystemBase {
    * @param desiredStates The desired SwerveModule states.
    */
   public void setModuleStates(SwerveModuleState[] desiredStates) {
-    SwerveDriveKinematics.desaturateWheelSpeeds(
-        desiredStates, maxSpeedMetersPerSecond);
     m_frontLeft.setDesiredState(desiredStates[0]);
     m_frontRight.setDesiredState(desiredStates[1]);
     m_rearLeft.setDesiredState(desiredStates[2]);
     m_rearRight.setDesiredState(desiredStates[3]);
+    m_statesRequested = desiredStates;
+    m_speedsRequested = DriveConstants.kDriveKinematics.toChassisSpeeds(desiredStates);
   }
 
   /** Resets the drive encoders to currently read a position of 0. */
@@ -456,4 +477,30 @@ public class DriveSubsystemSRX extends SubsystemBase {
     drive(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond, speeds.omegaRadiansPerSecond, true);
   }
 
+  // Allow simulation to access the latest chassis speeds to approximate robot motion.
+  public ChassisSpeeds getRobotCentricChassisSpeeds() {
+    return m_robotCentricChassisSpeeds;
+  }
+
+  // Allow simulation to access the latest chassis speeds to approximate robot motion.
+  public ChassisSpeeds getFieldCentricChassisSpeeds() {
+    return ChassisSpeeds.fromRobotRelativeSpeeds(
+      m_robotCentricChassisSpeeds.vxMetersPerSecond
+      ,m_robotCentricChassisSpeeds.vyMetersPerSecond
+      ,m_robotCentricChassisSpeeds.omegaRadiansPerSecond
+      ,Rotation2d.fromDegrees(-m_gyro.getAngle())
+    );
+  }
+
+  @Override
+  public void simulationPeriodic() {
+    double timestep = 20e-3;
+    ChassisSpeeds chassisSpeeds = getFieldCentricChassisSpeeds(); // only using this for robot rotation.
+    m_frontLeft.simulationPeriodic(timestep);
+    m_frontRight.simulationPeriodic(timestep);
+    m_rearLeft.simulationPeriodic(timestep);
+    m_rearRight.simulationPeriodic(timestep);
+    double dTheta = Units.radiansToDegrees(chassisSpeeds.omegaRadiansPerSecond * timestep);
+    setAngleDegrees(m_gyro.getAngle() - dTheta);
+  }
 }

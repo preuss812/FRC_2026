@@ -10,8 +10,10 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.wpilibj.simulation.EncoderSim;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 import com.revrobotics.spark.SparkMax;
@@ -23,9 +25,12 @@ import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import com.revrobotics.spark.config.ClosedLoopConfig.FeedbackSensor;
 import com.revrobotics.RelativeEncoder;
+import com.revrobotics.sim.SparkAbsoluteEncoderSim;
+import com.revrobotics.sim.SparkMaxSim;
 import com.ctre.phoenix6.StatusSignal;
 
 import com.ctre.phoenix6.hardware.CANcoder;
+import com.ctre.phoenix6.sim.CANcoderSimState;
 
 import frc.robot.Constants.ModuleConstants;
 import frc.robot.Constants.CANConstants;
@@ -36,7 +41,6 @@ public class MAXSRXSwerveModule {
   private final SparkMaxConfig m_drivingConfig;
   private final SparkMaxConfig m_turningConfig;
 
-
   private final RelativeEncoder m_drivingEncoder;
   private final CANcoder m_turningEncoder;
 
@@ -45,7 +49,14 @@ public class MAXSRXSwerveModule {
 
   private double m_chassisAngularOffset = 0;
   private SwerveModuleState m_desiredState = new SwerveModuleState(0.0, new Rotation2d());
+  private SwerveModuleState m_correctedDesiredState = new SwerveModuleState(0.0, new Rotation2d());
+
   private boolean debug = true;
+  private final DCMotor m_driveMotor = DCMotor.getNEO(1);
+  private final DCMotor m_turnMotor = DCMotor.getNEO(1);
+  private final SparkMaxSim m_drivingSparkSim;
+  private final SparkMaxSim m_turningSparkSim;
+  private final CANcoderSimState m_turningEncoderSim;
 
   /**
    * Constructs a MAXSRXSwerveModule and configures the driving and turning motor,
@@ -57,19 +68,28 @@ public class MAXSRXSwerveModule {
 
     m_drivingSparkMax = new SparkMax(drivingCANId, MotorType.kBrushless);
     m_turningSparkMax = new SparkMax(turningCANId, MotorType.kBrushless);
+
+    // Include simulation motors and encoders in case we are simulating.
+    m_drivingSparkSim = new SparkMaxSim(m_drivingSparkMax, m_driveMotor);
+    m_turningSparkSim = new SparkMaxSim(m_turningSparkMax, m_turnMotor);
+    // m_turningSparkSim.getAbsoluteEncoderSim();
+
     m_drivingConfig = new SparkMaxConfig(); // New for 2025
     m_turningConfig = new SparkMaxConfig(); // New for 2025
 
     // get the encoder objects for easier access later.
     m_drivingEncoder = m_drivingSparkMax.getEncoder();
     m_turningEncoder = new CANcoder(turningEncoderCANId);
+    m_turningEncoderSim = new CANcoderSimState(m_turningEncoder); 
 
     // Get the PID controllers for the driving and turning motors.
     m_drivingPIDController = m_drivingSparkMax.getClosedLoopController();
-    m_turningPIDController = new PIDController(ModuleConstants.kTurningP, ModuleConstants.kTurningI, ModuleConstants.kTurningD);
-    
+    m_turningPIDController = new PIDController(ModuleConstants.kTurningP, ModuleConstants.kTurningI,
+        ModuleConstants.kTurningD);
+
     // TODO remove the redundant code below
-    // Set the PID gains for the turning motor. Algae these are example gains, and you
+    // Set the PID gains for the turning motor. Algae these are example gains, and
+    // you
     // may need to tune them for your own robot!
     m_turningPIDController.setP(ModuleConstants.kTurningP);
     m_turningPIDController.setI(ModuleConstants.kTurningI);
@@ -79,71 +99,79 @@ public class MAXSRXSwerveModule {
     // controller to go through 0 to get to the setpoint i.e. going from 350 degrees
     // to 10 degrees will go through 0 rather than the other direction which is a
     // longer route.
-    // Match the PID's continuous range to [-pi, pi] to align with normalized angle below
+    // Match the PID's continuous range to [-pi, pi] to align with normalized angle
+    // below
     m_turningPIDController.enableContinuousInput(-Math.PI, Math.PI);
     // Reduce dithering near setpoint
     m_turningPIDController.setTolerance(Units.degreesToRadians(2.0));
 
     // Configure the driving Spark Max
     m_drivingConfig
-      .inverted(false)
-      .idleMode(ModuleConstants.kDrivingMotorIdleMode)
-      //.closedLoopRampRate(10.0) # did nothing
-      //.openLoopRampRate(10.0)   # did nothing
-      ;
+        .inverted(false)
+        .idleMode(ModuleConstants.kDrivingMotorIdleMode)
+    // .closedLoopRampRate(10.0) # did nothing
+    // .openLoopRampRate(10.0) # did nothing
+    ;
 
     // Apply position and velocity conversion factors for the driving encoder. The
     // native units for position and velocity are rotations and RPM, respectively,
     // but we want meters and meters per second to use with WPILib's swerve APIs.
     m_drivingConfig.encoder
-      .positionConversionFactor(ModuleConstants.kDrivingEncoderPositionFactor)
-      .velocityConversionFactor(ModuleConstants.kDrivingEncoderVelocityFactor);
+        .positionConversionFactor(ModuleConstants.kDrivingEncoderPositionFactor)
+        .velocityConversionFactor(ModuleConstants.kDrivingEncoderVelocityFactor);
 
     m_drivingConfig.smartCurrentLimit(ModuleConstants.kDrivingMotorCurrentLimit);
 
     // Set the PID related parameters for the driving motor.
     m_drivingConfig.closedLoop
-    .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
-    .pidf(ModuleConstants.kDrivingP, ModuleConstants.kDrivingI, ModuleConstants.kDrivingD, ModuleConstants.kDrivingFF)
-    .outputRange(ModuleConstants.kDrivingMinOutput, ModuleConstants.kDrivingMaxOutput);
-  
+        .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
+        .pidf(ModuleConstants.kDrivingP, ModuleConstants.kDrivingI, ModuleConstants.kDrivingD,
+            ModuleConstants.kDrivingFF)
+        .outputRange(ModuleConstants.kDrivingMinOutput, ModuleConstants.kDrivingMaxOutput);
+
     m_drivingSparkMax.configure(m_drivingConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-    
+
     // Configure the turning Spark Max
     m_turningConfig
-      .inverted(false)
-      .idleMode(ModuleConstants.kDrivingMotorIdleMode); // Should this be brake or coast?
-      m_turningConfig.smartCurrentLimit(ModuleConstants.kTurningMotorCurrentLimit);
+        .inverted(false)
+        .idleMode(ModuleConstants.kDrivingMotorIdleMode); // Should this be brake or coast?
+    m_turningConfig.smartCurrentLimit(ModuleConstants.kTurningMotorCurrentLimit);
 
     m_turningSparkMax.configure(m_turningConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
     m_chassisAngularOffset = chassisAngularOffset;
-    m_turningEncoder.setPosition(m_turningEncoder.getAbsolutePosition().getValue()); // An attempt to make the position == the absolute position
-    m_desiredState.angle = new Rotation2d(this.CANCoderPositionRadians()); // Set desired angle to current angle so it wont move.
+    m_turningEncoder.setPosition(m_turningEncoder.getAbsolutePosition().getValue()); // An attempt to make the position
+                                                                                     // == the absolute position
+    m_desiredState.angle = new Rotation2d(this.CANCoderPositionRadians()); // Set desired angle to current angle so it
+                                                                           // wont move.
 
     m_drivingEncoder.setPosition(0);
     m_turningConfig.closedLoop
-      .feedbackSensor(FeedbackSensor.kAlternateOrExternalEncoder)
-      .pid(ModuleConstants.kTurningP,ModuleConstants.kTurningI,ModuleConstants.kTurningD)
-      ;
+        .feedbackSensor(FeedbackSensor.kAlternateOrExternalEncoder)
+        .pid(ModuleConstants.kTurningP, ModuleConstants.kTurningI, ModuleConstants.kTurningD);
   }
+
   /**
    * Helper function that converts CANCoder output into an angle in radians
    * in the range of 0 to 2*pi.
-   * The CANCoder returns values in units of rotation, ie 1.0 = 1 full roration counterclockwise from the 0.0 position.
+   * The CANCoder returns values in units of rotation, ie 1.0 = 1 full roration
+   * counterclockwise from the 0.0 position.
+   * 
    * @return The current turning direction in radians
    */
   public double CANCoderPositionRadians() {
-    // Read absolute position as rotations, convert to radians, then normalize to [-pi, pi)
+    // Read absolute position as rotations, convert to radians, then normalize to
+    // [-pi, pi)
     StatusSignal<Angle> angleStatus = m_turningEncoder.getAbsolutePosition();
     double rotations = angleStatus.getValueAsDouble();
     double angleRadians = rotations * 2.0 * Math.PI;
     double normalized = MathUtil.angleModulus(angleRadians);
 
-    if (debug) SmartDashboard.putNumber("Absolute position"+m_turningEncoder.getDeviceID(), normalized);
+    if (debug)
+      SmartDashboard.putNumber("Absolute position" + m_turningEncoder.getDeviceID(), normalized);
     if (debug && (m_turningEncoder.getDeviceID() == CANConstants.kSwerveLeftFrontCANCoder)) {
       SmartDashboard.putNumber("lf_angle_radians", normalized);
-      SmartDashboard.putNumber("lf_angle_degrees", normalized/(2*Math.PI)*360.0);
+      SmartDashboard.putNumber("lf_angle_degrees", normalized / (2 * Math.PI) * 360.0);
     }
     return normalized;
   }
@@ -189,15 +217,15 @@ public class MAXSRXSwerveModule {
     correctedDesiredState.speedMetersPerSecond = desiredState.speedMetersPerSecond;
     correctedDesiredState.angle = desiredState.angle.plus(Rotation2d.fromRadians(m_chassisAngularOffset));
 
-   // TODO: Rework the optimize function to use the non-deprecated version
-   // Optimize the reference state to avoid spinning further than 90 degrees.
-    SwerveModuleState optimizedDesiredState = SwerveModuleState.optimize(correctedDesiredState,
-        new Rotation2d(currentTurningAngleInRadians));
+    // Optimize the reference state to avoid spinning further than 90 degrees.
+    correctedDesiredState.optimize(new Rotation2d(currentTurningAngleInRadians));
+    // correctedDesiredState.optimize(new
+    // Rotation2d(m_turningEncoder.getPosition()));
 
     // Command driving and turning SPARKS MAX towards their respective setpoints.
-    m_drivingPIDController.setReference(optimizedDesiredState.speedMetersPerSecond, ControlType.kVelocity);
-    m_turningPIDController.setSetpoint(optimizedDesiredState.angle.getRadians());
-    
+    m_drivingPIDController.setReference(correctedDesiredState.speedMetersPerSecond, ControlType.kVelocity);
+    m_turningPIDController.setSetpoint(correctedDesiredState.angle.getRadians());
+
     double pidOutput = m_turningPIDController.calculate(currentTurningAngleInRadians);
     // Avoid dithering at the setpoint from encoder noise
     if (m_turningPIDController.atSetpoint()) {
@@ -207,11 +235,13 @@ public class MAXSRXSwerveModule {
     }
 
     if (debug && (m_turningEncoder.getDeviceID() == CANConstants.kSwerveLeftFrontCANCoder)) {
-      SmartDashboard.putNumber("optimizedTurn", optimizedDesiredState.angle.getRadians());
-      SmartDashboard.putNumber("optimizedTurnError", optimizedDesiredState.angle.getRadians()-currentTurningAngleInRadians);
+      SmartDashboard.putNumber("optimizedTurn", correctedDesiredState.angle.getRadians());
+      SmartDashboard.putNumber("optimizedTurnError",
+          correctedDesiredState.angle.getRadians() - currentTurningAngleInRadians);
       SmartDashboard.putNumber("pidOutput", pidOutput);
     }
 
+    m_correctedDesiredState = correctedDesiredState;
     m_desiredState = desiredState;
   }
 
@@ -221,9 +251,22 @@ public class MAXSRXSwerveModule {
   }
 
   public void zeroOrientation() {
-    
+
   }
+
   public void quiesce() {
     setDesiredState(m_desiredState); // Tell the module to want to be where it already is.
+  }
+
+  // During simulation, refresh the encoders and motors based on the normal
+  // controls.
+  public void simulationPeriodic(double timestep) {
+    // double timestep = 20e-3;
+    m_drivingSparkMax.getAbsoluteEncoder().getPosition();
+    m_drivingSparkSim.iterate(m_correctedDesiredState.speedMetersPerSecond, 12, timestep);
+    m_drivingSparkMax.getAbsoluteEncoder().getPosition();
+    //m_turningEncoderSim.setRawPosition(m_correctedDesiredState.angle.getRadians()/(Math.PI*2.0));
+    m_turningEncoder.setPosition(m_correctedDesiredState.angle.getRadians()/(Math.PI*2.0)); // rotations
+    //m_turningSparkSim.getAbsoluteEncoderSim().setPosition(m_correctedDesiredState.angle.getRadians());
   }
 }

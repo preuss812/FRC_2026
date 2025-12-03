@@ -47,7 +47,7 @@ public class SwerveToProcessorCommand extends PreussSwerveControllerCommand {
       new PIDController(AutoConstants.kPXController, 0, 0),
       new PIDController(AutoConstants.kPYController, 0, 0),
       new ProfiledPIDController(
-        AutoConstants.kPThetaController*3,
+        AutoConstants.kPThetaController,
         0,
         0,
         new TrapezoidProfile.Constraints(Math.PI, Math.PI)

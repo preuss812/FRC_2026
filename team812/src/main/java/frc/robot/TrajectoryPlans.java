@@ -50,13 +50,13 @@ public class TrajectoryPlans {
     // For now, default speeds are coming from Constants.AutoConstants which has the slow/precision speeds.
     // the 0.9 is to allow headroom for the robot to make sure it does not run out of time during the FollowTrajectoryCommand.
     public static final TrajectoryConfig m_forwardTrajectoryConfig = new TrajectoryConfig(
-        AutoConstants.kMaxSpeedMetersPerSecond*0.9,
-        AutoConstants.kMaxAccelerationMetersPerSecondSquared*0.9*4.0)
+        AutoConstants.kMaxSpeedMetersPerSecond,
+        AutoConstants.kMaxAccelerationMetersPerSecondSquared)
         .setKinematics(DriveConstants.kDriveKinematics);
 
     public static final TrajectoryConfig m_reverseTrajectoryConfig = new TrajectoryConfig(
-        AutoConstants.kMaxSpeedMetersPerSecond*1.0,
-        AutoConstants.kMaxAccelerationMetersPerSecondSquared*1.0*4.0)
+        AutoConstants.kMaxSpeedMetersPerSecond,
+        AutoConstants.kMaxAccelerationMetersPerSecondSquared)
         .setKinematics(DriveConstants.kDriveKinematics)
         .setReversed(true);
     

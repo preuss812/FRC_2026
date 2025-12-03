@@ -677,8 +677,8 @@ public final class Constants {
         public static final double kAutoSlowdown = 1.0; // 1.0 is full speed, 0.5 is half speed, etc.
         public static final double kMaxSpeedMetersPerSecond = DriveConstants.kMaxSpeedMetersPerSecond*kAutoSlowdown;
         public static final double kMaxAccelerationMetersPerSecondSquared = DriveConstants.kMagnitudeIncreaseSlewRate*kAutoSlowdown;
-        public static final double kMaxAngularSpeedRadiansPerSecond = DriveConstants.kMaxAngularSpeed;
-        public static final double kMaxAngularSpeedRadiansPerSecondSquared = 2.0; // TODO Undo - DriveConstants.kRotationalIncreaseSlewRate;
+        public static final double kMaxAngularSpeedRadiansPerSecond = Math.PI; //DriveConstants.kMaxAngularSpeed;
+        public static final double kMaxAngularSpeedRadiansPerSecondSquared = Math.PI; //2.0; // TODO Undo - DriveConstants.kRotationalIncreaseSlewRate;
     
         public static final double kPXController = 1;
         public static final double kPYController = 1;
