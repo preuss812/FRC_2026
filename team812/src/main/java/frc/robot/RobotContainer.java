@@ -251,18 +251,7 @@ public class RobotContainer {
   // This assumes that the PoseEstimator has a really good estimate.
   // In other words, that it has a recent, accurate view of an Apriltag.
   public void alignDriveTrainToPoseEstimator() {
-    // Set the gyro angle to match the pose estimator 
-    // compensating for the placement of the camera on the robot.
-    /*
-    m_robotDrive.setAngleDegrees( 
-      MathUtil.inputModulus(
-        m_PoseEstimatorSubsystem.getCurrentPose().getRotation().getDegrees()+VisionConstants.CAMERA_TO_ROBOT.getRotation().toRotation2d().getDegrees()
-        ,-180
-        , 180
-      )
-    );
-    */
-    // Update the drive trains X, Y, and robot orientation to match the pose estimator.
+    m_robotDrive.setAngleDegrees(m_poseEstimatorSubsystem.getCurrentPose().getRotation().getDegrees());
     m_robotDrive.resetOdometry(m_poseEstimatorSubsystem.getCurrentPose());
   }
 

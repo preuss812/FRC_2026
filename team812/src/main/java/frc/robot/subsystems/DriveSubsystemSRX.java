@@ -6,6 +6,7 @@ package frc.robot.subsystems;
 
 import com.kauailabs.navx.frc.AHRS;
 
+import edu.preuss.sensors.AHRSInvertable;
 import edu.wpi.first.hal.SimDouble;
 import edu.wpi.first.math.MathUtil;
 import choreo.trajectory.SwerveSample;
@@ -56,9 +57,7 @@ public class DriveSubsystemSRX extends SubsystemBase {
       DriveConstants.kBackRightChassisAngularOffset);
 
   // The gyro sensor
-  public final AHRS m_gyro = new AHRS(SerialPort.Port.kUSB1);
-  private final SimDeviceSim m_gyroSim = new SimDeviceSim("navX-Sensor", 0); //m_gyro.getPort());
-  private final SimDouble m_gyroSimAngle = m_gyroSim.getDouble("Yaw");
+  public final AHRSInvertable m_gyro = new AHRSInvertable(SerialPort.Port.kUSB1).setInverted(true);
 
   private SwerveModuleState[] m_statesMeasured =
   new SwerveModuleState[] {
@@ -89,7 +88,7 @@ public class DriveSubsystemSRX extends SubsystemBase {
   // Odometry class for tracking robot pose
   SwerveDriveOdometry m_odometry = new SwerveDriveOdometry(
       DriveConstants.kDriveKinematics,
-      Rotation2d.fromDegrees(-m_gyro.getAngle()),
+      m_gyro.getRotation(),
       new SwerveModulePosition[] {
           m_frontLeft.getPosition(),
           m_frontRight.getPosition(),
@@ -165,14 +164,14 @@ public class DriveSubsystemSRX extends SubsystemBase {
   public void periodic() {
     // Update the odometry in the periodic block
     if (debug) {
-      SmartDashboard.putNumber("gyro_angle", MathUtil.inputModulus(-m_gyro.getAngle(), -180, 180));
+      SmartDashboard.putNumber("gyro_angle", m_gyro.getDegrees());
       Utilities.toSmartDashboard("DriveTrain", this.getPose()); 
       SmartDashboard.putNumber("Robot X", this.getPose().getX()); 
       SmartDashboard.putNumber("Robot Y", this.getPose().getY()); 
     }
 
     m_odometry.update(
-        Rotation2d.fromDegrees(-m_gyro.getAngle()),
+        m_gyro.getRotation(),
         new SwerveModulePosition[] {
             m_frontLeft.getPosition(),
             m_frontRight.getPosition(),
@@ -197,7 +196,7 @@ public class DriveSubsystemSRX extends SubsystemBase {
    */
   public void resetOdometry(Pose2d pose) {
     m_odometry.resetPosition(
-        Rotation2d.fromDegrees(-m_gyro.getAngle()),
+        m_gyro.getRotation(),
         new SwerveModulePosition[] {
             m_frontLeft.getPosition(),
             m_frontRight.getPosition(),
@@ -272,7 +271,7 @@ public class DriveSubsystemSRX extends SubsystemBase {
         vxMetersPerSec
         ,vyMetersPerSec
         ,omegaRadiansPerSec
-        ,Rotation2d.fromDegrees(-m_gyro.getAngle()))
+        ,m_gyro.getRotation())
       : new ChassisSpeeds(vxMetersPerSec, vyMetersPerSec, omegaRadiansPerSec);
 
     if (debug) {
@@ -371,7 +370,7 @@ public class DriveSubsystemSRX extends SubsystemBase {
    * @return the robot's heading in degrees, from -180 to 180
    */
   public double getHeading() {
-    return Rotation2d.fromDegrees(-m_gyro.getAngle()).getDegrees();
+    return m_gyro.getDegrees();
   }
 
   /**
@@ -380,34 +379,16 @@ public class DriveSubsystemSRX extends SubsystemBase {
    * @return the robot's rotation as Rotation2d.
    */
   public Rotation2d getRotation() {
-    return Rotation2d.fromDegrees(-m_gyro.getAngle());
+    return m_gyro.getRotation();
   }
 
-  /**
-   * Returns the turn rate of the robot.
-   *
-   * @return The turn rate of the robot, in degrees per second
-   */
-  public double getTurnRate() {
-    return m_gyro.getRate() * (DriveConstants.kGyroReversed ? -1.0 : 1.0);
-  }
   /**
    * Reset the gyro angle as specified, presumably to align the drivetrain to the field.
    * @param desiredngle
    * @return
    */
   public double setAngleDegrees(double desiredAngle) {
-    // There is something wrong here as the results are 180 out.
-    if (debug) {
-      SmartDashboard.putNumber("SetAngle", desiredAngle); // minus but we should have added m_gyro.inverted instead
-      SmartDashboard.putNumber("SetAngleGyro", m_gyro.getAngle());
-      SmartDashboard.putNumber("SetAngleOldAdj", m_gyro.getAngleAdjustment());
-      SmartDashboard.putNumber("SetAngleNewAdj", desiredAngle - (m_gyro.getAngle() - m_gyro.getAngleAdjustment()));
-    }
-    m_gyro.setAngleAdjustment((desiredAngle - (m_gyro.getAngle() - m_gyro.getAngleAdjustment())));    
-    if (debug) SmartDashboard.putNumber("SetAngleNew", m_gyro.getAngle());
-
-    return m_gyro.getAngle();  // Return the new angle for chaining
+    return m_gyro.setAngle(desiredAngle);  // Return the new angle for chaining
   }
 
   public void quiesce() {
@@ -488,7 +469,7 @@ public class DriveSubsystemSRX extends SubsystemBase {
       m_robotCentricChassisSpeeds.vxMetersPerSecond
       ,m_robotCentricChassisSpeeds.vyMetersPerSecond
       ,m_robotCentricChassisSpeeds.omegaRadiansPerSecond
-      ,Rotation2d.fromDegrees(-m_gyro.getAngle())
+      ,m_gyro.getRotation()
     );
   }
 
@@ -500,7 +481,6 @@ public class DriveSubsystemSRX extends SubsystemBase {
     m_frontRight.simulationPeriodic(timestep);
     m_rearLeft.simulationPeriodic(timestep);
     m_rearRight.simulationPeriodic(timestep);
-    double dTheta = Units.radiansToDegrees(chassisSpeeds.omegaRadiansPerSecond * timestep);
-    setAngleDegrees(m_gyro.getAngle() - dTheta);
+    m_gyro.iterate(chassisSpeeds.omegaRadiansPerSecond, timestep);
   }
 }

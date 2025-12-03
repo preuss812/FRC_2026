@@ -46,7 +46,7 @@ public class SimSetRobotPoseCommand extends Command {
   }
 
   public static void simSetRobotPose(DriveSubsystemSRX robotDrive, PoseEstimatorSubsystem poseEstimatorSubsystem, Pose2d pose) {
-    robotDrive.setAngleDegrees(-pose.getRotation().getDegrees());
+    robotDrive.setAngleDegrees(pose.getRotation().getDegrees());
     robotDrive.resetOdometry(pose);
     poseEstimatorSubsystem.setCurrentPose(pose);
   }

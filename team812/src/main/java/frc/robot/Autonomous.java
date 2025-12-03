@@ -102,7 +102,6 @@ public class Autonomous extends SequentialCommandGroup {
     // Initialize the robot before moving.
     addCommands(new SequentialCommandGroup(
       new InstantCommand(() -> AllianceConfigurationSubsystem.setStartingPose(AutonomousPlans.startingPoses.get(getAutoMode()))),
-      //new InstantCommand(() -> RobotContainer.m_robotDrive.setAngleDegrees(AutonomousPlans.startingPoses.get(getAutoMode()).getRotation().getDegrees())),
       new InstantCommand(() -> RobotContainer.m_robotDrive.setDrivingMode(DrivingMode.SPEED))
     ));
    

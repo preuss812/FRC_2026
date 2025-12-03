@@ -48,15 +48,6 @@ public class PreussDriveSimulation {
 
             // Update the DriveSubsystemSRX pose in case we are intentionally driving with using the camera.
             RobotContainer.m_robotDrive.resetOdometry(simulatedRobotPose);
-
-            /*
-             * TODO:implement simulation of the gyro angle.
-             * I wanted to update the drivetrain pose and the gyro angle for a more complete simulation
-             * but that functionality is not currently implemented.
-             * As a consequence, reliance on the gyro angle direclly will not work as the gyro angle will likely always be zero.
-             */
-            //RobotContainer.m_robotDrive.setAngleDegrees(simulatedRobotPose.getRotation().getDegrees());
-            //RobotContainer.m_robotDrive.m_gyro.getAngle();
         }
     }
 
