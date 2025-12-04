@@ -26,7 +26,7 @@ import frc.robot.subsystems.DriveSubsystemSRX;
 import frc.robot.subsystems.PoseEstimatorSubsystem;
 
 public class FollowTrajectoryCommand extends SequentialCommandGroup {
-  public static boolean debug = false;
+  public static boolean debug = true;
   // These trajectory config parameters are assumed to be the same for all trajectories.
   // If that is not true, this would need to be moved elsewere or cloned+mutated to provide options.
   public static final TrajectoryConfig config = new TrajectoryConfig(

@@ -11,17 +11,21 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants;
 import frc.robot.RobotContainer;
+import frc.robot.subsystems.DriveSubsystemSRX;
 import frc.robot.subsystems.PoseEstimatorSubsystem;
 
-/* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
-public class RandomRobotPosition extends Command {
+/**
+ * RandomRobotPositionCommand
+ * 
+ * Update the gyro, drivetrain, and pose estimator to a random location somewhere on the field.
+ * This is useful for exercising various other commands during simulation.
+ */
+public class RandomRobotPositionCommand extends Command {
   private Random rnd = new Random();
-  private final PoseEstimatorSubsystem m_poseEstimatorSubsystem;
   /** Creates a new RandomRobotPosition. */
-  public RandomRobotPosition(PoseEstimatorSubsystem poseEstimatorSubsystem) {
-    m_poseEstimatorSubsystem = poseEstimatorSubsystem;
+  public RandomRobotPositionCommand(DriveSubsystemSRX robotDrive, PoseEstimatorSubsystem poseEstimatorSubsystem) {
     // Use addRequirements() here to declare subsystem dependencies.
-    // Intentionally not adding poseEstimatorSubsystem as a requirement to avoid conflicts.
+    addRequirements(robotDrive, poseEstimatorSubsystem);
   }
 
   // Called when the command is initially scheduled.
@@ -34,7 +38,7 @@ public class RandomRobotPosition extends Command {
         ,new Rotation2d( rnd.nextDouble() * Math.PI) // Rotation     
       )
     ;
-    SimSetRobotPoseCommand.simSetRobotPose(RobotContainer.m_robotDrive, m_poseEstimatorSubsystem, randomPose);
+    RobotContainer.setRobotPose(randomPose);
   }
   
   // Called every time the scheduler runs while the command is scheduled.
@@ -48,6 +52,6 @@ public class RandomRobotPosition extends Command {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return true;
+    return true;  // Always true.  The work is done in initialize.
   }
 }

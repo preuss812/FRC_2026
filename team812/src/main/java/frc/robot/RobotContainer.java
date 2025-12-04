@@ -40,9 +40,10 @@ import frc.robot.commands.DriveWithoutVisionCommand;
 import frc.robot.commands.GotoPoseCommand;
 import frc.robot.commands.GotoProcessorCommand;
 import frc.robot.commands.PointCameraTowardReefCommand;
-import frc.robot.commands.RandomRobotPosition;
+import frc.robot.commands.RandomRobotPositionCommand;
 import frc.robot.commands.RotateRobotCommand;
 import frc.robot.commands.RotateRobotG2PCommand;
+import frc.robot.commands.SimSetRobotPoseCommand;
 import frc.robot.commands.SwerveToProcessorCommand;
 import frc.robot.commands.ResetDriveTrainCommand;
 import frc.utils.PoseEstimatorCamera;
@@ -74,7 +75,7 @@ public class RobotContainer {
   public static final PoseEstimatorCamera[] cameras = new PoseEstimatorCamera[]{m_rearCamera/*,m_frontCamera*/};
   public static PoseEstimatorSubsystem m_poseEstimatorSubsystem = new PoseEstimatorSubsystem( cameras, m_robotDrive);
   public final static AllianceConfigurationSubsystem m_allianceConfigurationSubsystem = new AllianceConfigurationSubsystem(m_robotDrive, m_poseEstimatorSubsystem);
-  private static  boolean isSimulation = !(System.getProperty("os.name").equals("Linux")); // Assuming roborio is the only Linux system.
+  private static  boolean isSimulation = !Robot.isReal();
   public static PreussDriveSimulation m_preussDriveSimulation = new PreussDriveSimulation(m_poseEstimatorSubsystem);
   private static boolean debug = true; // To enable debugging in this module, change false to true.
 
@@ -135,9 +136,8 @@ public class RobotContainer {
 
     // By default this is not a simulation.
     // For convenience, set the simulation mode to true if this is not linux (ie if it is MacOS or Windows).
-    RobotContainer.isSimulation = !(System.getProperty("os.name").equals("Linux"));
-    
-    ;
+    RobotContainer.isSimulation = !Robot.isReal();
+
     // Configure the button bindings
     configureButtonBindings();
 
@@ -214,14 +214,13 @@ public class RobotContainer {
       SmartDashboard.putData("Circle", new DriveCircleThrottle(m_robotDrive, m_poseEstimatorSubsystem, m_robotDrive.circleAutoConfig, 1.0));
       SmartDashboard.putData("DCG2P", new DriveCircle(m_robotDrive, m_poseEstimatorSubsystem, m_robotDrive.circleAutoConfig, 1.145916));
       SmartDashboard.putData("Choreo1", new DriveChoreoPathCommand(m_robotDrive, m_poseEstimatorSubsystem, "Blue 1 Meter", m_robotDrive.circleAutoConfig, 0.1, 0.0));
-      SmartDashboard.putData("Choreo2", new DriveChoreoPathCommand(m_robotDrive, m_poseEstimatorSubsystem, "Low to AT22", m_robotDrive.circleAutoConfig, 1.0, 1.0));
+      SmartDashboard.putData("C2Fast", new DriveChoreoPathCommand(m_robotDrive, m_poseEstimatorSubsystem, "Low to AT22", m_robotDrive.circleAutoConfig, 1.0, 1.0));
+      SmartDashboard.putData("C2Slow", new DriveChoreoPathCommand(m_robotDrive, m_poseEstimatorSubsystem, "Low to AT22", m_robotDrive.circleAutoConfig, 0.2, 1.0));
       SmartDashboard.putData("Choreo3", new DriveChoreoPathCommand(m_robotDrive, m_poseEstimatorSubsystem, "PID test", m_robotDrive.circleAutoConfig, 1.0, 1.0));
       SmartDashboard.putData("Y", new ResetDriveTrainCommand(this));
-      SmartDashboard.putData("Z", new InstantCommand(()->m_poseEstimatorSubsystem.setCurrentPose(new Pose2d(5.5 + 0.145916,4, Rotation2d.kZero)))
-        .andThen(new InstantCommand(() -> m_robotDrive.setAngleDegrees(0.0)))
-        .andThen(new InstantCommand(()->m_poseEstimatorSubsystem.setCurrentPose(new Pose2d(5.5 + 0.145916,4, Rotation2d.kZero)))));
+      SmartDashboard.putData("Z", new SimSetRobotPoseCommand(m_robotDrive, m_poseEstimatorSubsystem, new Pose2d(5.5 + 0.145916,4, Rotation2d.kZero)));
       SmartDashboard.putData("TT", new SwerveToProcessorCommand(m_robotDrive, m_poseEstimatorSubsystem, true));
-      SmartDashboard.putData("R", new RandomRobotPosition(m_poseEstimatorSubsystem));
+      SmartDashboard.putData("R", new RandomRobotPositionCommand(m_robotDrive, m_poseEstimatorSubsystem));
       SmartDashboard.putData("PR", new PointCameraTowardReefCommand(m_robotDrive, m_poseEstimatorSubsystem));
       SmartDashboard.putData("DR", new DriveRobotCommand(m_robotDrive, m_poseEstimatorSubsystem, new Pose2d(2,1,new Rotation2d(0)), false, null));
       SmartDashboard.putData("NV", new DriveWithoutVisionCommand(m_robotDrive, m_poseEstimatorSubsystem, new Pose2d(2,1,new Rotation2d(0)), null));
@@ -263,7 +262,7 @@ public class RobotContainer {
    * This is based on the hope that the pose estimator has a good fix on the robot position.
    * i.e. that an april tag is in sight of the vision processor.
    */
-   public void alignGyroRotationToFieldRotation() {
+  public void alignGyroRotationToFieldRotation() {
     m_robotDrive.setAngleDegrees(AllianceConfigurationSubsystem.robotToFieldRotation().getDegrees());
     m_robotDrive.resetOdometry(
       new Pose2d(
@@ -271,17 +270,31 @@ public class RobotContainer {
         , AllianceConfigurationSubsystem.robotToFieldRotation()
       )
     );
-   }
+  }
    
-   /**
-    * isSimulation - return true if this is a simulation or false if the robot is running.
-    */
-    public static boolean isSimulation() {
-      return isSimulation;
-    }
+  /**
+   * isSimulation - return true if this is a simulation or false if the robot is running.
+   * @return true if this is a simulation, false if this is running a real robot.
+   */
+  public static boolean isSimulation() {
+    return isSimulation;
+  }
 
-    public static double startingHeading() {
-      return startingHeading;
-    }
+  public static double startingHeading() {
+    return startingHeading;
+  }
+
+/**
+ * setRobotPose - update the gyro, drivetrain and pose estimated to the supplied pose.
+ * 
+ * Typically this is used one time at the beginning of autonomous or during simulation
+ * to place the robot into known locations on the field.
+ * @param pose
+ */
+  public static void setRobotPose(Pose2d pose) {
+    m_robotDrive.setAngleDegrees(pose.getRotation().getDegrees());
+    m_robotDrive.resetOdometry(pose);
+    m_poseEstimatorSubsystem.setCurrentPose(pose);
+  }
 
 }

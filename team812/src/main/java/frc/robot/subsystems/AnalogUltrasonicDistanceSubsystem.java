@@ -12,7 +12,7 @@ import frc.robot.Constants.UltrasonicConstants;
 
 public class AnalogUltrasonicDistanceSubsystem extends SubsystemBase {
   private final AnalogInput ultrasonicSensor;
-  private final boolean debug = true;
+  private final boolean debug = false;
   public double voltageScaleFactor = 1;
 
   /** Creates a new UltrasonicDistanceSubsystem. */

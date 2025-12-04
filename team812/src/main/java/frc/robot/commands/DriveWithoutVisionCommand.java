@@ -25,7 +25,7 @@ public class DriveWithoutVisionCommand extends Command {
   private final DrivingConfig m_config;
   private Pose2d m_targetPose;
   private boolean m_onTarget = true;
-  private boolean debug = true;
+  private boolean debug = false;
   
   /** Creates a new DriveWithoutVisionCommand. */
   public DriveWithoutVisionCommand(

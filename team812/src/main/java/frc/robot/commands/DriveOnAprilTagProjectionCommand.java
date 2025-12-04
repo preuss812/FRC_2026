@@ -37,7 +37,7 @@ public class DriveOnAprilTagProjectionCommand extends Command {
   private Pose2d aprilTagPose = null;
   private double cameraToRobotAngle;
   private static double sqrtOfTwoOverTwo = Math.sqrt(2.0)/2.0;
-  private boolean debug = true;
+  private boolean debug = false;
   private static final double[] simulatedJoystick = new double[] {0.8,0.1,0.1};
   private int simulationCycleCount = 0;
   private int simulationMinCount = -500;

@@ -19,7 +19,7 @@ public class RotateRobotG2PCommand extends GotoPoseCommand {
 
   private final double m_theta;
   private final boolean m_relative;
-  private boolean debug = true;
+  private boolean debug = false;
   private Timer m_timer = new Timer();
 
   /*

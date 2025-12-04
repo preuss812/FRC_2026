@@ -26,7 +26,7 @@ public class PoseEstimatorCamera extends PhotonCamera {
     private int m_lastAprilTagSeen = VisionConstants.NO_TAG_FOUND;
     private static final PhotonPipelineResult m_emptyPipeline = new PhotonPipelineResult();
     private PhotonPipelineResult lastPipeLineResult = m_emptyPipeline;
-    private final boolean debug = false;
+    private final boolean debug = true;
 
     public PoseEstimatorCamera(String name, Transform3d cameraToRobotTransform) {
         super(name);

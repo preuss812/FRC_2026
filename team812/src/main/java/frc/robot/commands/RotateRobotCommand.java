@@ -67,7 +67,7 @@ public class RotateRobotCommand extends Command {
   private final boolean m_relative;
   private final RotateRobotConfig m_config;
   private double m_targetTheta;
-  private boolean debug = true;
+  private boolean debug = false;
   private Timer m_timer = new Timer();
   
   private PIDController m_thetaController;

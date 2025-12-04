@@ -11,7 +11,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 public class PingResponseUltrasonicSubsystem extends SubsystemBase {
   private final Ultrasonic ultrasonicSensor;
   private final double offsetToBumper;
-  private final boolean debug = true;
+  private final boolean debug = false;
 
   /** Creates a new UltrasonicDistanceSubsystem. */
   public PingResponseUltrasonicSubsystem(int pingChannel, int echoChannel, double offsetToBumper) {

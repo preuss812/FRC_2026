@@ -11,7 +11,9 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.subsystems.DriveSubsystemSRX.DrivingMode;
@@ -28,9 +30,10 @@ public class Robot extends TimedRobot {
 
   private RobotContainer m_robotContainer;
   public static NetworkTable nttable;
-  private static boolean debug = false;
+  private static boolean debug = true;
   private static boolean usingCameraServer = false; // Set to true to enable the usb camera plugged into the roboRIO.
   public static SendableChooser<Integer> autoChooser = new SendableChooser<>();
+  private Timer m_timer = new Timer();
 
   /**
    * This function is run when the robot is first started up and should be used for any
@@ -67,7 +70,7 @@ public class Robot extends TimedRobot {
     // and running subsystem periodic() methods.  This must be called from the robot's periodic
     // block in order for anything in the Command-based framework to work.
     CommandScheduler.getInstance().run();
-
+    // In a periodic method (e.g., robotPeriodic() or teleopPeriodic())
   }
 
   /**
@@ -92,6 +95,8 @@ public class Robot extends TimedRobot {
     if (m_autonomousCommand != null) {
       m_autonomousCommand.schedule();
     }
+    m_timer.reset();
+    m_timer.start();
   }
 
   /**
@@ -99,6 +104,7 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void autonomousPeriodic() {
+    SmartDashboard.putNumber("Match Time", 15 - m_timer.get());
   }
 
   @Override
@@ -110,6 +116,8 @@ public class Robot extends TimedRobot {
     if (m_autonomousCommand != null) {
       m_autonomousCommand.cancel();
     }
+    m_timer.reset();
+    m_timer.start();
     // Ensure that at startup, the robot is in a known speed mode.
     RobotContainer.m_robotDrive.setDrivingMode(DrivingMode.SPEED);
   }
@@ -119,6 +127,8 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void teleopPeriodic() {
+    SmartDashboard.putNumber("Match Time", 165 - m_timer.get());
+
   }
 
   @Override
