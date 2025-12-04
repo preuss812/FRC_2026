@@ -13,7 +13,6 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.trajectory.TrajectoryConfig;
 import edu.wpi.first.math.trajectory.TrajectoryGenerator;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants.AutoConstants;
 import edu.wpi.first.math.trajectory.Trajectory;
@@ -35,17 +34,6 @@ public class TrajectoryPlans {
     public static int numYSquares = 4;
     public static double dx = FieldConstants.xMax/numXSquares;
     public static double dy = FieldConstants.yMax/numYSquares;
-    
-    public static int AUTO_MODE_ROBOT_DECIDES;
-    public static int AUTO_MODE_MOVE_OFF_LINE_AND_STOP;
-    public static int AUTO_MODE_DO_NOTHING;
-    public static int AUTO_MODE_MY_BARGE_TO_OPPOSITE;
-    public static int AUTO_MODE_MY_BARGE_TO_FAR_SIDE;
-    public static int AUTO_MODE_MY_BARGE_TO_NEAR_SIDE;
-    public static int AUTO_MODE_CENTER_STRAIGHT;
-    public static int AUTO_MODE_THEIR_BARGE_TO_NEAR_SIDE;
-    public static int AUTO_MODE_THEIR_BARGE_TO_FAR_SIDE;
-    public static int AUTO_MODE_MY_BARGE_TO_CENTER;
 
     // For now, default speeds are coming from Constants.AutoConstants which has the slow/precision speeds.
     // the 0.9 is to allow headroom for the robot to make sure it does not run out of time during the FollowTrajectoryCommand.

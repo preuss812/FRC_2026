@@ -4,11 +4,7 @@
 
 package frc.robot.subsystems;
 
-import com.kauailabs.navx.frc.AHRS;
-
 import edu.preuss.sensors.AHRSInvertable;
-import edu.wpi.first.hal.SimDouble;
-import edu.wpi.first.math.MathUtil;
 import choreo.trajectory.SwerveSample;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -20,7 +16,6 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.SerialPort;
-import edu.wpi.first.wpilibj.simulation.SimDeviceSim;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Utilities;
@@ -72,9 +67,6 @@ public class DriveSubsystemSRX extends SubsystemBase {
 
   @SuppressWarnings("unused")
   private ChassisSpeeds m_speedsMeasured = new ChassisSpeeds();
-
-  // @SuppressWarnings("unused")
-  private ChassisSpeeds m_speedsRequested = new ChassisSpeeds();
 
   // Slew rate filter variables for controlling lateral acceleration
   private double m_currentRotation = 0.0;
@@ -348,7 +340,6 @@ public class DriveSubsystemSRX extends SubsystemBase {
     m_rearLeft.setDesiredState(desiredStates[2]);
     m_rearRight.setDesiredState(desiredStates[3]);
     m_statesRequested = desiredStates;
-    m_speedsRequested = DriveConstants.kDriveKinematics.toChassisSpeeds(desiredStates);
   }
 
   /** Resets the drive encoders to currently read a position of 0. */

@@ -102,13 +102,10 @@ public class DriveChoreoPathCommand extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-
    if (m_trajectory.isPresent()) {
       // Sample the trajectory at the current time into the autonomous period
       Optional<SwerveSample> sample = m_trajectory.get().sampleAt(getTime(), isRedAlliance());
-      var x = m_trajectory.get();
-      var y = x.samples();
-      var z = y.get(0);
+      
       if (sample.isPresent()) {
         followTrajectory(sample.get(),pidControllers, m_speedFactor);
       }

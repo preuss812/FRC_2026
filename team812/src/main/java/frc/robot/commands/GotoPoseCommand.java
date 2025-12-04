@@ -14,7 +14,6 @@ import frc.robot.subsystems.DriveSubsystemSRX;
 import frc.robot.subsystems.PoseEstimatorSubsystem;
 import frc.utils.DrivingConfig;
 import frc.utils.PreussAutoDrive;
-import frc.robot.Constants.VisionConstants;
 import frc.robot.Utilities;
 
 public class GotoPoseCommand extends Command {
