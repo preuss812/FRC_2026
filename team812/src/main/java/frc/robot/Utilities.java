@@ -121,7 +121,7 @@ public class Utilities {
     */
     public static void refineYCoordinate() {
         boolean reset = false;
-        double ultrasonicRange = RobotContainer.m_PingResponseUltrasonicSubsystem.getRange();
+        double ultrasonicRange = RobotContainer.m_pingResponseUltrasonicSubsystem.getRange();
         if (ultrasonicRange < 2.0 /* Meters */) {
             Pose2d currentPose = RobotContainer.m_poseEstimatorSubsystem.getCurrentPose();
             if (Math.abs(currentPose.getRotation().getDegrees() -  -90.0) < 5.0 /* degrees */) {

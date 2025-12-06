@@ -3,10 +3,13 @@ package frc.utils;
 import edu.wpi.first.math.geometry.Translation2d;
 
 public class Line {
+    // Slope-intercept form y = mX + b
     public double m;
     public double b;
+    // points on the line
     public double y1;
     public double x1;
+    // Standard formula for the line, Ax + By + C = 0
     public double A;
     public double B;
     public double C;
@@ -20,20 +23,20 @@ public class Line {
         // We now have Point-Slope form, 
 
         // Convert to standard form, AX + BY + C = 0
-        if (m == Double.NaN) verticalLine = true;
+        if (Double.isNaN(m)) verticalLine = true;
         if (!verticalLine) {
             A = -m;
             B = 1;
-            C = m*x1 - y1;
+            C = - (A*x1 + B*y1);
         } else {
             // Verfical line 
-            A = 0;
+            A = 1;
             B = 0;
-            C = -x1;
+            C = x1;
         }
 
         // Calculate the slope intercept for y = mX + b
-        if (m != Double.NaN) {
+        if (!Double.isNaN(m)) {
             b = -m*x1 + y1;
         }
 
@@ -47,12 +50,28 @@ public class Line {
     public Translation2d intersection(Line l2) {
         Translation2d intersection;
 
-        if (this.m != l2.m) {
+        if (Double.isNaN(l2.m) && !Double.isNaN(this.m)) {
+            // l2 is vertical line
+            double x = l2.x1;
+            double y = this.m * x + this.b;
+            intersection = new Translation2d(x, y);
+            return intersection;
+        } else if (Double.isNaN(this.m) && !Double.isNaN(l2.m)) {
+            // this is vertical line
+            double x = this.x1;
+            double y = l2.m * x + l2.b;
+            intersection = new Translation2d(x, y);
+            return intersection;
+        } else if (this.m != l2.m) {
             // Formula from https://www.cuemath.com/geometry/intersection-of-two-lines/
             intersection = new Translation2d(
                 (this.B*l2.C - l2.B*this.C)/(this.A*l2.B - l2.A*this.B),
                 (this.C*l2.A - l2.C*this.A)/(this.A*l2.B - l2.A*this.B)
             );
+            return intersection;
+        } else if (this.b == l2.b) { // the same line
+            // Pick an arbitrary point on the line
+            intersection = new Translation2d(l2.x1, l2.m * l2.x1 + l2.b);
             return intersection;
         }
         return null; // intersection is either everywhere or nowhere, they have the same slope

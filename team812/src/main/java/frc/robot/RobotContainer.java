@@ -35,12 +35,14 @@ import frc.robot.commands.DriveCircle;
 import frc.robot.commands.DriveCircleThrottle;
 import frc.robot.commands.DriveRobotCommand;
 import frc.robot.commands.DriveWithoutVisionCommand;
+import frc.robot.commands.FireAtWillCommand;
 import frc.robot.commands.GotoPoseCommand;
 import frc.robot.commands.GotoProcessorCommand;
 import frc.robot.commands.PointCameraTowardReefCommand;
 import frc.robot.commands.RandomRobotPositionCommand;
 import frc.robot.commands.RotateRobotCommand;
 import frc.robot.commands.RotateRobotG2PCommand;
+import frc.robot.commands.RoombaG2PCommand;
 import frc.robot.commands.SimSetRobotPoseCommand;
 import frc.robot.commands.SwerveToProcessorCommand;
 import frc.robot.commands.ResetDriveTrainCommand;
@@ -77,7 +79,7 @@ public class RobotContainer {
   public static PreussDriveSimulation m_preussDriveSimulation = new PreussDriveSimulation(m_poseEstimatorSubsystem);
   private static boolean debug = true; // To enable debugging in this module, change false to true.
 
-  public static PingResponseUltrasonicSubsystem m_PingResponseUltrasonicSubsystem =
+  public static PingResponseUltrasonicSubsystem m_pingResponseUltrasonicSubsystem =
     new PingResponseUltrasonicSubsystem(
       UltrasonicConstants.kPingChannel,
       UltrasonicConstants.kEchoChannel,
@@ -232,7 +234,9 @@ public class RobotContainer {
         "G1", new GotoPoseCommand(m_robotDrive, m_poseEstimatorSubsystem, new Pose2d(6, 4, new Rotation2d(Math.PI)), null));
       SmartDashboard.putData(
         "G2", new GotoPoseCommand(m_robotDrive,  m_poseEstimatorSubsystem, new Pose2d(12, 6, new Rotation2d(0)), null));
-    } // (isSimulation()
+        SmartDashboard.putData("VV", new RoombaG2PCommand(m_robotDrive, m_poseEstimatorSubsystem, m_pingResponseUltrasonicSubsystem, null));
+        SmartDashboard.putData("FW", new FireAtWillCommand());
+      } // (isSimulation()
   } // (configureButtonBindings)
 
   /**

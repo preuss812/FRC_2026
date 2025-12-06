@@ -45,10 +45,10 @@ public final class Constants {
         public static final int kSwerveLeftFrontDrive = 28;
         public static final int kSwerveLeftFrontCANCoder = 38;
 
-        public static final int kElbowMotor1 = 43;
+        public static final int kFlywheelMotor = 43;
         public static final int kElbowMotor2 = 44;
         public static final int kAlgaeIntakeMotor = 40;
-        public static final int kShoulderMotor = 41;
+        public static final int kShooterElevationMotor = 41;
 
         public static final int kPDP = 0; // was 50 until 3/12/2024
         public static final int kPCM = 51;
@@ -107,7 +107,7 @@ public final class Constants {
         public static final int kPressureOffset = -20;
         public static final int kPressureRange = 200;
         */
-        public static final int kShoulderEncoder = 0;
+        public static final int kShooterElevationEncoder = 0;
         public static final int kElbowEncoder = 1;
     }
 
@@ -120,11 +120,11 @@ public final class Constants {
         public static final double kElbow_kD = 0.0;
         public static final double kElbow_kF = 0.0;
         public static final double kElbow_rampRate = 0.5;
-        public static final double kShoulder_kP = 0.2;
-        public static final double kShoulder_kI = 0.0005;
-        public static final double kShoulder_IntegralZone=15;
-        public static final double kShoulder_kD = 0.0;
-        public static final double kShoulder_kF = 0.0;
+        public static final double kShooterElevation_kP = 0.2;
+        public static final double kShooterElevation_kI = 0.0005;
+        public static final double kShooterElevation_IntegralZone=15;
+        public static final double kShooterElevation_kD = 0.0;
+        public static final double kShooterElevation_kF = 0.0;
         /*
         public static final double kArmExtension_kP = 0.3; //3.0;
         public static final double kArmExtension_kI = 0.0;
@@ -428,7 +428,7 @@ public final class Constants {
     
     }
 
-    public static final class ShoulderConstants {
+    public static final class ShooterElevationConstants {
         // This year we are using Lamprey 2 analog encoders.
         // That means ther will be no homing of the arm because this 
         // encoder remembers it orientation even when powered off.
@@ -436,62 +436,26 @@ public final class Constants {
         // so ticks is that same as degrees.
         public static final int kPidIdx = 0;
         public static final int kTimeoutMs = 10;
-        public static final boolean kAbsoluteEncoder = true;
+        public static final boolean kAbsoluteEncoder = false;
         public static final boolean kMotorInverted = false;
         public static final boolean kSensorInverted = false;
-        public static final double kShoulderEncoderCountPerRevolution = 360; 
-        public static final double kShoulderDegreesPerTick = 360.0/ShoulderConstants.kShoulderEncoderCountPerRevolution;
-        public static final double kShoulderTicksPerDegree = ShoulderConstants.kShoulderEncoderCountPerRevolution/360.0;
-        public static final double kShoulderPeakOutputForward =  1.0; // (percent) TODO: Tune this value.
-        public static final double kShoulderPeakOutputReverse = -1.0; // (percent) TODO: Tune this value.
-        public static final double kShoulderHomeTimeout = 3.0;        // (seconds) Wait for the shoulder to rotate to the home position.
-        public static final double kShoulderTimeout = 3.0;            // (seconds) Wait for the shoulder to rotate to any position.  TODO: Tune this value.
-        public static final double kShoulderMinEncoderVoltage = 0.0;  // (volts)
-        public static final double kShoulderMaxEncoderVoltage = 5.0;  // (volts)
-        public static final double kShoulderMinPosition = -180;       // (degrees) Smallest encoder value the software will rotate to. TODO: Tune this value.
-        public static final double kShoulderMaxPosition = 180;        // (degrees) Largest encoder value the software will rotote to. TODO: Tune this value.
-        public static final double kShoulderRotationThreshold = 2;    // (degrees) TODO: Tune this value.
-        public static final double kShoulderHomeSpeed = 0.2;          // (Percent) TODO: Tune this value.
+        public static final double kShooterElevationEncoderCountPerRevolution = 360; 
+        public static final double kShooterElevationDegreesPerTick = 360.0/ShooterElevationConstants.kShooterElevationEncoderCountPerRevolution;
+        public static final double kShooterElevationTicksPerDegree = ShooterElevationConstants.kShooterElevationEncoderCountPerRevolution/360.0;
+        public static final double kShooterElevationPeakOutputForward =  1.0; // (percent) TODO: Tune this value.
+        public static final double kShooterElevationPeakOutputReverse = -1.0; // (percent) TODO: Tune this value.
+        public static final double kShooterElevationHomeTimeout = 3.0;        // (seconds) Wait for the ShooterElevation to rotate to the home position.
+        public static final double kShooterElevationTimeout = 3.0;            // (seconds) Wait for the ShooterElevation to rotate to any position.  TODO: Tune this value.
+        public static final double kShooterElevationMinEncoderVoltage = 0.0;  // (volts)
+        public static final double kShooterElevationMaxEncoderVoltage = 5.0;  // (volts)
+        public static final double kShooterElevationMinPosition = 0;       // (degrees) Smallest encoder value the software will rotate to. TODO: Tune this value.
+        public static final double kShooterElevationMaxPosition = 45;        // (degrees) Largest encoder value the software will rotote to. TODO: Tune this value.
+        public static final double kShooterElevationRotationThreshold = 1;    // (degrees) TODO: Tune this value.
+        public static final double kShooterElevationHomeSpeed = 0.2;          // (Percent) TODO: Tune this value.
 
-        // Shoulder positions correspond closely to degrees in cartesian coordinate with 0 parallel to the ground and 90 vertical.
-        public static final double kShoulderStartingPosition = 50;  // (degrees) Starting with arm within the robot perimeter.
-        public static final double kShoulderHomePosition = kShoulderStartingPosition; // (degrees) Unused.
-        public static final double kShoulderLowAlgaePosition = 49; // (degrees) TODO: Tune this value.
-        public static final double kShoulderHighAlgaePosition = 95; // (degrees) TODO: Tune this value.
-        public static final double kShoulderClimbingPosition = 15; // (degrees) TODO: Tune this value.
-        public static final double kShoulderDrivingWithCoralPosition = kShoulderStartingPosition;
-        public static final double kShoulderDrivingWithAlgaePosition = 75; // (degrees)
-        public static final double kShoulderScoreCoralPosition = 95; // (degrees) TODO: Tune this value.
-        public static final double kShoulderScoreAlgaeInProcessorPosition = 30;  // (degrees) TODO: Tune this value.
-        public static final double kShoulderIntakeAlgaeFromGroundPosition = 20; // (degrees)
-        public static final double kShoulderHookCagePosition = 95; // (degrees)
-        public static final double kShoulderLeaveHighReefPosition = kShoulderHighAlgaePosition + 3.0; // (degrees) Slightly above the high algae position.
-
-        public static final double kShoulderMinLegalPosition = Utilities.least(
-              kShoulderStartingPosition
-            , kShoulderHomePosition
-            , kShoulderLowAlgaePosition
-            , kShoulderHighAlgaePosition
-            , kShoulderDrivingWithCoralPosition
-            , kShoulderDrivingWithAlgaePosition
-            , kShoulderScoreAlgaeInProcessorPosition
-            , kShoulderIntakeAlgaeFromGroundPosition
-            , kShoulderHookCagePosition
-            , kShoulderLeaveHighReefPosition
-        ) - 5.0; // The 5 degrees is a fudge factor to allow a small extra range of motion.
-        public static final double kShoulderMaxLegalPosition = Utilities.greatest(
-            kShoulderStartingPosition
-          , kShoulderHomePosition
-          , kShoulderLowAlgaePosition
-          , kShoulderHighAlgaePosition
-          , kShoulderDrivingWithCoralPosition
-          , kShoulderDrivingWithAlgaePosition
-          , kShoulderScoreAlgaeInProcessorPosition
-          , kShoulderIntakeAlgaeFromGroundPosition
-          , kShoulderHookCagePosition
-          , kShoulderLeaveHighReefPosition
-      ) + 5.0; // The 5 degrees is a fudge factor to allow a small extra range of motion.
-    
+        // ShooterElevation positions correspond closely to degrees in cartesian coordinate with 0 parallel to the ground and 90 vertical.
+        public static final double kShooterElevationStartingPosition = 0;  // (degrees) Starting with shooting parallel to the ground.
+        public static final double kShooterElevationHomePosition = kShooterElevationStartingPosition; // (degrees) Unused.
     }
 
     public static final class RotationConstants {
@@ -735,16 +699,16 @@ public final class Constants {
         .setF(PidConstants.kAlgaeIntake_kF)
         .setInverted((true));
 
-    public static final PreussMotorConfig shoulderMotor = new PreussMotorConfig(CANConstants.kShoulderMotor)
-    .setP(PidConstants.kShoulder_kP)
-        .setP(PidConstants.kShoulder_kI)
-        .setP(PidConstants.kShoulder_kD)
-        .setP(PidConstants.kShoulder_kF)
-        .setP(PidConstants.kShoulder_IntegralZone)
+    public static final PreussMotorConfig shooterElevationMotor = new PreussMotorConfig(CANConstants.kShooterElevationMotor)
+    .setP(PidConstants.kShooterElevation_kP)
+        .setP(PidConstants.kShooterElevation_kI)
+        .setP(PidConstants.kShooterElevation_kD)
+        .setP(PidConstants.kShooterElevation_kF)
+        .setP(PidConstants.kShooterElevation_IntegralZone)
         .setInverted(true)
         ;
         
-    public static final PreussMotorConfig elbowMotor1 = new PreussMotorConfig(CANConstants.kElbowMotor1)
+    public static final PreussMotorConfig flywheelMotor = new PreussMotorConfig(CANConstants.kFlywheelMotor)
         .setP(PidConstants.kElbow_kP)
         .setP(PidConstants.kElbow_kI)
         .setP(PidConstants.kElbow_kD)

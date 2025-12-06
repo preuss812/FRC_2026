@@ -176,4 +176,8 @@ public class GotoPoseCommand extends Command {
     return m_robotDrive;
   }
   
+  protected DrivingConfig getConfig() {
+    return config;
+  }
+  
 } // GotoPoseCommand class

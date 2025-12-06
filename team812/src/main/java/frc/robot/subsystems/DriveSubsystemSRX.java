@@ -270,7 +270,6 @@ public class DriveSubsystemSRX extends SubsystemBase {
       SmartDashboard.putNumber("ChassisSpeeds vx", chassisSpeeds.vxMetersPerSecond);
       SmartDashboard.putNumber("ChassisSpeeds vy", chassisSpeeds.vyMetersPerSecond);
       SmartDashboard.putNumber("ChassisSpeeds or", chassisSpeeds.omegaRadiansPerSecond);
-      //System.out.println("ChassisSpeeds vx"+chassisSpeeds.vxMetersPerSecond + " ChassisSpeeds vy"+chassisSpeeds.vyMetersPerSecond);
     }
 
     // For simulation, update the position of the robot based on the requested speeds.
