@@ -67,9 +67,9 @@ public class AHRSInvertable extends AHRS {
     public double getAngleAdjustment() {
     	double angleAdjustment;
         if (m_isInverted) {
-            angleAdjustment = -super.getAngle();
+            angleAdjustment = -super.getAngleAdjustment();
         } else {
-            angleAdjustment = super.getAngle();
+            angleAdjustment = super.getAngleAdjustment();
         }
         return angleAdjustment;
     }
