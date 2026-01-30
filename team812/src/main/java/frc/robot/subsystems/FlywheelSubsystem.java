@@ -70,6 +70,10 @@ public class FlywheelSubsystem extends SubsystemBase {
       return sensorUnitsPer100ms * nativeUnitsToRPM;
   }
 
+  public void runMotor(double pOut){
+    flywheel.set(ControlMode.PercentOutput, pOut);
+  }
+
   /**
    * setRPM - set the target rpm
    * @param rpm (double) The rpm target for the flywheel

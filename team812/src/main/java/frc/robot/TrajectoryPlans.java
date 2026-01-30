@@ -324,7 +324,7 @@ public class TrajectoryPlans {
      * Check that all the trajectory paths generated do not cause a crash.
      * This may throw a null pointer exception.
      */
-    public static void checkAllTrajectories() throws NullPointerException {
+    public static void checkAllTrajectories(){
         if (!debug) return;  // Dont waste time if we are not debugging.
         
         // Verify that the apriltag info matches our expectations

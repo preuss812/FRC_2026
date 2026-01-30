@@ -21,6 +21,7 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.POVButton;
 import edu.wpi.first.wpilibj2.command.RunCommand;
+import frc.robot.Constants.CANConstants;
 import frc.robot.Constants.OIConstants;
 import frc.robot.Constants.UltrasonicConstants;
 import frc.robot.Constants.VisionConstants;
@@ -30,12 +31,14 @@ import frc.robot.subsystems.DriveSubsystemSRX.DrivingMode;
 import frc.robot.subsystems.PingResponseUltrasonicSubsystem;
 import frc.robot.subsystems.PoseEstimatorSubsystem;
 import frc.robot.subsystems.DriveSubsystemSRX;
+import frc.robot.subsystems.FlywheelSubsystem;
 import frc.robot.commands.DriveChoreoPathCommand;
 import frc.robot.commands.DriveCircle;
 import frc.robot.commands.DriveCircleThrottle;
 import frc.robot.commands.DriveRobotCommand;
 import frc.robot.commands.DriveWithoutVisionCommand;
 import frc.robot.commands.FireAtWillCommand;
+import frc.robot.commands.FlywheelTest;
 import frc.robot.commands.GotoPoseCommand;
 import frc.robot.commands.GotoProcessorCommand;
 import frc.robot.commands.PointCameraTowardReefCommand;
@@ -78,6 +81,7 @@ public class RobotContainer {
   private static  boolean isSimulation = !Robot.isReal();
   public static PreussDriveSimulation m_preussDriveSimulation = new PreussDriveSimulation(m_poseEstimatorSubsystem);
   private static boolean debug = true; // To enable debugging in this module, change false to true.
+  private static FlywheelSubsystem m_FlywheelSubsystem = new FlywheelSubsystem(CANConstants.kFlywheelMotor);
 
   public static PingResponseUltrasonicSubsystem m_pingResponseUltrasonicSubsystem =
     new PingResponseUltrasonicSubsystem(
@@ -124,7 +128,6 @@ public class RobotContainer {
           Units.degreesToRadians(-heading),
           false
         ).withTimeout(2.0)
-
     ).debounce(0.2);
     return button;
   }
@@ -154,6 +157,7 @@ public class RobotContainer {
             true,  true),
         m_robotDrive)
     );
+    m_FlywheelSubsystem.setDefaultCommand(new FlywheelTest(m_FlywheelSubsystem, m_blackBox));
     
   }
 
@@ -195,6 +199,8 @@ public class RobotContainer {
     new JoystickButton(m_driverController, Button.kBack.value).onTrue(
       new InstantCommand(()->m_robotDrive.setDrivingMode(DrivingMode.PRECISION))
     );
+
+
 
 
     // POV buttons to point robot to a given heading where 0 is
