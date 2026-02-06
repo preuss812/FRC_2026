@@ -14,6 +14,7 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants;
+import frc.robot.Constants.FlywheelConstants;
 import frc.robot.subsystems.BlackBoxSubsystem;
 import frc.robot.subsystems.FlywheelSubsystem;
 import frc.robot.subsystems.PoseEstimatorSubsystem;
@@ -46,11 +47,13 @@ public class FlywheelTest extends Command {
     Translation2d hubPos = new Translation2d(Units.inchesToMeters(181.56), Units.inchesToMeters(158.32));
     //Distance from the center of the robot (Adjust later)
     double shooterOffset = 0;
-    double distance = hubPos.getDistance(robotPos.getTranslation()) - shooterOffset;
-    double height = Units.inchesToMeters(72);
+    double distance = 3;
+    //double distance = hubPos.getDistance(robotPos.getTranslation()) - shooterOffset;
     double RPM = distanceToRPM(distance);
-    flywheel.setRPM(RPM);
+    flywheel.runMotor(RPM*FlywheelConstants.RPMToVolts/12.0);
     SmartDashboard.putBoolean("RPM OK", canShoot(RPM));
+
+    
 
     // double knobPos = blackBox.getPotValue(0);
     // SmartDashboard.putNumber("Black Box Rotation", knobPos);
@@ -60,7 +63,9 @@ public class FlywheelTest extends Command {
 
   // Called once the command ends or is interrupted.
   @Override
-  public void end(boolean interrupted) {}
+  public void end(boolean interrupted) {
+    flywheel.runMotor(0);
+  }
 
   // Returns true when the command should end.
   @Override
@@ -70,7 +75,6 @@ public class FlywheelTest extends Command {
 
   public double distanceToRPM(double x){
     //Change coefficents later
-    //Maybe: move to Constants.java
     return Constants.FlywheelConstants.a*Math.pow(x, 3) + Constants.FlywheelConstants.b*Math.pow(x,2) + Constants.FlywheelConstants.c*x + Constants.FlywheelConstants.d;
   }
 

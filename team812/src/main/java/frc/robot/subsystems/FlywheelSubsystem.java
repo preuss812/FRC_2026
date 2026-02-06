@@ -6,6 +6,8 @@ package frc.robot.subsystems;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
+
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
@@ -71,6 +73,7 @@ public class FlywheelSubsystem extends SubsystemBase {
   }
 
   public void runMotor(double pOut){
+    pOut = MathUtil.clamp(pOut, -1, 1);
     flywheel.set(ControlMode.PercentOutput, pOut);
   }
 
@@ -89,6 +92,7 @@ public class FlywheelSubsystem extends SubsystemBase {
   public double getRPM() {
     return currentRPM;
   }
+  
 
   public double rpmToFeedForward(double rpm) { 
      //TODO: find a good value/equation for the conversion.

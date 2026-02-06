@@ -692,6 +692,15 @@ public final class Constants {
         public static double kOffsetToBumper = 0.157; // Meters
     }
 
+    public static final class FlywheelConstants {
+        public static final double a = 2.61;
+        public static final double b = -26.01;
+        public static final double c = 388.7;
+        public static final double d = 498;
+        public static final double RPMTolerance = 20;
+        public static final double RPMToVolts = 442.5;
+    }
+
     public static PreussMotorConfig algaeMotorConfig = new PreussMotorConfig(CANConstants.kAlgaeIntakeMotor)
         .setP(PidConstants.kAlgaeIntake_kP)
         .setI(PidConstants.kAlgaeIntake_kI)
@@ -724,3 +733,4 @@ public final class Constants {
 
 
 }
+

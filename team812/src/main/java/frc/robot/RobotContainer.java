@@ -157,7 +157,7 @@ public class RobotContainer {
             true,  true),
         m_robotDrive)
     );
-    m_FlywheelSubsystem.setDefaultCommand(new FlywheelTest(m_FlywheelSubsystem, m_blackBox));
+    //m_FlywheelSubsystem.setDefaultCommand(new FlywheelTest(m_FlywheelSubsystem, m_blackBox, m_poseEstimatorSubsystem));
     
   }
 
@@ -198,6 +198,10 @@ public class RobotContainer {
         // Xbox start button puts thte robot in slow/precision driving mode.
     new JoystickButton(m_driverController, Button.kBack.value).onTrue(
       new InstantCommand(()->m_robotDrive.setDrivingMode(DrivingMode.PRECISION))
+    );
+    new JoystickButton(m_driverController, Button.kRightBumper.value)
+    .whileTrue(
+      new FlywheelTest(m_FlywheelSubsystem, m_blackBox, m_poseEstimatorSubsystem)
     );
 
 
