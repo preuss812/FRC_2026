@@ -4,17 +4,26 @@
 
 package frc.robot.subsystems;
 
-import com.ctre.phoenix.motorcontrol.ControlMode;
-import com.ctre.phoenix.motorcontrol.can.TalonSRX;
+import com.revrobotics.PersistMode;
+import com.revrobotics.RelativeEncoder;
+import com.revrobotics.ResetMode;
+import com.revrobotics.spark.ClosedLoopSlot;
+import com.revrobotics.spark.FeedbackSensor;
+import com.revrobotics.spark.SparkClosedLoopController;
+import com.revrobotics.spark.SparkMax;
+import com.revrobotics.spark.SparkBase.ControlType;
+import com.revrobotics.spark.config.SparkMaxConfig;
+import com.revrobotics.spark.SparkLowLevel.MotorType;
+
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants.CANConstants;
 
 public class FlywheelSubsystem extends SubsystemBase {
-  /** Creates a new FlywheelSubsystem. */
 
-  private final TalonSRX flywheel;
+
 
     // Shooter settings
     //private final double maxRPM = 5320; // For a CIM motor. 
@@ -31,26 +40,94 @@ public class FlywheelSubsystem extends SubsystemBase {
     private final int pidIdx = 0;
     private final int slotIdx = 0;
     private final int timeoutMs = 10;
+    private final SparkMax motor1;
+    private final SparkMax motor2;
+    private final SparkMaxConfig motorConfig;
+    private final SparkMaxConfig motorFollowerConfig;
+    private final SparkClosedLoopController closedLoopController;
+    private final RelativeEncoder encoder;
     
 
   public FlywheelSubsystem(int flywheelCANId) {
-    flywheel = new TalonSRX(flywheelCANId);
-    flywheel.configFactoryDefault(); // set to default settings (ie a known starting state)
-    // encoder = new CANcoder(encoderCANId); // Would be needed if the encoder was not going direclty to the Talon.
-    // Configure feedback sensor
-    flywheel.configSelectedFeedbackSensor(
-      com.ctre.phoenix.motorcontrol.FeedbackDevice.CTRE_MagEncoder_Relative, pidIdx, timeoutMs
-    );
-    // Inversion settings (adjust based on your robot)
-    flywheel.setInverted(true); // TODO verify
-    flywheel.setSensorPhase(true);// TODO verify
-    // PID settings — TODO: tune these!
-    flywheel.config_kF(slotIdx, rpmToFeedForward(targetRPM), timeoutMs); // Probably should be set when target speed is set.
-    flywheel.config_kP(slotIdx, 0.15, timeoutMs);
-    flywheel.config_kI(slotIdx, 0.0, timeoutMs);
-    flywheel.config_kD(slotIdx, 2.0, timeoutMs);
-    double targetVelocity_UnitsPer100ms = rpmToNativeUnits(targetRPM);
-    flywheel.set(ControlMode.Velocity, targetVelocity_UnitsPer100ms);
+      /** Creates a new FlywheelSubsystem. */
+
+  /*
+     * Initialize the SPARK MAX and get its encoder and closed loop controller
+     * objects for later use.
+     */
+    motor1 = new SparkMax(CANConstants.kFlywheelMotor1, MotorType.kBrushless);
+    motor2 = new SparkMax(CANConstants.kFlywheelMotor2, MotorType.kBrushless);
+    closedLoopController = motor1.getClosedLoopController();
+    encoder = motor1.getEncoder();
+
+    /*
+     * Create a new SPARK MAX configuration object. This will store the
+     * configuration parameters for the SPARK MAX that we will set below.
+     */
+    motorConfig = new SparkMaxConfig();
+    motorFollowerConfig = new SparkMaxConfig();
+
+    /*
+     * Configure the encoder. For this specific example, we are using the
+     * integrated encoder of the NEO, and we don't need to configure it. If
+     * needed, we can adjust values like the position or velocity conversion
+     * factors.
+     */
+    motorConfig.encoder
+        .positionConversionFactor(1)
+        .velocityConversionFactor(1);
+    /*
+     * Configure the 2nd motor on the Flywheel to follow, inverted, the primary motor
+     */
+    motorFollowerConfig
+      .apply(motorConfig)
+      .follow(motor1)
+      .inverted(true);
+
+    /*
+     * Configure the closed loop controller. We want to make sure we set the
+     * feedback sensor as the primary encoder.
+     */
+    motorConfig.closedLoop
+        .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
+        // Set PID values for position control. We don't need to pass a closed loop
+        // slot, as it will default to slot 0.
+        .p(0.1)
+        .i(0)
+        .d(0)
+        .outputRange(-1, 1)
+        // Set PID values for velocity control in slot 1
+        .p(0.0001, ClosedLoopSlot.kSlot1)
+        .i(0, ClosedLoopSlot.kSlot1)
+        .d(0, ClosedLoopSlot.kSlot1)
+        .outputRange(-1, 1, ClosedLoopSlot.kSlot1)
+        .feedForward
+          // kV is now in Volts, so we multiply by the nominal voltage (12V)
+          .kV(12.0 / 5767, ClosedLoopSlot.kSlot1);
+
+    /*
+     * Apply the configuration to the SPARK MAX.
+     *
+     * kResetSafeParameters is used to get the SPARK MAX to a known state. This
+     * is useful in case the SPARK MAX is replaced.
+     *
+     * kPersistParameters is used to ensure the configuration is not lost when
+     * the SPARK MAX loses power. This is useful for power cycles that may occur
+     * mid-operation.
+     */
+    motor1.configure(motorConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
+    motorFollowerConfig
+      .apply(motorConfig)
+      .follow(motor1)
+      .inverted(true);
+    motor2.configure(motorFollowerConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
+
+    // Initialize dashboard values
+    SmartDashboard.setDefaultNumber("Target Position", 0);
+    SmartDashboard.setDefaultNumber("Target Velocity", 0);
+    SmartDashboard.setDefaultBoolean("Control Mode", false);
+    SmartDashboard.setDefaultBoolean("Reset Encoder", false);
+    
   }
 
   @Override
@@ -58,36 +135,30 @@ public class FlywheelSubsystem extends SubsystemBase {
     // This method will be called once per scheduler run
 
     // closed-loop velocity control
-    currentRPM = nativeUnitsToRPM(flywheel.getSelectedSensorVelocity(pidIdx));
+    currentRPM = encoder.getVelocity();
     // telemetry
     SmartDashboard.putNumber("Flywheel RPM", currentRPM);
-  }
-  /** Convert RPM to Talon SRX velocity units (ticks per 100ms) */
-  private double rpmToNativeUnits(double rpm) {
-      return rpm / nativeUnitsToRPM;
-  }
 
-  /** Convert sensor velocity to real RPM */
-  private double nativeUnitsToRPM(double sensorUnitsPer100ms) {
-      return sensorUnitsPer100ms * nativeUnitsToRPM;
+    targetRPM = SmartDashboard.getNumber("Target Velocity", 0);
+    closedLoopController.setSetpoint(targetRPM, ControlType.kVelocity, ClosedLoopSlot.kSlot1);
   }
 
   public void runMotor(double pOut){
     pOut = MathUtil.clamp(pOut, -1, 1);
-    flywheel.set(ControlMode.PercentOutput, pOut);
+    closedLoopController.setSetpoint(pOut, ControlType.kDutyCycle, ClosedLoopSlot.kSlot1);
   }
 
   /**
    * setRPM - set the target rpm
    * @param rpm (double) The rpm target for the flywheel
    */
-  public void setRPM(double rpm) {
-    targetRPM = rpm;
-    double targetVelocity = rpmToNativeUnits(rpm);
-    flywheel.config_kF(slotIdx, rpmToFeedForward(rpm), timeoutMs);
-    flywheel.set(ControlMode.Velocity, targetVelocity);
-    SmartDashboard.putNumber("Flywheel Target RPM", targetRPM);
-  }
+  // public void setRPM(double rpm) {
+  //   targetRPM = rpm;
+  //   double targetVelocity = rpmToNativeUnits(rpm);
+  //   motor.config_kF(slotIdx, rpmToFeedForward(rpm), timeoutMs);
+  //   motor.set(ControlMode.Velocity, targetVelocity);
+  //   SmartDashboard.putNumber("Flywheel Target RPM", targetRPM);
+  // }
 
   public double getRPM() {
     return currentRPM;
@@ -101,7 +172,7 @@ public class FlywheelSubsystem extends SubsystemBase {
   }
 
   public void stop() {
-    setRPM(0);
+    closedLoopController.setSetpoint(0, ControlType.kDutyCycle);
   }
 
 }

@@ -4,6 +4,7 @@ import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 import com.ctre.phoenix.motorcontrol.ControlMode;
 
 /**
+ * 
  * Create a TalonSRX motor object using config
  */
 public class PreussMotor extends WPI_TalonSRX{

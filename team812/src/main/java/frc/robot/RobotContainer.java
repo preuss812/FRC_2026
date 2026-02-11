@@ -81,7 +81,7 @@ public class RobotContainer {
   private static  boolean isSimulation = !Robot.isReal();
   public static PreussDriveSimulation m_preussDriveSimulation = new PreussDriveSimulation(m_poseEstimatorSubsystem);
   private static boolean debug = true; // To enable debugging in this module, change false to true.
-  private static FlywheelSubsystem m_FlywheelSubsystem = new FlywheelSubsystem(CANConstants.kFlywheelMotor);
+  private static FlywheelSubsystem m_FlywheelSubsystem = new FlywheelSubsystem(CANConstants.kFlywheelMotor1);
 
   public static PingResponseUltrasonicSubsystem m_pingResponseUltrasonicSubsystem =
     new PingResponseUltrasonicSubsystem(

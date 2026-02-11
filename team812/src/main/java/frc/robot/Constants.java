@@ -45,7 +45,9 @@ public final class Constants {
         public static final int kSwerveLeftFrontDrive = 28;
         public static final int kSwerveLeftFrontCANCoder = 38;
 
-        public static final int kFlywheelMotor = 43;
+        public static final int kFlywheelMotor1 = 43;
+        public static final int kFlywheelMotor2 = 40;
+
         public static final int kElbowMotor2 = 44;
         public static final int kAlgaeIntakeMotor = 40;
         public static final int kShooterElevationMotor = 41;
@@ -717,7 +719,7 @@ public final class Constants {
         .setInverted(true)
         ;
         
-    public static final PreussMotorConfig flywheelMotor = new PreussMotorConfig(CANConstants.kFlywheelMotor)
+    public static final PreussMotorConfig flywheelMotor = new PreussMotorConfig(CANConstants.kFlywheelMotor1)
         .setP(PidConstants.kElbow_kP)
         .setP(PidConstants.kElbow_kI)
         .setP(PidConstants.kElbow_kD)
