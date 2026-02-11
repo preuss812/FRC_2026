@@ -18,20 +18,13 @@ import edu.wpi.first.wpilibj.XboxController.Button;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.POVButton;
-import edu.wpi.first.wpilibj2.command.RunCommand;
 import frc.robot.Constants.CANConstants;
 import frc.robot.Constants.OIConstants;
 import frc.robot.Constants.UltrasonicConstants;
 import frc.robot.Constants.VisionConstants;
-import frc.robot.subsystems.AllianceConfigurationSubsystem;
-import frc.robot.subsystems.BlackBoxSubsystem;
-import frc.robot.subsystems.DriveSubsystemSRX.DrivingMode;
-import frc.robot.subsystems.PingResponseUltrasonicSubsystem;
-import frc.robot.subsystems.PoseEstimatorSubsystem;
-import frc.robot.subsystems.DriveSubsystemSRX;
-import frc.robot.subsystems.FlywheelSubsystem;
 import frc.robot.commands.DriveChoreoPathCommand;
 import frc.robot.commands.DriveCircle;
 import frc.robot.commands.DriveCircleThrottle;
@@ -43,12 +36,19 @@ import frc.robot.commands.GotoPoseCommand;
 import frc.robot.commands.GotoProcessorCommand;
 import frc.robot.commands.PointCameraTowardReefCommand;
 import frc.robot.commands.RandomRobotPositionCommand;
+import frc.robot.commands.ResetDriveTrainCommand;
+import frc.robot.commands.RoombaG2PCommand;
 import frc.robot.commands.RotateRobotCommand;
 import frc.robot.commands.RotateRobotG2PCommand;
-import frc.robot.commands.RoombaG2PCommand;
 import frc.robot.commands.SimSetRobotPoseCommand;
 import frc.robot.commands.SwerveToProcessorCommand;
-import frc.robot.commands.ResetDriveTrainCommand;
+import frc.robot.subsystems.AllianceConfigurationSubsystem;
+import frc.robot.subsystems.BlackBoxSubsystem;
+import frc.robot.subsystems.DriveSubsystemSRX;
+import frc.robot.subsystems.DriveSubsystemSRX.DrivingMode;
+import frc.robot.subsystems.FlywheelSubsystem;
+import frc.robot.subsystems.PingResponseUltrasonicSubsystem;
+import frc.robot.subsystems.PoseEstimatorSubsystem;
 import frc.utils.PoseEstimatorCamera;
 import frc.utils.PreussDriveSimulation;
 
@@ -246,6 +246,8 @@ public class RobotContainer {
         "G2", new GotoPoseCommand(m_robotDrive,  m_poseEstimatorSubsystem, new Pose2d(12, 6, new Rotation2d(0)), null));
         SmartDashboard.putData("VV", new RoombaG2PCommand(m_robotDrive, m_poseEstimatorSubsystem, m_pingResponseUltrasonicSubsystem, null));
         SmartDashboard.putData("FW", new FireAtWillCommand());
+        Utilities.toSmartDashboard("April17", m_poseEstimatorSubsystem.getAprilTagPose((17)));
+        Utilities.toSmartDashboard("April31", m_poseEstimatorSubsystem.getAprilTagPose((31)));
       } // (isSimulation()
   } // (configureButtonBindings)
 
