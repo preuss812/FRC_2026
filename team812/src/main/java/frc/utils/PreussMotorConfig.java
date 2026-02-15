@@ -4,6 +4,8 @@ import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 import com.ctre.phoenix.motorcontrol.LimitSwitchNormal;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
+import com.revrobotics.spark.SparkBase.ControlType;
+import com.revrobotics.spark.SparkLowLevel.MotorType;
 
 /**
  * Data structure used to configure a PreussMotor.
@@ -37,6 +39,8 @@ public class PreussMotorConfig {
     public boolean clearEncoderOnReverseLimit = false; // if true, encoder will be zeroed when reverse limit switch is hit.
     public int magicMotionFramePeriod = 10; // milliseconds.
     public int pidFramePeriod = 10; // milliseconds.
+    public MotorType sparkMotorType = com.revrobotics.spark.SparkLowLevel.MotorType.kBrushless; // rev vs ctre not handled well.
+    public ControlType sparkControlType = com.revrobotics.spark.SparkBase.ControlType.kDutyCycle; // rev vs ctre not handled well.
 
     public PreussMotorConfig(int canID) {
         this.canID = canID;

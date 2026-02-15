@@ -6,6 +6,7 @@ package frc.robot.subsystems;
 import java.io.IOException;
 import java.util.Optional;
 import java.util.function.BooleanSupplier;
+
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFieldLayout.OriginPosition;
 import edu.wpi.first.apriltag.AprilTagFields;
@@ -20,11 +21,11 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants.DriveConstants;
+import frc.robot.Constants.VisionConstants;
 import frc.robot.Utilities;
 import frc.utils.PoseEstimatorCamera;
 import frc.utils.VisionResult;
-import frc.robot.Constants.DriveConstants;
-import frc.robot.Constants.VisionConstants;
 
 public class PoseEstimatorSubsystem extends SubsystemBase {
 
