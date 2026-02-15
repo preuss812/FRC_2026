@@ -31,14 +31,16 @@ import frc.robot.subsystems.DriveSubsystemSRX.DrivingMode;
 import frc.robot.subsystems.PingResponseUltrasonicSubsystem;
 import frc.robot.subsystems.PoseEstimatorSubsystem;
 import frc.robot.subsystems.DriveSubsystemSRX;
-import frc.robot.subsystems.FlywheelSubsystem;
+import frc.robot.subsystems.FeederSubsystem;
+import frc.robot.subsystems.IntakeSubsystem;
+import frc.robot.subsystems.ShooterSubsystem;
 import frc.robot.commands.DriveChoreoPathCommand;
 import frc.robot.commands.DriveCircle;
 import frc.robot.commands.DriveCircleThrottle;
 import frc.robot.commands.DriveRobotCommand;
 import frc.robot.commands.DriveWithoutVisionCommand;
 import frc.robot.commands.FireAtWillCommand;
-import frc.robot.commands.FlywheelTest;
+import frc.robot.commands.ShooterTest;
 import frc.robot.commands.GotoPoseCommand;
 import frc.robot.commands.GotoProcessorCommand;
 import frc.robot.commands.PointCameraTowardReefCommand;
@@ -81,7 +83,9 @@ public class RobotContainer {
   private static  boolean isSimulation = !Robot.isReal();
   public static PreussDriveSimulation m_preussDriveSimulation = new PreussDriveSimulation(m_poseEstimatorSubsystem);
   private static boolean debug = true; // To enable debugging in this module, change false to true.
-  private static FlywheelSubsystem m_FlywheelSubsystem = new FlywheelSubsystem(CANConstants.kFlywheelMotor1);
+  private static ShooterSubsystem m_ShooterSubsystem = new ShooterSubsystem(CANConstants.kShooterMotor1);
+  private static IntakeSubsystem m_IntakeSubsystem = new IntakeSubsystem(CANConstants.kIntakeMotor);
+  private static FeederSubsystem m_FeederSubsystem = new FeederSubsystem(CANConstants.kFeederMotor);
 
   public static PingResponseUltrasonicSubsystem m_pingResponseUltrasonicSubsystem =
     new PingResponseUltrasonicSubsystem(
@@ -157,7 +161,7 @@ public class RobotContainer {
             true,  true),
         m_robotDrive)
     );
-    //m_FlywheelSubsystem.setDefaultCommand(new FlywheelTest(m_FlywheelSubsystem, m_blackBox, m_poseEstimatorSubsystem));
+    //m_ShooterSubsystem.setDefaultCommand(new ShooterTest(m_ShooterSubsystem, m_blackBox, m_poseEstimatorSubsystem));
     
   }
 
@@ -182,10 +186,7 @@ public class RobotContainer {
      */
     
     // Xbox A button drives in a circle
-    new JoystickButton(m_driverController, Button.kA.value)
-    .whileTrue(
-      new DriveCircleThrottle(m_robotDrive, m_poseEstimatorSubsystem, m_robotDrive.circleAutoConfig, 1.0));
-  
+    
       // Xbox Y button resets the robot coorinate system
     new JoystickButton(m_driverController, Button.kY.value).onTrue(new ResetDriveTrainCommand(this));
     new JoystickButton(m_driverController, Button.kX.value).onTrue(new InstantCommand(()->m_poseEstimatorSubsystem.setCurrentPose(new Pose2d(0,0, Rotation2d.kZero))));
@@ -201,8 +202,20 @@ public class RobotContainer {
     );
     new JoystickButton(m_driverController, Button.kRightBumper.value)
     .whileTrue(
-      new FlywheelTest(m_FlywheelSubsystem, m_blackBox, m_poseEstimatorSubsystem)
+      new ShooterTest(m_ShooterSubsystem, m_blackBox, m_poseEstimatorSubsystem)
     );
+
+    new JoystickButton(m_driverController, Button.kA.value).onTrue(
+      new InstantCommand(()->m_IntakeSubsystem.runMotor(0.2), m_IntakeSubsystem)
+    );
+    new JoystickButton(m_driverController, Button.kB.value).onTrue(
+      new InstantCommand(()->m_IntakeSubsystem.runMotor(0), m_IntakeSubsystem)
+    );
+
+    new JoystickButton(m_driverController, Button.kLeftBumper.value).whileTrue(
+      new InstantCommand(()->m_FeederSubsystem.runMotor(10), m_IntakeSubsystem)
+    );
+
 
 
 

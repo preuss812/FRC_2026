@@ -26,7 +26,7 @@ public class FireAtWillCommand extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    // calculate the target distance and use that to calculate flywheel speed and elevation angle.
+    // calculate the target distance and use that to calculate shooter speed and elevation angle.
     /*
      * The projectile will follow a parabolic path.
      * We can control the intial velocity and the initial angle of projection.
@@ -61,10 +61,10 @@ public class FireAtWillCommand extends Command {
   }
 
   /**
-   * fixedFlyWheelSpeedSolution - Theta and RPM for fixed flywheel speed
+   * fixedFlyWheelSpeedSolution - Theta and RPM for fixed shooter speed
    * @param dxToTarget  (double) - the distance in meters to the target.
    * @param dyToTarget  (double) - the height of the target relative to the shooter.
-   * @param rpm         (double) - the rotation speed of the flywheel
+   * @param rpm         (double) - the rotation speed of the shooter
    * @param wheelRadius (double) - the radius of the shooting wheels.
    * @return theta      (double) - angle of elevation required to hit the target.
    */
@@ -86,7 +86,7 @@ public class FireAtWillCommand extends Command {
      * https://math.stackexchange.com/questions/3019313/finding-projectile-angle-with-different-elevation-when-velocity-and-range-are-kn
      * 
      * There are always 2 solutions but we will likely always prefer the more direct (lowest) angle.
-     * TODO: add a test(s) for flywheel velocity too low to reach the (height,range) of the target
+     * TODO: add a test(s) for shooter velocity too low to reach the (height,range) of the target
      */
     double theta1 = Math.atan(
       (v0*v0 + Math.sqrt((Math.pow(v0,4) - g*(g*Math.pow(dxToTarget,2) + 2 * dyToTarget * Math.pow(v0,2)))))
@@ -110,7 +110,7 @@ public class FireAtWillCommand extends Command {
    * 
    * @param dxToTarget - (double) the x axis distance to the target in meters.
    * @param dyToTarget - (double) the y axis distance to the target in meters.
-   * @param wheelRadius - (double) the radius of the flywheel in meters.
+   * @param wheelRadius - (double) the radius of the shooter in meters.
    * @param slope - (double) the slope of the trajectory at the target.
    * @return double[2] containing the rpm and theta.
    */
@@ -152,13 +152,13 @@ public class FireAtWillCommand extends Command {
 
   /**
    * fixedShooterAngleTargetSolution
-   * calculate a flywheel speed to hit the target given a fixed shooting angle on the robot.
+   * calculate a shooter speed to hit the target given a fixed shooting angle on the robot.
    * 
    * @param dxToTarget - (double) x-axis distance to the target in meters.
    * @param dyToTarget - (double) y-axis distance from shooter to the target in meters.
-   * @param wheelRadius - (double) the radius of the flywheel in meters.
+   * @param wheelRadius - (double) the radius of the shooter in meters.
    * @param theta - (double) the shooting angle in radians where 0 is parallel to the ground.
-   * @return (double) the rpm for the flywheel to hit the target.
+   * @return (double) the rpm for the shooter to hit the target.
    */
   public double fixedShooterAngleTargetSolution(
     double dxToTarget,

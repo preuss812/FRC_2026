@@ -14,20 +14,20 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants;
-import frc.robot.Constants.FlywheelConstants;
+import frc.robot.Constants.ShooterConstants;
 import frc.robot.subsystems.BlackBoxSubsystem;
-import frc.robot.subsystems.FlywheelSubsystem;
+import frc.robot.subsystems.ShooterSubsystem;
 import frc.robot.subsystems.PoseEstimatorSubsystem;
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
-public class FlywheelTest extends Command {
-  private final FlywheelSubsystem flywheel;
+public class ShooterTest extends Command {
+  private final ShooterSubsystem shooter;
   private final  BlackBoxSubsystem blackBox;
   private final PoseEstimatorSubsystem PoseEstimatorSubsystem;
   private final double[] rangesFromHub = {0, 100, 120, 135, 150, 165, 180};
   /** Creates a new MotorTest. */
-  public FlywheelTest(FlywheelSubsystem motor, BlackBoxSubsystem blackBox, PoseEstimatorSubsystem poseEstimator) {
-    this.flywheel = motor;
+  public ShooterTest(ShooterSubsystem motor, BlackBoxSubsystem blackBox, PoseEstimatorSubsystem poseEstimator) {
+    this.shooter = motor;
     this.blackBox = blackBox;
     PoseEstimatorSubsystem = poseEstimator;
     // Use addRequirements() here to declare subsystem dependencies.
@@ -50,7 +50,7 @@ public class FlywheelTest extends Command {
     double distance = 3;
     //double distance = hubPos.getDistance(robotPos.getTranslation()) - shooterOffset;
     double RPM = distanceToRPM(distance);
-    flywheel.runMotor(RPM*FlywheelConstants.RPMToVolts/12.0);
+    shooter.runMotor(RPM*ShooterConstants.RPMToVolts/12.0);
     SmartDashboard.putBoolean("RPM OK", canShoot(RPM));
 
     
@@ -64,7 +64,7 @@ public class FlywheelTest extends Command {
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    flywheel.runMotor(0);
+    shooter.runMotor(0);
   }
 
   // Returns true when the command should end.
@@ -75,12 +75,12 @@ public class FlywheelTest extends Command {
 
   public double distanceToRPM(double x){
     //Change coefficents later
-    return Constants.FlywheelConstants.a*Math.pow(x, 3) + Constants.FlywheelConstants.b*Math.pow(x,2) + Constants.FlywheelConstants.c*x + Constants.FlywheelConstants.d;
+    return Constants.ShooterConstants.a*Math.pow(x, 3) + Constants.ShooterConstants.b*Math.pow(x,2) + Constants.ShooterConstants.c*x + Constants.ShooterConstants.d;
   }
 
   public boolean canShoot(double targetRPM){
-    double actualRPM = flywheel.getRPM();
-    return Math.abs(actualRPM-targetRPM) < Constants.FlywheelConstants.RPMTolerance;
+    double actualRPM = shooter.getRPM();
+    return Math.abs(actualRPM-targetRPM) < Constants.ShooterConstants.RPMTolerance;
   }
 
 

@@ -21,7 +21,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.CANConstants;
 
-public class FlywheelSubsystem extends SubsystemBase {
+public class ShooterSubsystem extends SubsystemBase {
 
 
 
@@ -30,7 +30,7 @@ public class FlywheelSubsystem extends SubsystemBase {
     private final double defaultRPM = 3000;
     private final double defaultRPMFeedForward = 1.0; // TODO: need a real number.
     private double targetRPM = defaultRPM;  // desired shooter wheel speed
-    private double currentRPM; // the current rpm of the flywheel.
+    private double currentRPM; // the current rpm of the shooter.
     // native units are ticks per 100ms.
     // the revrobotics through bore encoder I think has 4096 ticks per revolution.
     // Therefore rpm to ticks is 1 rpm * (4096 ticks/rpm) * (1 minute/60 seconds) * (0.1 second/100ms) = rpm to native
@@ -48,15 +48,15 @@ public class FlywheelSubsystem extends SubsystemBase {
     private final RelativeEncoder encoder;
     
 
-  public FlywheelSubsystem(int flywheelCANId) {
-      /** Creates a new FlywheelSubsystem. */
+  public ShooterSubsystem(int shooterCANId) {
+      /** Creates a new ShooterSubsystem. */
 
   /*
      * Initialize the SPARK MAX and get its encoder and closed loop controller
      * objects for later use.
      */
-    motor1 = new SparkMax(CANConstants.kFlywheelMotor1, MotorType.kBrushless);
-    motor2 = new SparkMax(CANConstants.kFlywheelMotor2, MotorType.kBrushless);
+    motor1 = new SparkMax(CANConstants.kShooterMotor1, MotorType.kBrushless);
+    motor2 = new SparkMax(CANConstants.kShooterMotor2, MotorType.kBrushless);
     closedLoopController = motor1.getClosedLoopController();
     encoder = motor1.getEncoder();
 
@@ -77,7 +77,7 @@ public class FlywheelSubsystem extends SubsystemBase {
         .positionConversionFactor(1)
         .velocityConversionFactor(1);
     /*
-     * Configure the 2nd motor on the Flywheel to follow, inverted, the primary motor
+     * Configure the 2nd motor on the Shooter to follow, inverted, the primary motor
      */
     motorFollowerConfig
       .apply(motorConfig)
@@ -137,7 +137,7 @@ public class FlywheelSubsystem extends SubsystemBase {
     // closed-loop velocity control
     currentRPM = encoder.getVelocity();
     // telemetry
-    SmartDashboard.putNumber("Flywheel RPM", currentRPM);
+    SmartDashboard.putNumber("Shooter RPM", currentRPM);
 
     targetRPM = SmartDashboard.getNumber("Target Velocity", 0);
     closedLoopController.setSetpoint(targetRPM, ControlType.kVelocity, ClosedLoopSlot.kSlot1);
@@ -150,14 +150,14 @@ public class FlywheelSubsystem extends SubsystemBase {
 
   /**
    * setRPM - set the target rpm
-   * @param rpm (double) The rpm target for the flywheel
+   * @param rpm (double) The rpm target for the shooter
    */
   // public void setRPM(double rpm) {
   //   targetRPM = rpm;
   //   double targetVelocity = rpmToNativeUnits(rpm);
   //   motor.config_kF(slotIdx, rpmToFeedForward(rpm), timeoutMs);
   //   motor.set(ControlMode.Velocity, targetVelocity);
-  //   SmartDashboard.putNumber("Flywheel Target RPM", targetRPM);
+  //   SmartDashboard.putNumber("Shooter Target RPM", targetRPM);
   // }
 
   public double getRPM() {

@@ -45,11 +45,13 @@ public final class Constants {
         public static final int kSwerveLeftFrontDrive = 28;
         public static final int kSwerveLeftFrontCANCoder = 38;
 
-        public static final int kFlywheelMotor1 = 43;
-        public static final int kFlywheelMotor2 = 40;
+        public static final int kShooterMotor1 = 45;
+        public static final int kShooterMotor2 = 40;
 
         public static final int kElbowMotor2 = 44;
-        public static final int kAlgaeIntakeMotor = 40;
+        public static final int kIntakeMotor = 43;
+        public static final int kFeederMotor = 46;
+        public static final int kIndexerMotor = 47;
         public static final int kShooterElevationMotor = 41;
 
         public static final int kPDP = 0; // was 50 until 3/12/2024
@@ -694,7 +696,7 @@ public final class Constants {
         public static double kOffsetToBumper = 0.157; // Meters
     }
 
-    public static final class FlywheelConstants {
+    public static final class ShooterConstants {
         public static final double a = 2.61;
         public static final double b = -26.01;
         public static final double c = 388.7;
@@ -702,13 +704,6 @@ public final class Constants {
         public static final double RPMTolerance = 20;
         public static final double RPMToVolts = 442.5;
     }
-
-    public static PreussMotorConfig algaeMotorConfig = new PreussMotorConfig(CANConstants.kAlgaeIntakeMotor)
-        .setP(PidConstants.kAlgaeIntake_kP)
-        .setI(PidConstants.kAlgaeIntake_kI)
-        .setD(PidConstants.kAlgaeIntake_kD)
-        .setF(PidConstants.kAlgaeIntake_kF)
-        .setInverted((true));
 
     public static final PreussMotorConfig shooterElevationMotor = new PreussMotorConfig(CANConstants.kShooterElevationMotor)
     .setP(PidConstants.kShooterElevation_kP)
@@ -719,7 +714,7 @@ public final class Constants {
         .setInverted(true)
         ;
         
-    public static final PreussMotorConfig flywheelMotor = new PreussMotorConfig(CANConstants.kFlywheelMotor1)
+    public static final PreussMotorConfig shooterMotor = new PreussMotorConfig(CANConstants.kShooterMotor1)
         .setP(PidConstants.kElbow_kP)
         .setP(PidConstants.kElbow_kI)
         .setP(PidConstants.kElbow_kD)
