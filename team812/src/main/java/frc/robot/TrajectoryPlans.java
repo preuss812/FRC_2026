@@ -265,13 +265,13 @@ public class TrajectoryPlans {
     
     
     /**
-     * robotRearFacingReef 
-     * @return - the rotation in radians for the robot's rear to face the reef in field coordinates.
+     * robotRearFacingHub 
+     * @return - the rotation in radians for the robot's rear to face the hub in field coordinates.
      */
-    public static Rotation2d robotRearFacingReef() {
+    public static Rotation2d robotFrontFacingHub() {
         Rotation2d rotation = new Rotation2d(
-            AllianceConfigurationSubsystem.robotHeadingToReef()
-        ).rotateBy(new Rotation2d(Math.PI)); // Rotate by 180 degrees to get the rear facing direction.
+            AllianceConfigurationSubsystem.robotHeadingToHub()
+        );
         return rotation;
     } 
 

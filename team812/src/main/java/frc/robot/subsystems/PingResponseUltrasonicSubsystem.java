@@ -76,7 +76,7 @@ public class PingResponseUltrasonicSubsystem extends SubsystemBase {
       new Translation2d(FieldConstants.fieldLength,0)
     ));
     obstacles[0] = fieldBoundary;
-    Polygon blueReef = new Polygon( Arrays.asList(
+    Polygon blueHub = new Polygon( Arrays.asList(
       new Translation2d(3,3.5),
       new Translation2d(3,4.5),
       new Translation2d(4, 5),
@@ -84,8 +84,8 @@ public class PingResponseUltrasonicSubsystem extends SubsystemBase {
       new Translation2d(5,3.5),
       new Translation2d(4,3)
     ));
-    obstacles[1] = blueReef;
-    Polygon redReef = new Polygon( Arrays.asList(
+    obstacles[1] = blueHub;
+    Polygon redHub = new Polygon( Arrays.asList(
       new Translation2d(11,3.5),
       new Translation2d(11,4.5),
       new Translation2d(12, 5),
@@ -93,7 +93,7 @@ public class PingResponseUltrasonicSubsystem extends SubsystemBase {
       new Translation2d(13,3.5),
       new Translation2d(12.5,3)
     ));
-    obstacles[2] = redReef;
+    obstacles[2] = redHub;
 
     //obstacles[0] = new Line(new Translation2d(0,0), 0);
     //obstacles[1] = new Line(new Translation2d(0,0), Double.NaN);

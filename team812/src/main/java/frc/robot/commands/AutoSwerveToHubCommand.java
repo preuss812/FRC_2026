@@ -15,11 +15,11 @@ import frc.robot.subsystems.DriveSubsystemSRX;
 import frc.robot.subsystems.PoseEstimatorSubsystem;
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
-public class AutoSwerveToReefCommand extends PreussSwerveControllerCommand {
+public class AutoSwerveToHubCommand extends PreussSwerveControllerCommand {
   private final PoseEstimatorSubsystem m_poseEstimatorSubsystem;
   
-  /** Creates a new AutoDriveToReefCommand. */
-  public AutoSwerveToReefCommand(
+  /** Creates a new AutoDriveToHubCommand. */
+  public AutoSwerveToHubCommand(
     DriveSubsystemSRX robotDrive,
     PoseEstimatorSubsystem poseEstimatorSubsystem
   ) {
@@ -32,7 +32,7 @@ public class AutoSwerveToReefCommand extends PreussSwerveControllerCommand {
       new PIDController(AutoConstants.kPYController, 0, 0),
       new ProfiledPIDController(
       AutoConstants.kPThetaController*3, 0, 0, AutoConstants.kThetaControllerConstraints),
-      () -> TrajectoryPlans.robotRearFacingReef(),
+      () -> TrajectoryPlans.robotFrontFacingHub(),
       robotDrive::driveFieldRelative,
       robotDrive);
     m_poseEstimatorSubsystem = poseEstimatorSubsystem;

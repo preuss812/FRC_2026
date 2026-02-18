@@ -33,14 +33,14 @@ public class AllianceConfigurationSubsystem extends SubsystemBase {
   private static PoseEstimatorSubsystem m_poseEstimatorSubsystem;
   private static boolean initialized = false;
   private static Alliance currentAlliance = Alliance.Blue;
-  private static Translation2d reefCenter;
+  private static Translation2d hubCenter;
   private static AprilTag processorAprilTag;
   private static Pose2d[][] m_processorWaypoints ;
   private static boolean m_isAutonomous = true;
   private static double m_startLine;
 
 
-  //private static boolean reefCenterSet = false;
+  //private static boolean hubCenterSet = false;
 
   /** Creates a new AllianceConfigurationSubsystem. */
   public AllianceConfigurationSubsystem(DriveSubsystemSRX robotDrive, PoseEstimatorSubsystem poseEstimatorSubsystem) {
@@ -85,8 +85,8 @@ public class AllianceConfigurationSubsystem extends SubsystemBase {
   }
 
   public static void refreshAllianceConfiguration(Alliance alliance) {
-    // Set the reef center location for the current alliance.
-    setReefCenter(alliance);
+    // Set the hub center location for the current alliance.
+    setHubCenter(alliance);
     setProcessorAprilTag(alliance);
     //if (isAutonomous()) setStartingHeading(alliance); // Problems with debug switching from auto -> teleop -> auto
     setProcessorWaypoints(alliance);
@@ -137,36 +137,36 @@ public class AllianceConfigurationSubsystem extends SubsystemBase {
   }
 
   /*
-   * reefCenter - return the field locatoin for the current alliance's reef center.
-   * This allows for easy access to the reef center location without having to check alliance
+   * hubCenter - return the field locatoin for the current alliance's hub center.
+   * This allows for easy access to the hub center location without having to check alliance
    * for vision tracking or autonomous driving.
    * @param - alliance blue or red as the current alliance
    */
-  public static void setReefCenter(Alliance alliance) {
+  public static void setHubCenter(Alliance alliance) {
     if (alliance == Alliance.Blue) {
-      reefCenter = FieldConstants.blueReefCenter;
+      hubCenter = FieldConstants.blueHubCenter;
     } else if (alliance == Alliance.Red) {
-      reefCenter = FieldConstants.redReefCenter;
+      hubCenter = FieldConstants.redHubCenter;
     } else {
-      reefCenter = FieldConstants.blueReefCenter;
+      hubCenter = FieldConstants.blueHubCenter;
     }
   }
 
   /*
-   * getReefCenter - return the location of the center of the reef for the current robot alliance
+   * getHubCenter - return the location of the center of the hub for the current robot alliance
    */
-  public static Translation2d getReefCenter() {
-    return reefCenter;
+  public static Translation2d getHubCenter() {
+    return hubCenter;
   }
 
   /*
-   * robotHeadingToReef() - return the heading from the robot to the reef center for the current alliance.
+   * robotHeadingToHub() - return the heading from the robot to the hub center for the current alliance.
    * 
    */
-  public static double robotHeadingToReef() {
+  public static double robotHeadingToHub() {
     Pose2d robotPose = m_poseEstimatorSubsystem.getCurrentPose();
     return MathUtil.angleModulus(
-        Math.atan2(reefCenter.getY() - robotPose.getY(), reefCenter.getX() - robotPose.getX()));
+        Math.atan2(hubCenter.getY() - robotPose.getY(), hubCenter.getX() - robotPose.getX()));
   }
 
   /*

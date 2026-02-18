@@ -21,7 +21,7 @@ import frc.robot.subsystems.AllianceConfigurationSubsystem;
  */
 public class AutonomousPlans {
     private static boolean debug = true;
-    private static final double robotInitialOrientation = Units.degreesToRadians(0.0);  // robot starts on the starting line with rear facing the reef.
+    private static final double robotInitialOrientation = Units.degreesToRadians(0.0);  // robot starts on the starting line with rear facing the hub.
 
     public static ArrayList<Trajectory> autoPaths = new ArrayList<Trajectory>();
     public static ArrayList<String>     autoNames = new ArrayList<String>();
@@ -81,7 +81,7 @@ public class AutonomousPlans {
 
     /**
      * Create predefined autonomous routines for use during the autonomous period.
-     * For now, 6 routines are defined.  One for each april tag on the reef.
+     * For now, 6 routines are defined.  One for each april tag on the hub.
      * It creates paths for either blue and red alliances depending on the argument.
      * Data is entered in blue alliance and transformed to red if we are in the red alliance.
      * 
@@ -102,8 +102,8 @@ public class AutonomousPlans {
         // The staring poses will be on the blue starting line facing back toward the blue drive station
         Rotation2d startingRotation = new Rotation2d(robotInitialOrientation);
         double offsetFromAprilTag = Units.inchesToMeters(40); // 0.5 meters from the april tag
-        double offsetToTouchReef = Units.inchesToMeters(0.0); // -5 inches meters from the april tag Note: this should be 0.0 so something is off somewhere.
-        // Get/create poses for each Reef April tag and barge april tag
+        double offsetToTouchHub = Units.inchesToMeters(0.0); // -5 inches meters from the april tag Note: this should be 0.0 so something is off somewhere.
+        // Get/create poses for each Hub April tag and barge april tag
         // for omre concise coding below.
         Pose2d AT14 = RobotContainer.m_poseEstimatorSubsystem.getAprilTagPose(14);
         Pose2d AT15 = RobotContainer.m_poseEstimatorSubsystem.getAprilTagPose(15);
@@ -120,12 +120,12 @@ public class AutonomousPlans {
         Pose2d nearAT20 = DriveConstants.robotRearAtPose(AT20, offsetFromAprilTag);
         Pose2d nearAT21 = DriveConstants.robotRearAtPose(AT21, offsetFromAprilTag);
         Pose2d nearAT22 = DriveConstants.robotRearAtPose(AT22, offsetFromAprilTag);
-        Pose2d atAT17 = DriveConstants.robotRearAtPose(AT17, offsetToTouchReef);
-        Pose2d atAT18 = DriveConstants.robotRearAtPose(AT18, offsetToTouchReef);
-        Pose2d atAT19 = DriveConstants.robotRearAtPose(AT19, offsetToTouchReef);
-        Pose2d atAT20 = DriveConstants.robotRearAtPose(AT20, offsetToTouchReef);
-        Pose2d atAT21 = DriveConstants.robotRearAtPose(AT21, offsetToTouchReef);
-        Pose2d atAT22 = DriveConstants.robotRearAtPose(AT22, offsetToTouchReef);
+        Pose2d atAT17 = DriveConstants.robotRearAtPose(AT17, offsetToTouchHub);
+        Pose2d atAT18 = DriveConstants.robotRearAtPose(AT18, offsetToTouchHub);
+        Pose2d atAT19 = DriveConstants.robotRearAtPose(AT19, offsetToTouchHub);
+        Pose2d atAT20 = DriveConstants.robotRearAtPose(AT20, offsetToTouchHub);
+        Pose2d atAT21 = DriveConstants.robotRearAtPose(AT21, offsetToTouchHub);
+        Pose2d atAT22 = DriveConstants.robotRearAtPose(AT22, offsetToTouchHub);
         //TrajectoryConfig config = m_debugTrajectoryConfig;
         TrajectoryConfig config = TrajectoryPlans.m_reverseTrajectoryConfig;
 
@@ -167,8 +167,8 @@ public class AutonomousPlans {
                 new Pose2d(FieldConstants.blueStartLine,AT14.getY(), startingRotation),
                 //new Pose2d(AT20.getX(),AT14.getY(), startingRotation),
                 //new Pose2d(AT19.getX(),AT14.getY(), startingRotation),
-                new Pose2d(FieldConstants.zeroToReef,AT14.getY(), startingRotation),
-                new Pose2d(FieldConstants.zeroToReef * 0.66 - 1,AT18.getY()+1.0, new Rotation2d(Math.PI*0.5)),
+                new Pose2d(FieldConstants.zeroToHub,AT14.getY(), startingRotation),
+                new Pose2d(FieldConstants.zeroToHub * 0.66 - 1,AT18.getY()+1.0, new Rotation2d(Math.PI*0.5)),
                 nearAT18
             },
             atAT18,
@@ -198,7 +198,7 @@ public class AutonomousPlans {
             , new Pose2d[] {
                 new Pose2d(FieldConstants.blueStartLine,AT14.getY(), startingRotation)
                 //new Pose2d(AT21.getX()+0.5,AT14.getY(), startingRotation.plus(new Rotation2d(Units.degreesToRadians(0)))),
-                //poseWithCameraFacingTheReef((AT20.getX()+FieldConstants.blueStartLine)/2.0,AT14.getY()),  Adds extra squiggles to the path
+                //poseWithCameraFacingTheHub((AT20.getX()+FieldConstants.blueStartLine)/2.0,AT14.getY()),  Adds extra squiggles to the path
                 //nearAT20
             }
             ,atAT20

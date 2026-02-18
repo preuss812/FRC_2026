@@ -14,13 +14,13 @@ import frc.utils.PreussAutoDrive;
 
 // This command just starts the robot spinning and keeps rotating at the requested speed.
 // That means that some other outside force has to end this command.
-public class PushTowardsReefCommand extends Command {
+public class PushTowardsHubCommand extends Command {
 
   private final PoseEstimatorSubsystem poseEstimatorSubsystem;
   private final PreussAutoDrive autoDrive;
 
   /** Creates a new RotateRobotCommand. */
-  public PushTowardsReefCommand(DriveSubsystemSRX robotDrive, PoseEstimatorSubsystem poseEstimatorSubsystem) {
+  public PushTowardsHubCommand(DriveSubsystemSRX robotDrive, PoseEstimatorSubsystem poseEstimatorSubsystem) {
     this.poseEstimatorSubsystem = poseEstimatorSubsystem;
     autoDrive = new PreussAutoDrive(robotDrive, poseEstimatorSubsystem, robotDrive.defaultAutoConfig );
     
@@ -38,10 +38,10 @@ public class PushTowardsReefCommand extends Command {
   @Override
   public void execute() {
     // I'm intentially not controlling rotation as the expected scenario is that we are already touching
-    // the reef so the force toward the reef will rotate the robot to butt up against the reef. 
+    // the hub so the force toward the hub will rotate the robot to butt up against the hub. 
     double throttle = 0.11; // Minimal throttle
     Pose2d currentPose = poseEstimatorSubsystem.getCurrentPose();
-    double heading = Autonomous.robotHeadingForCameraToReefCenter(currentPose.getTranslation())+ VisionConstants.rearCameraHeading;
+    double heading = Autonomous.robotHeadingForCameraToHubCenter(currentPose.getTranslation())+ VisionConstants.rearCameraHeading;
     double xDrive = Math.cos(heading) * throttle;
     double yDrive = Math.sin(heading) * throttle;
     autoDrive.drive(xDrive, yDrive, 0, true, true);

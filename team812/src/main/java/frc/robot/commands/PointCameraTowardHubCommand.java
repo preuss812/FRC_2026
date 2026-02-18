@@ -5,36 +5,33 @@
 package frc.robot.commands;
 
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import frc.robot.Autonomous;
-import frc.robot.AutonomousPlans;
 import frc.robot.subsystems.DriveSubsystemSRX;
 import frc.robot.subsystems.PoseEstimatorSubsystem;
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
-public class AutoGotoReefCommand extends GotoPoseCommand {
-  private final PoseEstimatorSubsystem m_poseEstimatorSubsystem;
+public class PointCameraTowardHubCommand extends GotoPoseCommand {
+  /** Creates a new PointCameraTowardHubCommand. */
+  public PointCameraTowardHubCommand(DriveSubsystemSRX robotDrive, PoseEstimatorSubsystem poseEstimatorSubsystem) {
+    
+    super(robotDrive, poseEstimatorSubsystem, new Pose2d(), null );
 
-  /** Creates a new AutoGotoReefCommand. */
-  public AutoGotoReefCommand(
-     DriveSubsystemSRX robotDrive
-    , PoseEstimatorSubsystem poseEstimatorSubsystem
-  ){
-    super(robotDrive, poseEstimatorSubsystem, new Pose2d(), robotDrive.defaultAutoConfig);
-    m_poseEstimatorSubsystem = poseEstimatorSubsystem;
+    
     // Use addRequirements() here to declare subsystem dependencies.
-    // Super adds the requirements
   }
 
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    try{
-      setTargetPose(AutonomousPlans.finalPoses.get(Autonomous.getAutoMode()));
-    }
-    catch(Exception e){
-      setTargetPose(m_poseEstimatorSubsystem.getCurrentPose());
-    }
+    // Calculate the pose to face 
+    Pose2d currentPose = getPoseEstimatorSubsystem().getCurrentPose();
+    setTargetPose(new Pose2d(
+      currentPose.getTranslation(),
+      new Rotation2d(Autonomous.robotHeadingForCameraToHubCenter(currentPose.getTranslation()))
+    ));
     super.initialize();
   }
 
+  
 }

@@ -18,8 +18,8 @@ import frc.robot.subsystems.AllianceConfigurationSubsystem;
 import frc.robot.subsystems.DriveSubsystemSRX;
 import frc.robot.subsystems.DriveSubsystemSRX.DrivingMode;
 import frc.robot.subsystems.PoseEstimatorSubsystem;
-import frc.robot.commands.AutoSwerveToReefCommand;
-import frc.robot.commands.AutoGotoReefCommand;
+import frc.robot.commands.AutoSwerveToHubCommand;
+import frc.robot.commands.AutoGotoHubCommand;
 import frc.robot.commands.DriveWithoutVisionCommand;
 import frc.robot.Constants.FieldConstants;
 import frc.robot.Constants.VisionConstants;
@@ -42,15 +42,15 @@ public class Autonomous extends SequentialCommandGroup {
   public static int m_autoMode = 1; // Default to move 1 meter and stop;
 
   /**
-   * robotHeadingForCameraToReefCenter - helper function for controlling rotation during autonomous driving.
+   * robotHeadingForCameraToHubCenter - helper function for controlling rotation during autonomous driving.
    * @param x - (double) robot x field coordinate.
    * @param y - (double) robot y field coordinate.
-   * @return  - (double) the heading in radians from the robot to the reef center.
+   * @return  - (double) the heading in radians from the robot to the hub center.
    */
-  public static double robotHeadingForCameraToReefCenter(Translation2d location) {
-    Translation2d reefCenter = AllianceConfigurationSubsystem.getReefCenter();
+  public static double robotHeadingForCameraToHubCenter(Translation2d location) {
+    Translation2d hubCenter = AllianceConfigurationSubsystem.getHubCenter();
     return MathUtil.angleModulus(
-        Math.atan2(reefCenter.getY() - location.getY(),reefCenter.getX() - location.getX()) + VisionConstants.rearCameraHeading);
+        Math.atan2(hubCenter.getY() - location.getY(),hubCenter.getX() - location.getX()) + VisionConstants.rearCameraHeading);
   }
 
   public static double robotHeadingForCameraToPose(Pose2d currentPose, Pose2d targetPose) {
@@ -59,13 +59,13 @@ public class Autonomous extends SequentialCommandGroup {
     );
   }
 
-  public static double robotHeadingForCameraToReefCenter(boolean convertToRed, double x, double y) {
+  public static double robotHeadingForCameraToHubCenter(boolean convertToRed, double x, double y) {
     if (convertToRed) {
       return MathUtil.angleModulus(
-        Math.atan2(FieldConstants.redReefCenter.getY() - y, FieldConstants.redReefCenter.getX() - x) + VisionConstants.rearCameraHeading);
+        Math.atan2(FieldConstants.redHubCenter.getY() - y, FieldConstants.redHubCenter.getX() - x) + VisionConstants.rearCameraHeading);
     } else {
       return MathUtil.angleModulus(
-        Math.atan2(FieldConstants.blueReefCenter.getY() - y, FieldConstants.blueReefCenter.getX() - x) + VisionConstants.rearCameraHeading);
+        Math.atan2(FieldConstants.blueHubCenter.getY() - y, FieldConstants.blueHubCenter.getX() - x) + VisionConstants.rearCameraHeading);
     }
   }
 
@@ -116,15 +116,15 @@ public class Autonomous extends SequentialCommandGroup {
       return;
     }
 
-    // Perform the initial driving to get from the start line to the reef.
+    // Perform the initial driving to get from the start line to the hub.
     double timeout = 15;
     if (getAutoMode() == AutonomousPlans.AUTO_MODE_MY_BARGE_TO_OPPOSITE)
       timeout = 12;
     if (getAutoMode() == AutonomousPlans.AUTO_MODE_CENTER_STRAIGHT)
       timeout = 8;
     addCommands(
-      new AutoSwerveToReefCommand(m_robotDrive, m_PoseEstimatorSubsystem).withTimeout(timeout), // Should get us to the reef.
-      new AutoGotoReefCommand(m_robotDrive,m_PoseEstimatorSubsystem).withTimeout(timeout) // this one makes sure we get to the reef.
+      new AutoSwerveToHubCommand(m_robotDrive, m_PoseEstimatorSubsystem).withTimeout(timeout), // Should get us to the hub.
+      new AutoGotoHubCommand(m_robotDrive,m_PoseEstimatorSubsystem).withTimeout(timeout) // this one makes sure we get to the hub.
     );
 
     

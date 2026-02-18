@@ -43,7 +43,7 @@ import frc.robot.commands.FireAtWillCommand;
 import frc.robot.commands.ShooterTest;
 import frc.robot.commands.GotoPoseCommand;
 import frc.robot.commands.GotoProcessorCommand;
-import frc.robot.commands.PointCameraTowardReefCommand;
+import frc.robot.commands.PointCameraTowardHubCommand;
 import frc.robot.commands.RandomRobotPositionCommand;
 import frc.robot.commands.ResetDriveTrainCommand;
 import frc.robot.commands.RoombaG2PCommand;
@@ -250,7 +250,7 @@ public class RobotContainer {
       SmartDashboard.putData("Z", new SimSetRobotPoseCommand(m_robotDrive, m_poseEstimatorSubsystem, new Pose2d(5.5 + 0.145916,4, Rotation2d.kZero)));
       SmartDashboard.putData("TT", new SwerveToProcessorCommand(m_robotDrive, m_poseEstimatorSubsystem, true));
       SmartDashboard.putData("R", new RandomRobotPositionCommand(m_robotDrive, m_poseEstimatorSubsystem));
-      SmartDashboard.putData("PR", new PointCameraTowardReefCommand(m_robotDrive, m_poseEstimatorSubsystem));
+      SmartDashboard.putData("PR", new PointCameraTowardHubCommand(m_robotDrive, m_poseEstimatorSubsystem));
       SmartDashboard.putData("DR", new DriveRobotCommand(m_robotDrive, m_poseEstimatorSubsystem, new Pose2d(2,1,new Rotation2d(0)), false, null));
       SmartDashboard.putData("NV", new DriveWithoutVisionCommand(m_robotDrive, m_poseEstimatorSubsystem, new Pose2d(2,1,new Rotation2d(0)), null));
       SmartDashboard.putData("R0", new RotateRobotCommand(m_robotDrive, Units.degreesToRadians(0),false));

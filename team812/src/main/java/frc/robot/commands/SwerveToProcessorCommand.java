@@ -29,13 +29,13 @@ public class SwerveToProcessorCommand extends PreussSwerveControllerCommand {
   private AprilTag processorAprilTag;
   private static Rotation2d m_robotRotationToFaceProcessor;
   private Pose2d m_aprilTagPose;
-  private final boolean m_faceReef;
+  private final boolean m_faceHub;
 
   /** Creates a new SwerveToProcessorCommand. */
   public SwerveToProcessorCommand(
     DriveSubsystemSRX robotDrive,
     PoseEstimatorSubsystem poseEstimatorSubsystem,
-    boolean faceReef
+    boolean faceHub
   ) {
     super (
       robotDrive,
@@ -52,13 +52,13 @@ public class SwerveToProcessorCommand extends PreussSwerveControllerCommand {
         0,
         new TrapezoidProfile.Constraints(Math.PI, Math.PI)
       ),
-      (faceReef)
-        ? () -> TrajectoryPlans.robotRearFacingReef()
+      (faceHub)
+        ? () -> TrajectoryPlans.robotFrontFacingHub()
         : () -> robotRotationToFaceProcessor(),
       robotDrive::driveFieldRelative,
       robotDrive
     );
-    m_faceReef = faceReef;
+    m_faceHub = faceHub;
   }
 
   // Called when the command is initially scheduled.
@@ -75,8 +75,8 @@ public class SwerveToProcessorCommand extends PreussSwerveControllerCommand {
 
     waypoints = TrajectoryPlans.planTrajectory(AllianceConfigurationSubsystem.getProcessorWaypoints(), startingPose);
     m_aprilTagPose = getPoseEstimatorSubsystem().getAprilTagPose(processorAprilTag.id());
-    if (m_faceReef)
-      super.setRotationSupplier(() -> TrajectoryPlans.robotRearFacingReef());
+    if (m_faceHub)
+      super.setRotationSupplier(() -> TrajectoryPlans.robotFrontFacingHub());
     else 
       super.setRotationSupplier(() -> m_aprilTagPose.getRotation().plus(new Rotation2d(Math.PI)));
 
