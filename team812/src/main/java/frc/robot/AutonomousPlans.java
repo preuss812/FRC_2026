@@ -114,18 +114,18 @@ public class AutonomousPlans {
         Pose2d AT21 = RobotContainer.m_poseEstimatorSubsystem.getAprilTagPose(21);
         Pose2d AT22 = RobotContainer.m_poseEstimatorSubsystem.getAprilTagPose(22);
 
-        Pose2d nearAT17 = DriveConstants.robotRearAtPose(AT17, offsetFromAprilTag);
-        Pose2d nearAT18 = DriveConstants.robotRearAtPose(AT18, offsetFromAprilTag);
-        Pose2d nearAT19 = DriveConstants.robotRearAtPose(AT19, offsetFromAprilTag);
-        Pose2d nearAT20 = DriveConstants.robotRearAtPose(AT20, offsetFromAprilTag);
-        Pose2d nearAT21 = DriveConstants.robotRearAtPose(AT21, offsetFromAprilTag);
-        Pose2d nearAT22 = DriveConstants.robotRearAtPose(AT22, offsetFromAprilTag);
-        Pose2d atAT17 = DriveConstants.robotRearAtPose(AT17, offsetToTouchHub);
-        Pose2d atAT18 = DriveConstants.robotRearAtPose(AT18, offsetToTouchHub);
-        Pose2d atAT19 = DriveConstants.robotRearAtPose(AT19, offsetToTouchHub);
-        Pose2d atAT20 = DriveConstants.robotRearAtPose(AT20, offsetToTouchHub);
-        Pose2d atAT21 = DriveConstants.robotRearAtPose(AT21, offsetToTouchHub);
-        Pose2d atAT22 = DriveConstants.robotRearAtPose(AT22, offsetToTouchHub);
+        Pose2d nearAT17 = DriveConstants.robotFrontAtPose(AT17, offsetFromAprilTag);
+        Pose2d nearAT18 = DriveConstants.robotFrontAtPose(AT18, offsetFromAprilTag);
+        Pose2d nearAT19 = DriveConstants.robotFrontAtPose(AT19, offsetFromAprilTag);
+        Pose2d nearAT20 = DriveConstants.robotFrontAtPose(AT20, offsetFromAprilTag);
+        Pose2d nearAT21 = DriveConstants.robotFrontAtPose(AT21, offsetFromAprilTag);
+        Pose2d nearAT22 = DriveConstants.robotFrontAtPose(AT22, offsetFromAprilTag);
+        Pose2d atAT17 = DriveConstants.robotFrontAtPose(AT17, offsetToTouchHub);
+        Pose2d atAT18 = DriveConstants.robotFrontAtPose(AT18, offsetToTouchHub);
+        Pose2d atAT19 = DriveConstants.robotFrontAtPose(AT19, offsetToTouchHub);
+        Pose2d atAT20 = DriveConstants.robotFrontAtPose(AT20, offsetToTouchHub);
+        Pose2d atAT21 = DriveConstants.robotFrontAtPose(AT21, offsetToTouchHub);
+        Pose2d atAT22 = DriveConstants.robotFrontAtPose(AT22, offsetToTouchHub);
         //TrajectoryConfig config = m_debugTrajectoryConfig;
         TrajectoryConfig config = TrajectoryPlans.m_reverseTrajectoryConfig;
 

@@ -207,7 +207,7 @@ public final class Constants {
                 Math.atan2(
                     blueHubCenter.getY() - y
                     , blueHubCenter.getX() - x
-                ) + VisionConstants.rearCameraHeading
+                ) + VisionConstants.aprilCameraHeading
             );
         }
         public static double robotHeadingForCameraToRedHubCenter(double x, double y) {
@@ -215,7 +215,7 @@ public final class Constants {
                 Math.atan2(
                     redHubCenter.getY() - y
                     , redHubCenter.getX() - x
-                ) + VisionConstants.rearCameraHeading
+                ) + VisionConstants.aprilCameraHeading
             );
         }
 
@@ -226,28 +226,38 @@ public final class Constants {
 
         public static int[] complementaryAprilTag = new int[] {
             0, // Artifact of zero indexing.
-            13, // 1
-            12, // 2
-            16, // 3
-            15, // 4
-            14,
-            19,
-            18,
-            17,
-            22,
+            17, // 1
+            18, // 2
+            19, // 3
+            20, // 4
             21,
-            20,
-            2,  
+            22,
+            23,
+            24,
+            25,
+            26,
+            27,
+            28,  
+            29,
+            30,
+            31,
+            32,
             1,
-            5,
-            4,
+            2,
             3,
-            8,
+            4,
+            5,
+            6,  
             7,
-            6,
-            11,
+            8,
+            9,
             10,
-            9  // 22
+            11,
+            12,
+            13,
+            14,
+            15,
+            16 
         };
 
         // for autonomous, get the alliance appropriate april tag using the tag mapping.
@@ -288,9 +298,9 @@ public final class Constants {
         public static final double maximumAmbiguity = 0.2;
         
 
-        public static double frontCameraXOffsetToRobot = Units.inchesToMeters(17.5);
-        public static double frontCameraYOffsetToRobot = Units.inchesToMeters(0.0);
-        public static double frontCameraHeightToGround = Units.inchesToMeters(15.0);
+        public static double frontCameraXOffsetToRobot = Units.inchesToMeters(13.5);
+        public static double frontCameraYOffsetToRobot = Units.inchesToMeters(6.5);
+        public static double frontCameraHeightToGround = Units.inchesToMeters(12.0);
         public static double frontCameraRoll  = Units.degreesToRadians(0.0);
         public static double frontCameraPitch = Units.degreesToRadians(0.0); 
         public static double frontCameraYaw   = Units.degreesToRadians(0.0); // Front facing camera.
@@ -302,18 +312,18 @@ public final class Constants {
         public static final Transform3d ROBOT_TO_FRONT_CAMERA = FRONT_CAMERA_TO_ROBOT.inverse();
 
 
-        public static double rearCameraXOffsetToRobot = Units.inchesToMeters(-18.0);
-        public static double rearCameraYOffsetToRobot = Units.inchesToMeters(0.0);
-        public static double rearCameraHeightToGround = Units.inchesToMeters(13.0);
-        public static double rearCameraRoll  = Units.degreesToRadians(0.0);
-        public static double rearCameraPitch = Units.degreesToRadians(0.0); 
-        public static double rearCameraYaw   = Units.degreesToRadians(180.0); // Rear facing camera.
-        public static final double rearCameraHeading = Units.degreesToRadians(180.0); // Rear facing camera
-        public static final Transform3d REAR_CAMERA_TO_ROBOT = new Transform3d(
-            new Translation3d(rearCameraXOffsetToRobot,rearCameraYOffsetToRobot,rearCameraHeightToGround),
-            new Rotation3d(rearCameraRoll, rearCameraPitch, rearCameraYaw)
+        public static double aprilCameraXOffsetToRobot = Units.inchesToMeters(13.5);
+        public static double aprilCameraYOffsetToRobot = Units.inchesToMeters(6.5);
+        public static double aprilCameraHeightToGround = Units.inchesToMeters(12);
+        public static double aprilCameraRoll  = Units.degreesToRadians(0.0);
+        public static double aprilCameraPitch = Units.degreesToRadians(0.0); 
+        public static double aprilCameraYaw   = Units.degreesToRadians(0.0); // Front facing camera.
+        public static final double aprilCameraHeading = Units.degreesToRadians(0); // Front facing camera
+        public static final Transform3d APRIL_CAMERA_TO_ROBOT = new Transform3d(
+            new Translation3d(aprilCameraXOffsetToRobot,aprilCameraYOffsetToRobot,aprilCameraHeightToGround),
+            new Rotation3d(aprilCameraRoll, aprilCameraPitch, aprilCameraYaw)
         );
-        public static final Transform3d ROBOT_TO_REAR_CAMERA = REAR_CAMERA_TO_ROBOT.inverse();
+        public static final Transform3d ROBOT_TO_APRIL_CAMERA = APRIL_CAMERA_TO_ROBOT.inverse();
 
 
         public enum AprilTag {
@@ -398,9 +408,9 @@ public final class Constants {
         public static final double kRotationalDecreaseSlewRatePM = 4.0;
         
         // Chassis configuration
-        public static final double kTrackWidth = Units.inchesToMeters(17.75); // was 26.5 until 3/5/2024, actual is 17.75
+        public static final double kTrackWidth = Units.inchesToMeters(20.25); 
         // Distance between centers of right and left wheels on robot
-        public static final double kWheelBase = Units.inchesToMeters(27.75); //  was 26.5 until 3/5/2024, actual is 17.75
+        public static final double kWheelBase = Units.inchesToMeters(20.25);
         // Distance between front and back wheels on robot
 
         public static final SwerveDriveKinematics kDriveKinematics = new SwerveDriveKinematics(
@@ -435,9 +445,9 @@ public final class Constants {
 
         public static final double kBackToCenterDistance = Units.inchesToMeters(17.5); //was 15.0 until 3/5/2024
         public static final double kFrontToCenterDistance = Units.inchesToMeters(17.5); //was 15.0 until 3/5/2024
-        public static final double kBumperWidth = Units.inchesToMeters(3.0);
-        public static final double kRobotWidth = Units.inchesToMeters(24.0)+kBumperWidth*2.0; // Frame width plus 2 bumpers.
-        public static final double kRobotLength = Units.inchesToMeters(33.25)+kBumperWidth*2.0; // Frame length plus 2 bumpers.
+        public static final double kBumperWidth = 0; //Units.inchesToMeters(4.25);
+        public static final double kRobotWidth = Units.inchesToMeters(27.18)+kBumperWidth*2.0; // Frame width plus 2 bumpers.
+        public static final double kRobotLength = Units.inchesToMeters(27.0)+kBumperWidth*2.0; // Frame length plus 2 bumpers.
         public static final double kApproximateStartingY = FieldConstants.yMax - Units.inchesToMeters(36.0); // Meters (ie near the amp)
         public static final double kStartingOrientation = 0.0; // Starting orientation in radians (ie robot back against the alliance wall)
         public static final Translation2d robotCenterToFrontBumper = new Translation2d(kRobotLength/2, 0);
@@ -468,7 +478,7 @@ public final class Constants {
          * @param offset - (meters) the distance to be away from the pose.
          * @return - The pose of the robot facing the pose with the center of it's front bumper aligned to the pose.
          */
-        public static Pose2d robotFrontAtPose(Pose2d pose, double offset) {
+        public static Pose2d robotRearAtPose(Pose2d pose, double offset) {
             Translation2d position = pose.getTranslation().plus(rotatedRobotFrontBumper(pose.getRotation(), offset));
             Rotation2d rotation = pose.getRotation().rotateBy(rotate180);
             return new Pose2d(position, rotation);
@@ -480,8 +490,8 @@ public final class Constants {
          * @param offset - (meters) the distance to be away from the pose.
          * @return - The pose of the robot backed up to the pose with the center of it's rear bumper aligned to the pose.
          */
-        public static Pose2d robotRearAtPose(Pose2d pose, double offset) {
-            Translation2d position = pose.getTranslation().plus(rotatedRobotRearBumper(pose.getRotation(), offset));
+        public static Pose2d robotFrontAtPose(Pose2d pose, double offset) {
+            Translation2d position = pose.getTranslation().plus(rotatedRobotFrontBumper(pose.getRotation(), offset));
             Rotation2d rotation = pose.getRotation();
             return new Pose2d(position, rotation);
         }

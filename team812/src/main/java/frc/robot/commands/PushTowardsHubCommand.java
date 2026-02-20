@@ -41,7 +41,7 @@ public class PushTowardsHubCommand extends Command {
     // the hub so the force toward the hub will rotate the robot to butt up against the hub. 
     double throttle = 0.11; // Minimal throttle
     Pose2d currentPose = poseEstimatorSubsystem.getCurrentPose();
-    double heading = Autonomous.robotHeadingForCameraToHubCenter(currentPose.getTranslation())+ VisionConstants.rearCameraHeading;
+    double heading = Autonomous.robotHeadingForCameraToHubCenter(currentPose.getTranslation())+ VisionConstants.aprilCameraHeading;
     double xDrive = Math.cos(heading) * throttle;
     double yDrive = Math.sin(heading) * throttle;
     autoDrive.drive(xDrive, yDrive, 0, true, true);

@@ -15,18 +15,19 @@ import frc.utils.PreussAutoDrive;
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
 
-public class FaceHub extends Command {
+public class DriveFacingHub extends Command {
   /** Creates a new FaceHub. */
   private final DriveSubsystemSRX m_DriveSubsystemSRX;
   private final PoseEstimatorSubsystem m_PoseEstimatorSubsystem;
   private final XboxController m_XboxController;
   private final PreussAutoDrive m_preussAutoDrive;
-  public FaceHub(DriveSubsystemSRX driveSubsystemSRX, PoseEstimatorSubsystem poseEstimatorSubsystem, XboxController xboxController) {
+  public DriveFacingHub(DriveSubsystemSRX driveSubsystemSRX, PoseEstimatorSubsystem poseEstimatorSubsystem, XboxController xboxController) {
     // Use addRequirements() here to declare subsystem dependencies.
     m_DriveSubsystemSRX = driveSubsystemSRX;
     m_PoseEstimatorSubsystem = poseEstimatorSubsystem;
     m_XboxController = xboxController;
     m_preussAutoDrive = new PreussAutoDrive(driveSubsystemSRX, poseEstimatorSubsystem, driveSubsystemSRX.defaultAutoConfig);
+    addRequirements(driveSubsystemSRX);
   }
   
 

@@ -203,7 +203,7 @@ public class PoseEstimatorSubsystem extends SubsystemBase {
 
   // Return the pose for a robot to be directly in front of the specified apriltag
   public Pose2d robotRearAtApriltag(int id, double offset) {
-    return DriveConstants.robotRearAtPose(getAprilTagPose(id), offset);
+    return DriveConstants.robotFrontAtPose(getAprilTagPose(id), offset);
   }  
   
   

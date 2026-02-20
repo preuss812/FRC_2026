@@ -8,6 +8,7 @@
 package frc.robot;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.estimator.PoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
@@ -22,6 +23,7 @@ import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.POVButton;
 import frc.robot.Constants.CANConstants;
+import frc.robot.Constants.DriveConstants;
 import frc.robot.Constants.OIConstants;
 import frc.robot.Constants.UltrasonicConstants;
 import frc.robot.Constants.VisionConstants;
@@ -39,6 +41,7 @@ import frc.robot.commands.DriveCircle;
 import frc.robot.commands.DriveCircleThrottle;
 import frc.robot.commands.DriveRobotCommand;
 import frc.robot.commands.DriveWithoutVisionCommand;
+import frc.robot.commands.DriveFacingHub;
 import frc.robot.commands.FireAtWillCommand;
 import frc.robot.commands.ShooterTest;
 import frc.robot.commands.GotoPoseCommand;
@@ -80,10 +83,10 @@ public class RobotContainer {
   public final static DriveSubsystemSRX m_robotDrive = new DriveSubsystemSRX();
 
   public static BlackBoxSubsystem m_blackBox = new BlackBoxSubsystem();
-  public static PoseEstimatorCamera m_rearCamera = new PoseEstimatorCamera("pv-812", VisionConstants.ROBOT_TO_REAR_CAMERA);
+  public static PoseEstimatorCamera m_atagCamera = new PoseEstimatorCamera("atag812", VisionConstants.ROBOT_TO_APRIL_CAMERA);
   //public static PoseEstimatorCamera m_frontCamera = new PoseEstimatorCamera("Microsoft_LifeCam_HD-3000", VisionConstants.ROBOT_TO_FRONT_CAMERA);
 
-  public static final PoseEstimatorCamera[] cameras = new PoseEstimatorCamera[]{m_rearCamera/*,m_frontCamera*/};
+  public static final PoseEstimatorCamera[] cameras = new PoseEstimatorCamera[]{m_atagCamera/*,m_frontCamera*/};
   public static PoseEstimatorSubsystem m_poseEstimatorSubsystem = new PoseEstimatorSubsystem( cameras, m_robotDrive);
   public final static AllianceConfigurationSubsystem m_allianceConfigurationSubsystem = new AllianceConfigurationSubsystem(m_robotDrive, m_poseEstimatorSubsystem);
   private static  boolean isSimulation = !Robot.isReal();
@@ -207,8 +210,8 @@ public class RobotContainer {
       new InstantCommand(()->m_robotDrive.setDrivingMode(DrivingMode.PRECISION))
     );
     new JoystickButton(m_driverController, Button.kRightBumper.value)
-    .whileTrue(
-      new ShooterTest(m_ShooterSubsystem, m_blackBox, m_poseEstimatorSubsystem)
+    .onTrue(
+      new DriveFacingHub(m_robotDrive, m_poseEstimatorSubsystem, m_driverController)
     );
 
     new JoystickButton(m_driverController, Button.kA.value).onTrue(
@@ -221,6 +224,12 @@ public class RobotContainer {
     new JoystickButton(m_driverController, Button.kLeftBumper.value).whileTrue(
       new InstantCommand(()->m_FeederSubsystem.runMotor(10), m_IntakeSubsystem)
     );
+
+    new JoystickButton(leftJoystick, 11).whileTrue(
+      new GotoPoseCommand(m_robotDrive, m_poseEstimatorSubsystem, DriveConstants.robotFrontAtPose(m_poseEstimatorSubsystem.getAprilTagPose(19), 0.5) , m_robotDrive.debugAutoConfig)
+      );
+      Utilities.toSmartDashboard("April Tag 19 pose: ", m_poseEstimatorSubsystem.getAprilTagPose(19));
+    
 
 
 

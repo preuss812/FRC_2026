@@ -50,22 +50,22 @@ public class Autonomous extends SequentialCommandGroup {
   public static double robotHeadingForCameraToHubCenter(Translation2d location) {
     Translation2d hubCenter = AllianceConfigurationSubsystem.getHubCenter();
     return MathUtil.angleModulus(
-        Math.atan2(hubCenter.getY() - location.getY(),hubCenter.getX() - location.getX()) + VisionConstants.rearCameraHeading);
+        Math.atan2(hubCenter.getY() - location.getY(),hubCenter.getX() - location.getX()) + VisionConstants.aprilCameraHeading);
   }
 
   public static double robotHeadingForCameraToPose(Pose2d currentPose, Pose2d targetPose) {
     return MathUtil.angleModulus(
-      Math.atan2(targetPose.getY() - currentPose.getY(), targetPose.getX() - currentPose.getX()) + VisionConstants.rearCameraHeading
+      Math.atan2(targetPose.getY() - currentPose.getY(), targetPose.getX() - currentPose.getX()) + VisionConstants.aprilCameraHeading
     );
   }
 
   public static double robotHeadingForCameraToHubCenter(boolean convertToRed, double x, double y) {
     if (convertToRed) {
       return MathUtil.angleModulus(
-        Math.atan2(FieldConstants.redHubCenter.getY() - y, FieldConstants.redHubCenter.getX() - x) + VisionConstants.rearCameraHeading);
+        Math.atan2(FieldConstants.redHubCenter.getY() - y, FieldConstants.redHubCenter.getX() - x) + VisionConstants.aprilCameraHeading);
     } else {
       return MathUtil.angleModulus(
-        Math.atan2(FieldConstants.blueHubCenter.getY() - y, FieldConstants.blueHubCenter.getX() - x) + VisionConstants.rearCameraHeading);
+        Math.atan2(FieldConstants.blueHubCenter.getY() - y, FieldConstants.blueHubCenter.getX() - x) + VisionConstants.aprilCameraHeading);
     }
   }
 

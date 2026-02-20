@@ -88,7 +88,7 @@ public class GotoAprilTagCommand extends GotoPoseCommand {
     
     if (fiducialId >= 0) {
       m_aprilTagPose = getPoseEstimatorSubsystem().getAprilTagPose(fiducialId);
-      setTargetPose(DriveConstants.robotRearAtPose(m_aprilTagPose, m_targetDistance));
+      setTargetPose(DriveConstants.robotFrontAtPose(m_aprilTagPose, m_targetDistance));
     } else {
       setTargetPose(getPoseEstimatorSubsystem().getCurrentPose()); // effectively do nothing.
     }
