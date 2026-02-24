@@ -226,10 +226,10 @@ public class RobotContainer {
     );
 
     new JoystickButton(leftJoystick, 11).whileTrue(
-      new GotoPoseCommand(m_robotDrive, m_poseEstimatorSubsystem, DriveConstants.robotFrontAtPose(m_poseEstimatorSubsystem.getAprilTagPose(19), 0.5) , m_robotDrive.debugAutoConfig)
+      new GotoPoseCommand(m_robotDrive, m_poseEstimatorSubsystem, DriveConstants.robotFrontAtPose(m_poseEstimatorSubsystem.getAprilTagPose(19), 0.0) , m_robotDrive.debugAutoConfig)
       );
       Utilities.toSmartDashboard("April Tag 19 pose: ", m_poseEstimatorSubsystem.getAprilTagPose(19));
-    
+      Utilities.toSmartDashboard("A19 Robot: ", DriveConstants.robotFrontAtPose(m_poseEstimatorSubsystem.getAprilTagPose(19), 0.0) );
 
 
 
@@ -276,6 +276,10 @@ public class RobotContainer {
         SmartDashboard.putData("FW", new FireAtWillCommand());
         Utilities.toSmartDashboard("April17", m_poseEstimatorSubsystem.getAprilTagPose((17)));
         Utilities.toSmartDashboard("April31", m_poseEstimatorSubsystem.getAprilTagPose((31)));
+        SmartDashboard.putData("OP", new GotoPoseCommand(m_robotDrive, m_poseEstimatorSubsystem, DriveConstants.robotFrontAtPose(m_poseEstimatorSubsystem.getAprilTagPose(19), 0.0) , m_robotDrive.defaultAutoConfig));
+        SmartDashboard.putData("A29", new GotoPoseCommand(m_robotDrive, m_poseEstimatorSubsystem, DriveConstants.robotRearAtPose(m_poseEstimatorSubsystem.getAprilTagPose(29), 0.0) , m_robotDrive.defaultAutoConfig));
+        SmartDashboard.putData("A29L", new GotoPoseCommand(m_robotDrive, m_poseEstimatorSubsystem, DriveConstants.robotLeftAtPose(m_poseEstimatorSubsystem.getAprilTagPose(29), 0.0) , m_robotDrive.defaultAutoConfig));
+        SmartDashboard.putData("A29R", new GotoPoseCommand(m_robotDrive, m_poseEstimatorSubsystem, DriveConstants.robotRightAtPose(m_poseEstimatorSubsystem.getAprilTagPose(29), 0.0) , m_robotDrive.defaultAutoConfig));
       } // (isSimulation()
   } // (configureButtonBindings)
 

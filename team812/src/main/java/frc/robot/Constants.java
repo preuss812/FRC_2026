@@ -374,7 +374,10 @@ public final class Constants {
 
     public static final class RotationConstants {
         public static final Rotation2d zero = new Rotation2d(0);
+        public static final Rotation2d rotate90 = new Rotation2d(Math.PI/2.0);
         public static final Rotation2d rotate180 = new Rotation2d(Math.PI);
+        public static final Rotation2d rotate270 = new Rotation2d(Math.PI*3.0/2.0);
+
     }
 
 
@@ -445,15 +448,17 @@ public final class Constants {
 
         public static final double kBackToCenterDistance = Units.inchesToMeters(17.5); //was 15.0 until 3/5/2024
         public static final double kFrontToCenterDistance = Units.inchesToMeters(17.5); //was 15.0 until 3/5/2024
-        public static final double kBumperWidth = 0; //Units.inchesToMeters(4.25);
+        public static final double kBumperWidth = 0; //TODO Restore Units.inchesToMeters(4.25);
         public static final double kRobotWidth = Units.inchesToMeters(27.18)+kBumperWidth*2.0; // Frame width plus 2 bumpers.
         public static final double kRobotLength = Units.inchesToMeters(27.0)+kBumperWidth*2.0; // Frame length plus 2 bumpers.
         public static final double kApproximateStartingY = FieldConstants.yMax - Units.inchesToMeters(36.0); // Meters (ie near the amp)
         public static final double kStartingOrientation = 0.0; // Starting orientation in radians (ie robot back against the alliance wall)
         public static final Translation2d robotCenterToFrontBumper = new Translation2d(kRobotLength/2, 0);
+        public static final Translation2d robotCenterToLeftBumper = new Translation2d(0, kRobotWidth/2);
         public static final Translation2d robotCenterToRearBumper = new Translation2d(-(kRobotLength/2), 0);
-        public static final Rotation2d rotate180 = new Rotation2d(Math.PI);
+                public static final Translation2d robotCenterToRightBumper = new Translation2d(0, -kRobotWidth/2);
 
+        
         /**
          * Returns the translation of the robot's center to the center of the front bumper.
          * @param rotation (radians)
@@ -473,26 +478,69 @@ public final class Constants {
         }
 
         /**
-         * Return a pose for the robot to be facing the pose with the center of it's front bumper touching the pose.
-         * @param pose - The pose you want to be facing.  Persumably, an AprilTag's pose.
-         * @param offset - (meters) the distance to be away from the pose.
-         * @return - The pose of the robot facing the pose with the center of it's front bumper aligned to the pose.
+         * Returns the translation of the robot's center to the center of the left bumper.
+         * @param rotation (radians)
+         * @return (x,y) (meters) the translation of the robot's center to the center of the left bumper
          */
-        public static Pose2d robotRearAtPose(Pose2d pose, double offset) {
-            Translation2d position = pose.getTranslation().plus(rotatedRobotFrontBumper(pose.getRotation(), offset));
-            Rotation2d rotation = pose.getRotation().rotateBy(rotate180);
-            return new Pose2d(position, rotation);
+        public static final Translation2d rotatedRobotLeftBumper(Rotation2d rotation, double offset) {
+            return robotCenterToLeftBumper.plus(new Translation2d(offset, 0.0)).rotateBy(rotation.plus(RotationConstants.rotate270));
         }
-    
+
+/**
+         * Returns the translation of the robot's center to the center of the right bumper.
+         * @param rotation (radians)
+         * @return (x,y) (meters) the translation of the robot's center to the center of the right bumper
+         */
+        public static final Translation2d rotatedRobotRightBumper(Rotation2d rotation, double offset) {
+            return robotCenterToRightBumper.plus(new Translation2d(offset, 0.0)).rotateBy(rotation.plus(RotationConstants.rotate90));
+        }
+
+
         /**
-         * Return a pose for the robot to be facing the pose with the center of it's rear bumper touching the pose.
+         * Return a pose for the robot to be backing up to the pose with the center of it's rear bumper touching the pose.
          * @param pose - The pose you want to back up to.  Persumably, an AprilTag's pose.
          * @param offset - (meters) the distance to be away from the pose.
          * @return - The pose of the robot backed up to the pose with the center of it's rear bumper aligned to the pose.
          */
+        public static Pose2d robotRearAtPose(Pose2d pose, double offset) {
+            Translation2d position = pose.getTranslation().plus(rotatedRobotFrontBumper(pose.getRotation(), offset));
+            Rotation2d rotation = pose.getRotation(); // .rotateBy(rotate180);
+            return new Pose2d(position, rotation);
+        }
+    
+        /**
+         * Return a pose for the robot to be facing the pose with the center of it's front bumper touching the pose.
+         * @param pose - The pose you want to face. Persumably, an AprilTag's pose.
+         * @param offset - (meters) the distance to be away from the pose.
+         * @return - The pose of the robot facing the pose with the center of it's front bumper aligned to the pose.
+         */
         public static Pose2d robotFrontAtPose(Pose2d pose, double offset) {
             Translation2d position = pose.getTranslation().plus(rotatedRobotFrontBumper(pose.getRotation(), offset));
-            Rotation2d rotation = pose.getRotation();
+            Rotation2d rotation = pose.getRotation().rotateBy(RotationConstants.rotate180);
+            return new Pose2d(position, rotation);
+        }
+
+         /**
+         * Return a pose for the robot to be at the pose with the center of it's left bumper touching the pose.
+         * @param pose - The pose you want to face. Persumably, an AprilTag's pose.
+         * @param offset - (meters) the distance to be away from the pose.
+         * @return - The pose of the robot facing the pose with the center of it's left bumper aligned to the pose.
+         */
+        public static Pose2d robotLeftAtPose(Pose2d pose, double offset) {
+            Translation2d position = pose.getTranslation().plus(rotatedRobotLeftBumper(pose.getRotation(), offset));
+            Rotation2d rotation = pose.getRotation().rotateBy(RotationConstants.rotate90);  // +90 to face left
+            return new Pose2d(position, rotation);
+        }
+
+        /**
+         * Return a pose for the robot to be at the pose with the center of it's right bumper touching the pose.
+         * @param pose - The pose you want to face. Persumably, an AprilTag's pose.
+         * @param offset - (meters) the distance to be away from the pose.
+         * @return - The pose of the robot facing the pose with the center of it's right bumper aligned to the pose.
+         */
+        public static Pose2d robotRightAtPose(Pose2d pose, double offset) {
+            Translation2d position = pose.getTranslation().plus(rotatedRobotRightBumper(pose.getRotation(), offset));
+            Rotation2d rotation = pose.getRotation().rotateBy(RotationConstants.rotate270); // +270 to face right
             return new Pose2d(position, rotation);
         }
     }
