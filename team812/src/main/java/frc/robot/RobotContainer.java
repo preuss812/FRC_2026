@@ -7,6 +7,9 @@
 
 package frc.robot;
 
+import com.revrobotics.spark.SparkFlex;
+import com.revrobotics.spark.SparkLowLevel.MotorType;
+
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.estimator.PoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -81,7 +84,7 @@ public class RobotContainer {
   //private final DriveTrain m_DriveTrain = new DriveTrain();
   // The robot's subsystems
   public final static DriveSubsystemSRX m_robotDrive = new DriveSubsystemSRX();
-
+  public final SparkFlex m_test = new SparkFlex(50, MotorType.kBrushless);
   public static BlackBoxSubsystem m_blackBox = new BlackBoxSubsystem();
   public static PoseEstimatorCamera m_atagCamera = new PoseEstimatorCamera("atag812", VisionConstants.ROBOT_TO_APRIL_CAMERA);
   //public static PoseEstimatorCamera m_frontCamera = new PoseEstimatorCamera("Microsoft_LifeCam_HD-3000", VisionConstants.ROBOT_TO_FRONT_CAMERA);
