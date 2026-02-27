@@ -5,142 +5,261 @@
     {
       "name": "Teleoperated",
       "grid_layout": {
-        "layouts": [],
-        "containers": [
+        "layouts": [
           {
             "title": "Field",
-            "x": 512.0,
-            "y": 0.0,
-            "width": 896.0,
-            "height": 384.0,
-            "type": "Field",
-            "properties": {
-              "topic": "/SmartDashboard/Field",
-              "period": 0.06,
-              "field_game": "Reefscape",
-              "robot_width": 0.85,
-              "robot_length": 0.85,
-              "show_other_objects": true,
-              "show_trajectories": true,
-              "field_rotation": 0.0,
-              "robot_color": 4294198070,
-              "trajectory_color": 4294967295
-            }
-          },
-          {
-            "title": "AutoSelector",
-            "x": 1408.0,
-            "y": 0.0,
-            "width": 384.0,
-            "height": 128.0,
-            "type": "ComboBox Chooser",
-            "properties": {
-              "topic": "/SmartDashboard/AutoSelector",
-              "period": 0.06,
-              "sort_options": false
-            }
-          },
-          {
-            "title": "C2Fast",
-            "x": 512.0,
-            "y": 384.0,
-            "width": 256.0,
-            "height": 128.0,
-            "type": "Command",
-            "properties": {
-              "topic": "/SmartDashboard/C2Fast",
-              "period": 0.06,
-              "show_type": true
-            }
-          },
-          {
-            "title": "C2Slow",
-            "x": 512.0,
-            "y": 512.0,
-            "width": 256.0,
-            "height": 128.0,
-            "type": "Command",
-            "properties": {
-              "topic": "/SmartDashboard/C2Slow",
-              "period": 0.06,
-              "show_type": true
-            }
-          },
-          {
-            "title": "xFeedback",
-            "x": 768.0,
-            "y": 384.0,
-            "width": 512.0,
-            "height": 256.0,
-            "type": "Graph",
-            "properties": {
-              "topic": "/SmartDashboard/xFeedback",
-              "period": 0.033,
-              "data_type": "double",
-              "time_displayed": 5.0,
-              "color": 4278238420,
-              "line_width": 2.0
-            }
-          },
-          {
-            "title": "yFF",
-            "x": 128.0,
+            "x": 1280.0,
             "y": 256.0,
+            "width": 384.0,
+            "height": 256.0,
+            "type": "List Layout",
+            "properties": {
+              "label_position": "TOP"
+            },
+            "children": [
+              {
+                "title": "Robot",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 128.0,
+                "height": 128.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/SmartDashboard/Field/Robot",
+                  "period": 0.06,
+                  "data_type": "double[]",
+                  "show_submit_button": false
+                }
+              }
+            ]
+          }
+        ],
+        "containers": [
+          {
+            "title": "DriveTrain",
+            "x": 512.0,
+            "y": 128.0,
+            "width": 256.0,
+            "height": 128.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/SmartDashboard/DriveTrain",
+              "period": 0.06,
+              "data_type": "string",
+              "show_submit_button": false
+            }
+          },
+          {
+            "title": "gyro_angle",
+            "x": 896.0,
+            "y": 128.0,
             "width": 128.0,
             "height": 128.0,
             "type": "Text Display",
             "properties": {
-              "topic": "/SmartDashboard/yFF",
+              "topic": "/SmartDashboard/gyro_angle",
               "period": 0.06,
               "data_type": "double",
               "show_submit_button": false
             }
           },
           {
-            "title": "yFeedback",
-            "x": 1280.0,
-            "y": 384.0,
-            "width": 512.0,
-            "height": 256.0,
-            "type": "Graph",
+            "title": "CurrentPose",
+            "x": 512.0,
+            "y": 256.0,
+            "width": 256.0,
+            "height": 128.0,
+            "type": "Text Display",
             "properties": {
-              "topic": "/SmartDashboard/yFeedback",
-              "period": 0.033,
-              "data_type": "double",
-              "time_displayed": 5.0,
-              "color": 4278238420,
-              "line_width": 2.0
+              "topic": "/SmartDashboard/CurrentPose",
+              "period": 0.06,
+              "data_type": "string",
+              "show_submit_button": false
             }
           },
           {
-            "title": "TT",
+            "title": "setRobotPose",
+            "x": 896.0,
+            "y": 256.0,
+            "width": 128.0,
+            "height": 128.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/SmartDashboard/setRobotPose",
+              "period": 0.06,
+              "data_type": "double",
+              "show_submit_button": false
+            }
+          },
+          {
+            "title": "oldAngleAdjustment",
             "x": 512.0,
-            "y": 640.0,
+            "y": 384.0,
+            "width": 128.0,
+            "height": 128.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/SmartDashboard/oldAngleAdjustment",
+              "period": 0.06,
+              "data_type": "double",
+              "show_submit_button": false
+            }
+          },
+          {
+            "title": "newAngleAdjustment",
+            "x": 640.0,
+            "y": 384.0,
+            "width": 128.0,
+            "height": 128.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/SmartDashboard/newAngleAdjustment",
+              "period": 0.06,
+              "data_type": "double",
+              "show_submit_button": false
+            }
+          },
+          {
+            "title": "newAngle",
+            "x": 1024.0,
+            "y": 128.0,
+            "width": 128.0,
+            "height": 128.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/SmartDashboard/newAngle",
+              "period": 0.06,
+              "data_type": "double",
+              "show_submit_button": false
+            }
+          },
+          {
+            "title": "sgetAngle",
+            "x": 1152.0,
+            "y": 128.0,
+            "width": 128.0,
+            "height": 128.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/SmartDashboard/sgetAngle",
+              "period": 0.06,
+              "data_type": "double",
+              "show_submit_button": false
+            }
+          },
+          {
+            "title": "sgetAngleAdj",
+            "x": 1280.0,
+            "y": 128.0,
+            "width": 128.0,
+            "height": 128.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/SmartDashboard/sgetAngleAdj",
+              "period": 0.06,
+              "data_type": "double",
+              "show_submit_button": false
+            }
+          },
+          {
+            "title": "srgetAngle",
+            "x": 1408.0,
+            "y": 128.0,
+            "width": 128.0,
+            "height": 128.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/SmartDashboard/srgetAngle",
+              "period": 0.06,
+              "data_type": "double",
+              "show_submit_button": false
+            }
+          },
+          {
+            "title": "sssAngle",
+            "x": 1024.0,
+            "y": 256.0,
+            "width": 128.0,
+            "height": 128.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/SmartDashboard/sssAngle",
+              "period": 0.06,
+              "data_type": "double",
+              "show_submit_button": false
+            }
+          },
+          {
+            "title": "Gyroinverted",
+            "x": 896.0,
+            "y": 384.0,
+            "width": 128.0,
+            "height": 128.0,
+            "type": "Boolean Box",
+            "properties": {
+              "topic": "/SmartDashboard/Gyroinverted",
+              "period": 0.06,
+              "data_type": "boolean",
+              "true_color": 4283215696,
+              "false_color": 4294198070,
+              "true_icon": "None",
+              "false_icon": "None"
+            }
+          },
+          {
+            "title": "sssAngleAdj",
+            "x": 1152.0,
+            "y": 256.0,
+            "width": 128.0,
+            "height": 128.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/SmartDashboard/sssAngleAdj",
+              "period": 0.06,
+              "data_type": "double",
+              "show_submit_button": false
+            }
+          },
+          {
+            "title": "srgetAngleadjustment",
+            "x": 1024.0,
+            "y": 384.0,
+            "width": 128.0,
+            "height": 128.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/SmartDashboard/srgetAngleadjustment",
+              "period": 0.06,
+              "data_type": "double",
+              "show_submit_button": false
+            }
+          },
+          {
+            "title": "sradjustment",
+            "x": 1152.0,
+            "y": 384.0,
+            "width": 128.0,
+            "height": 128.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/SmartDashboard/sradjustment",
+              "period": 0.06,
+              "data_type": "double",
+              "show_submit_button": false
+            }
+          },
+          {
+            "title": "Circle",
+            "x": 512.0,
+            "y": 512.0,
             "width": 256.0,
             "height": 128.0,
             "type": "Command",
             "properties": {
-              "topic": "/SmartDashboard/TT",
+              "topic": "/SmartDashboard/Circle",
               "period": 0.06,
-              "show_type": true
-            }
-          },
-          {
-            "title": "xFF",
-            "x": 768.0,
-            "y": 640.0,
-            "width": 512.0,
-            "height": 256.0,
-            "type": "Graph",
-            "properties": {
-              "topic": "/SmartDashboard/xFF",
-              "period": 0.033,
-              "data_type": "double",
-              "time_displayed": 5.0,
-              "min_value": -5.0,
-              "max_value": 5.0,
-              "color": 4278238420,
-              "line_width": 2.0
+              "show_type": true,
+              "maximize_button_space": false
             }
           },
           {
@@ -153,41 +272,99 @@
             "properties": {
               "topic": "/SmartDashboard/R",
               "period": 0.06,
-              "show_type": true
+              "show_type": true,
+              "maximize_button_space": false
             }
           },
           {
-            "title": "yFF",
-            "x": 1280.0,
-            "y": 640.0,
-            "width": 512.0,
-            "height": 256.0,
-            "type": "Graph",
+            "title": "Black Box Rotation",
+            "x": 768.0,
+            "y": 256.0,
+            "width": 128.0,
+            "height": 128.0,
+            "type": "Text Display",
             "properties": {
-              "topic": "/SmartDashboard/yFF",
-              "period": 0.033,
-              "data_type": "double",
-              "time_displayed": 5.0,
-              "min_value": -5.0,
-              "max_value": 5.0,
-              "color": 4278238420,
-              "line_width": 2.0
-            }
-          },
-          {
-            "title": "Match Time",
-            "x": 128.0,
-            "y": 0.0,
-            "width": 384.0,
-            "height": 256.0,
-            "type": "Match Time",
-            "properties": {
-              "topic": "/SmartDashboard/Match Time",
+              "topic": "/SmartDashboard/Black Box Rotation",
               "period": 0.06,
               "data_type": "double",
-              "time_display_mode": "Minutes and Seconds",
-              "red_start_time": 15,
-              "yellow_start_time": 30
+              "show_submit_button": false
+            }
+          },
+          {
+            "title": "Target Velocity",
+            "x": 512.0,
+            "y": 0.0,
+            "width": 128.0,
+            "height": 128.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/SmartDashboard/Target Velocity",
+              "period": 0.06,
+              "data_type": "double",
+              "show_submit_button": false
+            }
+          },
+          {
+            "title": "Flywheel RPM",
+            "x": 768.0,
+            "y": 0.0,
+            "width": 128.0,
+            "height": 128.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/SmartDashboard/Flywheel RPM",
+              "period": 0.06,
+              "data_type": "double",
+              "show_submit_button": false
+            }
+          },
+          {
+            "title": "April Tag 19 pose: ",
+            "x": 768.0,
+            "y": 384.0,
+            "width": 128.0,
+            "height": 128.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/SmartDashboard/April Tag 19 pose: ",
+              "period": 0.06,
+              "data_type": "string",
+              "show_submit_button": false
+            }
+          },
+          {
+            "title": "CurrentPose",
+            "x": 384.0,
+            "y": 384.0,
+            "width": 128.0,
+            "height": 128.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/SmartDashboard/CurrentPose",
+              "period": 0.06,
+              "data_type": "string",
+              "show_submit_button": false
+            }
+          },
+          {
+            "title": "Field",
+            "x": 0.0,
+            "y": 0.0,
+            "width": 512.0,
+            "height": 384.0,
+            "type": "Field",
+            "properties": {
+              "topic": "/SmartDashboard/Field",
+              "period": 0.06,
+              "field_game": "Rebuilt",
+              "robot_width": 0.85,
+              "robot_length": 0.85,
+              "show_other_objects": true,
+              "show_trajectories": true,
+              "field_rotation": 0.0,
+              "robot_color": 4294198070,
+              "trajectory_color": 4294967295,
+              "show_robot_outside_widget": true
             }
           }
         ]
