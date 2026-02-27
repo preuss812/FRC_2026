@@ -12,8 +12,11 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.math.trajectory.Trajectory;
+import edu.wpi.first.wpilibj2.command.Command;
+
 import frc.robot.Constants.DriveConstants;
 import frc.robot.Constants.FieldConstants;
+import frc.robot.commands.DriveChoreoPathCommand;
 import frc.robot.subsystems.AllianceConfigurationSubsystem;
 
 /** 
@@ -21,7 +24,7 @@ import frc.robot.subsystems.AllianceConfigurationSubsystem;
  */
 public class AutonomousPlans {
     private static boolean debug = true;
-    private static final double robotInitialOrientation = Units.degreesToRadians(0.0);  // robot starts on the starting line with rear facing the hub.
+    private static final double robotInitialOrientation = Units.degreesToRadians(0.0);  // robot starts on the starting line with front facing the hub.
 
     public static ArrayList<Trajectory> autoPaths = new ArrayList<Trajectory>();
     public static ArrayList<String>     autoNames = new ArrayList<String>();
@@ -33,7 +36,7 @@ public class AutonomousPlans {
     public static int AUTO_MODE_ROBOT_DECIDES;
     public static int AUTO_MODE_MOVE_OFF_LINE_AND_STOP;
     public static int AUTO_MODE_DO_NOTHING;
-    public static int AUTO_MODE_MY_BARGE_TO_OPPOSITE;
+    public static int CENTER_SHOOT;
     public static int AUTO_MODE_MY_BARGE_TO_FAR_SIDE;
     public static int AUTO_MODE_MY_BARGE_TO_NEAR_SIDE;
     public static int AUTO_MODE_CENTER_STRAIGHT;
@@ -99,6 +102,8 @@ public class AutonomousPlans {
         finalPoses.clear();
         startingPoses.clear();
     
+        // Make commands for all the choreo paths
+        Command choreoCenterShoot = new DriveChoreoPathCommand(RobotContainer.m_robotDrive, RobotContainer.m_poseEstimatorSubsystem, "CenterShoot", RobotContainer.m_robotDrive.defaultAutoConfig, 1.0, 1.0);
         // The staring poses will be on the blue starting line facing back toward the blue drive station
         Rotation2d startingRotation = new Rotation2d(robotInitialOrientation);
         double offsetFromAprilTag = Units.inchesToMeters(40); // 0.5 meters from the april tag
@@ -160,9 +165,9 @@ public class AutonomousPlans {
         expectedAprilTags.add(0);
 
         // Build a path adding it to the autoChooser which will select the autonomous routine
-        AUTO_MODE_MY_BARGE_TO_OPPOSITE = autoNames.size();
+        CENTER_SHOOT = autoNames.size();
         addAutoMode(
-            "My Barge to Opposite"
+            "CenterShoot"
             ,new Pose2d[] {
                 new Pose2d(FieldConstants.blueStartLine,AT14.getY(), startingRotation),
                 //new Pose2d(AT20.getX(),AT14.getY(), startingRotation),

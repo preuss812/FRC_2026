@@ -7,19 +7,18 @@ package frc.robot.subsystems;
 import com.revrobotics.PersistMode;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.ResetMode;
-import com.revrobotics.spark.ClosedLoopSlot;
 import com.revrobotics.spark.FeedbackSensor;
-import com.revrobotics.spark.SparkClosedLoopController;
-import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.SparkBase.ControlType;
-import com.revrobotics.spark.config.SparkMaxConfig;
+import com.revrobotics.spark.SparkClosedLoopController;
+import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
-
+import com.revrobotics.spark.config.SparkFlexConfig;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.CANConstants;
+import frc.robot.Robot;
 
 public class ShooterSubsystem extends SubsystemBase {
 
@@ -40,10 +39,10 @@ public class ShooterSubsystem extends SubsystemBase {
     private final int pidIdx = 0;
     private final int slotIdx = 0;
     private final int timeoutMs = 10;
-    private final SparkMax motor1;
-    private final SparkMax motor2;
-    private final SparkMaxConfig motorConfig;
-    private final SparkMaxConfig motorFollowerConfig;
+    private final SparkFlex motor1;
+    private final SparkFlex motor2;
+    private final SparkFlexConfig motorConfig;
+    private final SparkFlexConfig motorFollowerConfig;
     private final SparkClosedLoopController closedLoopController;
     private final RelativeEncoder encoder;
     
@@ -55,8 +54,8 @@ public class ShooterSubsystem extends SubsystemBase {
      * Initialize the SPARK MAX and get its encoder and closed loop controller
      * objects for later use.
      */
-    motor1 = new SparkMax(CANConstants.kShooterMotor1, MotorType.kBrushless);
-    motor2 = new SparkMax(CANConstants.kShooterMotor2, MotorType.kBrushless);
+    motor1 = new SparkFlex(CANConstants.kShooterMotor1, MotorType.kBrushless);
+    motor2 = new SparkFlex(CANConstants.kShooterMotor2, MotorType.kBrushless);
     closedLoopController = motor1.getClosedLoopController();
     encoder = motor1.getEncoder();
 
@@ -64,8 +63,8 @@ public class ShooterSubsystem extends SubsystemBase {
      * Create a new SPARK MAX configuration object. This will store the
      * configuration parameters for the SPARK MAX that we will set below.
      */
-    motorConfig = new SparkMaxConfig();
-    motorFollowerConfig = new SparkMaxConfig();
+    motorConfig = new SparkFlexConfig();
+    motorFollowerConfig = new SparkFlexConfig();
 
     /*
      * Configure the encoder. For this specific example, we are using the
@@ -90,20 +89,14 @@ public class ShooterSubsystem extends SubsystemBase {
      */
     motorConfig.closedLoop
         .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
-        // Set PID values for position control. We don't need to pass a closed loop
-        // slot, as it will default to slot 0.
-        .p(0.1)
+        // Set PID values for velocity control in slot 1
+        .p(0.0001)
         .i(0)
         .d(0)
         .outputRange(-1, 1)
-        // Set PID values for velocity control in slot 1
-        .p(0.0001, ClosedLoopSlot.kSlot1)
-        .i(0, ClosedLoopSlot.kSlot1)
-        .d(0, ClosedLoopSlot.kSlot1)
-        .outputRange(-1, 1, ClosedLoopSlot.kSlot1)
         .feedForward
           // kV is now in Volts, so we multiply by the nominal voltage (12V)
-          .kV(12.0 / 5767, ClosedLoopSlot.kSlot1);
+          .kV(12.0 / 5767);
 
     /*
      * Apply the configuration to the SPARK MAX.
@@ -123,11 +116,8 @@ public class ShooterSubsystem extends SubsystemBase {
     motor2.configure(motorFollowerConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
 
     // Initialize dashboard values
-    SmartDashboard.setDefaultNumber("Target Position", 0);
     SmartDashboard.setDefaultNumber("Target Velocity", 0);
-    SmartDashboard.setDefaultBoolean("Control Mode", false);
-    SmartDashboard.setDefaultBoolean("Reset Encoder", false);
-    
+    currentRPM = 0;
   }
 
   @Override
@@ -135,30 +125,33 @@ public class ShooterSubsystem extends SubsystemBase {
     // This method will be called once per scheduler run
 
     // closed-loop velocity control
-    currentRPM = encoder.getVelocity();
+    if (Robot.isReal()) currentRPM = encoder.getVelocity();
     // telemetry
     SmartDashboard.putNumber("Shooter RPM", currentRPM);
 
-    targetRPM = SmartDashboard.getNumber("Target Velocity", 0);
-    closedLoopController.setSetpoint(targetRPM, ControlType.kVelocity, ClosedLoopSlot.kSlot1);
+    // = SmartDashboard.getNumber("Target Velocity", 0);
+    closedLoopController.setSetpoint(targetRPM, ControlType.kVelocity);
   }
 
   public void runMotor(double pOut){
     pOut = MathUtil.clamp(pOut, -1, 1);
-    closedLoopController.setSetpoint(pOut, ControlType.kDutyCycle, ClosedLoopSlot.kSlot1);
+    closedLoopController.setSetpoint(pOut, ControlType.kDutyCycle);
+  }
+
+  public double rpmToNativeUnits(double rpm) {
+    return 1.0 * rpm;
   }
 
   /**
    * setRPM - set the target rpm
    * @param rpm (double) The rpm target for the shooter
    */
-  // public void setRPM(double rpm) {
-  //   targetRPM = rpm;
-  //   double targetVelocity = rpmToNativeUnits(rpm);
-  //   motor.config_kF(slotIdx, rpmToFeedForward(rpm), timeoutMs);
-  //   motor.set(ControlMode.Velocity, targetVelocity);
-  //   SmartDashboard.putNumber("Shooter Target RPM", targetRPM);
-  // }
+  public void setRPM(double rpm) {
+    targetRPM = rpm;
+    double targetVelocity = rpmToNativeUnits(rpm);
+    closedLoopController.setSetpoint(targetVelocity, ControlType.kVelocity);
+    SmartDashboard.putNumber("Shooter Target RPM", targetRPM);
+  }
 
   public double getRPM() {
     return currentRPM;
@@ -175,4 +168,9 @@ public class ShooterSubsystem extends SubsystemBase {
     closedLoopController.setSetpoint(0, ControlType.kDutyCycle);
   }
 
+  @Override
+  public void simulationPeriodic() {
+    currentRPM = currentRPM + (targetRPM - currentRPM) * 0.1; // simple simulation of the shooter speed changing over time.
+  }
+  
 }

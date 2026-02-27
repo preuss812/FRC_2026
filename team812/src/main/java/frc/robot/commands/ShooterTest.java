@@ -4,31 +4,22 @@
 
 package frc.robot.commands;
 
-import com.ctre.phoenix.motorcontrol.can.TalonSRX;
-
-import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.Constants;
 import frc.robot.Constants.ShooterConstants;
-import frc.robot.subsystems.BlackBoxSubsystem;
-import frc.robot.subsystems.ShooterSubsystem;
+import frc.robot.subsystems.AllianceConfigurationSubsystem;
 import frc.robot.subsystems.PoseEstimatorSubsystem;
+import frc.robot.subsystems.ShooterSubsystem;
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
 public class ShooterTest extends Command {
   private final ShooterSubsystem shooter;
-  private final  BlackBoxSubsystem blackBox;
   private final PoseEstimatorSubsystem PoseEstimatorSubsystem;
-  private final double[] rangesFromHub = {0, 100, 120, 135, 150, 165, 180};
   /** Creates a new MotorTest. */
-  public ShooterTest(ShooterSubsystem motor, BlackBoxSubsystem blackBox, PoseEstimatorSubsystem poseEstimator) {
+  public ShooterTest(ShooterSubsystem motor, PoseEstimatorSubsystem poseEstimator) {
     this.shooter = motor;
-    this.blackBox = blackBox;
     PoseEstimatorSubsystem = poseEstimator;
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(motor);
@@ -43,14 +34,14 @@ public class ShooterTest extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    Pose2d robotPos = PoseEstimatorSubsystem.getCurrentPose();
-    Translation2d hubPos = new Translation2d(Units.inchesToMeters(181.56), Units.inchesToMeters(158.32));
+    Pose2d robotPose = PoseEstimatorSubsystem.getCurrentPose();
+    Translation2d hubPos = AllianceConfigurationSubsystem.getHubCenter();
     //Distance from the center of the robot (Adjust later)
     double shooterOffset = 0;
-    double distance = 3;
-    //double distance = hubPos.getDistance(robotPos.getTranslation()) - shooterOffset;
+    double distance = robotPose.getTranslation().getDistance(hubPos) - shooterOffset;
     double RPM = distanceToRPM(distance);
-    shooter.runMotor(RPM*ShooterConstants.RPMToVolts/12.0);
+    shooter.setRPM(RPM);
+    //shooter.runMotor(RPM*ShooterConstants.RPMToVolts/12.0);
     SmartDashboard.putBoolean("RPM OK", canShoot(RPM));
 
     
@@ -75,12 +66,12 @@ public class ShooterTest extends Command {
 
   public double distanceToRPM(double x){
     //Change coefficents later
-    return Constants.ShooterConstants.a*Math.pow(x, 3) + Constants.ShooterConstants.b*Math.pow(x,2) + Constants.ShooterConstants.c*x + Constants.ShooterConstants.d;
+    return ShooterConstants.a*Math.pow(x, 3) + ShooterConstants.b*Math.pow(x,2) + ShooterConstants.c*x + ShooterConstants.d;
   }
 
   public boolean canShoot(double targetRPM){
     double actualRPM = shooter.getRPM();
-    return Math.abs(actualRPM-targetRPM) < Constants.ShooterConstants.RPMTolerance;
+    return Math.abs(actualRPM-targetRPM) < ShooterConstants.RPMTolerance;
   }
 
 

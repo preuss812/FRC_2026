@@ -7,17 +7,18 @@
 
 package frc.robot;
 
+import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
+
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
-import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
+import edu.wpi.first.math.util.Units;
 import frc.utils.PreussMotorConfig;
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
@@ -167,7 +168,7 @@ public final class Constants {
         // Handy X coordinates:
         public static double blueStartLine =  Units.inchesToMeters(156.61);
         public static double redStartLine = xMax - blueStartLine;   
-        public static Translation2d outpostCenter = new Translation2d(Units.inchesToMeters(26.22), 0);
+        public static Translation2d outpostCenter = new Translation2d(Units.inchesToMeters(0.3), Units.inchesToMeters(26.22));
 
 
         // Helper functions to translate Blue coordinates to Red coordinates.

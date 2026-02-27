@@ -11,7 +11,6 @@ import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.estimator.PoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
@@ -30,23 +29,13 @@ import frc.robot.Constants.DriveConstants;
 import frc.robot.Constants.OIConstants;
 import frc.robot.Constants.UltrasonicConstants;
 import frc.robot.Constants.VisionConstants;
-import frc.robot.subsystems.AllianceConfigurationSubsystem;
-import frc.robot.subsystems.BlackBoxSubsystem;
-import frc.robot.subsystems.DriveSubsystemSRX.DrivingMode;
-import frc.robot.subsystems.FeederSubsystem;
-import frc.robot.subsystems.IntakeSubsystem;
-import frc.robot.subsystems.PingResponseUltrasonicSubsystem;
-import frc.robot.subsystems.PoseEstimatorSubsystem;
-import frc.robot.subsystems.ShooterSubsystem;
-import frc.robot.subsystems.DriveSubsystemSRX;
 import frc.robot.commands.DriveChoreoPathCommand;
 import frc.robot.commands.DriveCircle;
 import frc.robot.commands.DriveCircleThrottle;
+import frc.robot.commands.DriveFacingHub;
 import frc.robot.commands.DriveRobotCommand;
 import frc.robot.commands.DriveWithoutVisionCommand;
-import frc.robot.commands.DriveFacingHub;
 import frc.robot.commands.FireAtWillCommand;
-import frc.robot.commands.ShooterTest;
 import frc.robot.commands.GotoPoseCommand;
 import frc.robot.commands.GotoProcessorCommand;
 import frc.robot.commands.PointCameraTowardHubCommand;
@@ -61,8 +50,11 @@ import frc.robot.subsystems.AllianceConfigurationSubsystem;
 import frc.robot.subsystems.BlackBoxSubsystem;
 import frc.robot.subsystems.DriveSubsystemSRX;
 import frc.robot.subsystems.DriveSubsystemSRX.DrivingMode;
+import frc.robot.subsystems.FeederSubsystem;
+import frc.robot.subsystems.IntakeSubsystem;
 import frc.robot.subsystems.PingResponseUltrasonicSubsystem;
 import frc.robot.subsystems.PoseEstimatorSubsystem;
+import frc.robot.subsystems.ShooterSubsystem;
 import frc.utils.PoseEstimatorCamera;
 import frc.utils.PreussDriveSimulation;
 
@@ -95,7 +87,7 @@ public class RobotContainer {
   private static  boolean isSimulation = !Robot.isReal();
   public static PreussDriveSimulation m_preussDriveSimulation = new PreussDriveSimulation(m_poseEstimatorSubsystem);
   private static boolean debug = true; // To enable debugging in this module, change false to true.
-  private static ShooterSubsystem m_ShooterSubsystem = new ShooterSubsystem(CANConstants.kShooterMotor1);
+  public static ShooterSubsystem m_ShooterSubsystem = new ShooterSubsystem(CANConstants.kShooterMotor1);
   private static IntakeSubsystem m_IntakeSubsystem = new IntakeSubsystem(CANConstants.kIntakeMotor);
   private static FeederSubsystem m_FeederSubsystem = new FeederSubsystem(CANConstants.kFeederMotor);
 
@@ -109,7 +101,7 @@ public class RobotContainer {
   // Controller definitions
   private final Joystick leftJoystick = new Joystick(OIConstants.kLeftJoystick);
   private final Joystick rightJoystick = new Joystick(OIConstants.kRightJoystick);
-  XboxController m_driverController = new XboxController(OIConstants.kDriverControllerPort);
+  public static XboxController m_driverController = new XboxController(OIConstants.kDriverControllerPort);
   public static double startingHeading;
 
   double POV_to_double(int pov) {
@@ -254,10 +246,7 @@ public class RobotContainer {
     if (isSimulation()) {
       SmartDashboard.putData("Circle", new DriveCircleThrottle(m_robotDrive, m_poseEstimatorSubsystem, m_robotDrive.circleAutoConfig, 1.0));
       SmartDashboard.putData("DCG2P", new DriveCircle(m_robotDrive, m_poseEstimatorSubsystem, m_robotDrive.circleAutoConfig, 1.145916));
-      SmartDashboard.putData("Choreo1", new DriveChoreoPathCommand(m_robotDrive, m_poseEstimatorSubsystem, "Blue 1 Meter", m_robotDrive.circleAutoConfig, 0.1, 0.0));
-      SmartDashboard.putData("C2Fast", new DriveChoreoPathCommand(m_robotDrive, m_poseEstimatorSubsystem, "Low to AT22", m_robotDrive.circleAutoConfig, 1.0, 1.0));
-      SmartDashboard.putData("C2Slow", new DriveChoreoPathCommand(m_robotDrive, m_poseEstimatorSubsystem, "Low to AT22", m_robotDrive.circleAutoConfig, 0.2, 1.0));
-      SmartDashboard.putData("Choreo3", new DriveChoreoPathCommand(m_robotDrive, m_poseEstimatorSubsystem, "PID test", m_robotDrive.circleAutoConfig, 1.0, 1.0));
+      SmartDashboard.putData("Choreo1", new DriveChoreoPathCommand(m_robotDrive, m_poseEstimatorSubsystem, "CenterShoot", m_robotDrive.circleAutoConfig, 0.1, 0.0));
       SmartDashboard.putData("Y", new ResetDriveTrainCommand(this));
       SmartDashboard.putData("Z", new SimSetRobotPoseCommand(m_robotDrive, m_poseEstimatorSubsystem, new Pose2d(5.5 + 0.145916,4, Rotation2d.kZero)));
       SmartDashboard.putData("TT", new SwerveToProcessorCommand(m_robotDrive, m_poseEstimatorSubsystem, true));

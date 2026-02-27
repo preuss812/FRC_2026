@@ -9,20 +9,17 @@ package frc.robot;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import frc.robot.Constants.FieldConstants;
+import frc.robot.Constants.VisionConstants;
+import frc.robot.autoCommands.CenterShootCommand;
 import frc.robot.subsystems.AllianceConfigurationSubsystem;
 import frc.robot.subsystems.DriveSubsystemSRX;
 import frc.robot.subsystems.DriveSubsystemSRX.DrivingMode;
 import frc.robot.subsystems.PoseEstimatorSubsystem;
-import frc.robot.commands.AutoSwerveToHubCommand;
-import frc.robot.commands.AutoGotoHubCommand;
-import frc.robot.commands.DriveWithoutVisionCommand;
-import frc.robot.Constants.FieldConstants;
-import frc.robot.Constants.VisionConstants;
 
 /**
  * Construct the autonomous command.
@@ -102,9 +99,12 @@ public class Autonomous extends SequentialCommandGroup {
     // Initialize the robot before moving.
     addCommands(new SequentialCommandGroup(
       new InstantCommand(() -> AllianceConfigurationSubsystem.setStartingPose(AutonomousPlans.startingPoses.get(getAutoMode()))),
-      new InstantCommand(() -> RobotContainer.m_robotDrive.setDrivingMode(DrivingMode.SPEED))
+      new InstantCommand(() -> RobotContainer.m_robotDrive.setDrivingMode(DrivingMode.SPEED)),
+      new InstantCommand(() -> RobotContainer.m_ShooterSubsystem.setRPM(3000.0)) // Initial guess at required rpm.  Could do better - TODO
     ));
-   
+    addCommands(new CenterShootCommand());
+
+    /*
     // For these first 2 modes, just drive 1 meter and wait.
     if (getAutoMode() == AutonomousPlans.AUTO_MODE_ROBOT_DECIDES || getAutoMode() == AutonomousPlans.AUTO_MODE_MOVE_OFF_LINE_AND_STOP) {
       addCommands(new DriveWithoutVisionCommand(m_robotDrive, m_PoseEstimatorSubsystem,  new Pose2d(-1.0, 0, new Rotation2d(0.0)), null));
@@ -118,7 +118,7 @@ public class Autonomous extends SequentialCommandGroup {
 
     // Perform the initial driving to get from the start line to the hub.
     double timeout = 15;
-    if (getAutoMode() == AutonomousPlans.AUTO_MODE_MY_BARGE_TO_OPPOSITE)
+    if (getAutoMode() == AutonomousPlans.CENTER_SHOOT)
       timeout = 12;
     if (getAutoMode() == AutonomousPlans.AUTO_MODE_CENTER_STRAIGHT)
       timeout = 8;
@@ -127,7 +127,7 @@ public class Autonomous extends SequentialCommandGroup {
       new AutoGotoHubCommand(m_robotDrive,m_PoseEstimatorSubsystem).withTimeout(timeout) // this one makes sure we get to the hub.
     );
 
-    
+    */
     
   }
 }

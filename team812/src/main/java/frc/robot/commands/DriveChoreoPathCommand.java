@@ -4,11 +4,18 @@
 
 package frc.robot.commands;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.ListIterator;
+import java.util.Optional;
+
+import choreo.Choreo;
+import choreo.trajectory.SwerveSample;
+import choreo.trajectory.Trajectory;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-//import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Timer;
@@ -19,15 +26,6 @@ import frc.robot.RobotContainer;
 import frc.robot.subsystems.DriveSubsystemSRX;
 import frc.robot.subsystems.PoseEstimatorSubsystem;
 import frc.utils.DrivingConfig;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.ListIterator;
-import java.util.Optional;
-
-import choreo.Choreo;
-import choreo.trajectory.SwerveSample;
-import choreo.trajectory.Trajectory;
 
 public class DriveChoreoPathCommand extends Command {
 
@@ -40,6 +38,7 @@ public class DriveChoreoPathCommand extends Command {
   private int m_count = 0; // Used for simulating time in a way that allows for breakpoints during simulation.
   private PIDController[] pidControllers = new PIDController[3]; // X, Y, and Rotation
   private boolean debug = true;
+  private Optional<Pose2d> m_initialPose = Optional.empty();
 
   /** Creates a new DriveChoreoPathCommand. */
   public DriveChoreoPathCommand(
@@ -58,6 +57,7 @@ public class DriveChoreoPathCommand extends Command {
     pidControllers[1] = new PIDController(10.0 * pidCorrectionFactor, 0.0, 0.0);
     pidControllers[2] = new PIDController(7.5  * pidCorrectionFactor, 0.0, 0.0);
     pidControllers[2].enableContinuousInput(-Math.PI, Math.PI); // For wrapping rotation.
+    m_initialPose = m_trajectory.get().getInitialPose(isRedAlliance());
 
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(robotDrive, poseEstimatorSubsystem);
@@ -70,24 +70,23 @@ public class DriveChoreoPathCommand extends Command {
     if (m_trajectory.isPresent()) {
      //RobotContainer.m_PoseEstimatorSubsystem.field2d.getObject("trajectory").setTrajectory(trajectory.get());// wrong class of trajectory
             // Get the initial pose of the trajectory
-            Optional<Pose2d> initialPose = m_trajectory.get().getInitialPose(isRedAlliance());
 
-            if (initialPose.isPresent()) {
+            if (m_initialPose.isPresent()) {
                 // Reset odometry to the start of the trajectory
                 //robotDrive.resetOdometry(initialPose.get());
 
-                RobotContainer.setRobotPose(initialPose.get());
+                RobotContainer.setRobotPose(m_initialPose.get());
 
                 if (m_trajectoryName == "PID test")
                 {
                   // Set up at the wrong start location to see if the robot can correct itself
-                  Pose2d  offsetPose = initialPose.get();
+                  Pose2d  offsetPose = m_initialPose.get();
                   //poseEstimatorSubsystem.setCurrentPose(initialPose.get());
                   m_poseEstimatorSubsystem.setCurrentPose(new Pose2d(offsetPose.getX(), offsetPose.getY() + 2.0, new Rotation2d(Math.PI/2.0))); //offsetPose.getRotation()));
                 }
                 else              
                 {  // Set the pose estimator to the start of the traject
-                  m_poseEstimatorSubsystem.setCurrentPose(initialPose.get());
+                  m_poseEstimatorSubsystem.setCurrentPose(m_initialPose.get());
                 
                 }
             }
@@ -205,5 +204,12 @@ public class DriveChoreoPathCommand extends Command {
       wpiTrajectory = new edu.wpi.first.math.trajectory.Trajectory(states);
     }
     return wpiTrajectory;
+  }
+
+  /*
+   * getInitialPose - helper function to return the initial pose of the trajectory if it exists, otherwise return a default pose.
+   */
+ public Pose2d getInitialPose() {
+    return m_initialPose.orElse(new Pose2d());
   }
 }
