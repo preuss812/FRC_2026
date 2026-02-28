@@ -44,6 +44,7 @@ import frc.robot.commands.ResetDriveTrainCommand;
 import frc.robot.commands.RoombaG2PCommand;
 import frc.robot.commands.RotateRobotCommand;
 import frc.robot.commands.RotateRobotG2PCommand;
+import frc.robot.commands.ShooterTest;
 import frc.robot.commands.SimSetRobotPoseCommand;
 import frc.robot.commands.SwerveToProcessorCommand;
 import frc.robot.subsystems.AllianceConfigurationSubsystem;
@@ -274,8 +275,8 @@ public class RobotContainer {
         SmartDashboard.putData("A29", new GotoPoseCommand(m_robotDrive, m_poseEstimatorSubsystem, DriveConstants.robotRearAtPose(m_poseEstimatorSubsystem.getAprilTagPose(29), 0.0) , m_robotDrive.defaultAutoConfig));
         SmartDashboard.putData("A29L", new GotoPoseCommand(m_robotDrive, m_poseEstimatorSubsystem, DriveConstants.robotLeftAtPose(m_poseEstimatorSubsystem.getAprilTagPose(29), 0.0) , m_robotDrive.defaultAutoConfig));
         SmartDashboard.putData("A29R", new GotoPoseCommand(m_robotDrive, m_poseEstimatorSubsystem, DriveConstants.robotRightAtPose(m_poseEstimatorSubsystem.getAprilTagPose(29), 0.0) , m_robotDrive.defaultAutoConfig));
-      } // (isSimulation()
-  } // (configureButtonBindings)
+    } // (isSimulation()
+        SmartDashboard.putData("RTest", new ShooterTest(m_ShooterSubsystem, m_poseEstimatorSubsystem));      } // (configureButtonBindings)
 
   /**
    * Use this to pass the autonomous command to the main {@link Robot} class.
