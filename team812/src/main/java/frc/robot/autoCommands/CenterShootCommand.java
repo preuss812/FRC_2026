@@ -10,6 +10,7 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.ParallelRaceGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import frc.robot.Constants.DriveConstants;
 import frc.robot.Constants.FieldConstants;
 import frc.robot.RobotContainer;
 import frc.robot.commands.DriveChoreoPathCommand;
@@ -45,9 +46,10 @@ public class CenterShootCommand extends SequentialCommandGroup {
         new GotoPoseCommand(
           RobotContainer.m_robotDrive,
           RobotContainer.m_poseEstimatorSubsystem,
-          outPostPose,
+          DriveConstants.robotLeftAtPose(
+            RobotContainer.m_poseEstimatorSubsystem.getAprilTagPose(RobotContainer.m_allianceConfigurationSubsystem.allianceAprilTag(29)),
+            0.0),
           RobotContainer.m_robotDrive.defaultAutoConfig
-
       )
     );
   }
