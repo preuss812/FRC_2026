@@ -87,12 +87,13 @@ public class Autonomous extends SequentialCommandGroup {
     // get the required subsystems for constructing the plans below.
     m_robotDrive = RobotContainer.m_robotDrive;
     m_PoseEstimatorSubsystem = RobotContainer.m_poseEstimatorSubsystem;
+    AllianceConfigurationSubsystem.refreshAllianceConfiguration( DriverStation.getAlliance().get());
 
     // Set up the alliance first.  Other commands need to know which alliance to operate correctly.
     setAutoMode();
 
     // set up for the current alliance
-    addCommands(new InstantCommand(() -> AllianceConfigurationSubsystem.refreshAllianceConfiguration(DriverStation.getAlliance().get())));
+    //addCommands(new InstantCommand(() -> AllianceConfigurationSubsystem.refreshAllianceConfiguration(DriverStation.getAlliance().get())));
 
     //addCommands(new InstantCommand(() -> setAutoMode()));
 

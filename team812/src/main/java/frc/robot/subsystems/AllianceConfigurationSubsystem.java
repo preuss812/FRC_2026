@@ -11,10 +11,10 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.AutonomousPlans;
 import frc.robot.Constants.FieldConstants;
 import frc.robot.Constants.VisionConstants;
 import frc.robot.Constants.VisionConstants.AprilTag;
-import frc.robot.AutonomousPlans;
 import frc.robot.TrajectoryPlans;
 
 /*
@@ -92,6 +92,7 @@ public class AllianceConfigurationSubsystem extends SubsystemBase {
     setProcessorWaypoints(alliance);
     setStartLine(alliance);
     AutonomousPlans.buildAutoPlans(alliance);
+    currentAlliance = alliance;
     
   }
 
@@ -227,5 +228,19 @@ public class AllianceConfigurationSubsystem extends SubsystemBase {
     m_robotDrive.setAngleDegrees(startingPose.getRotation().getDegrees());
     m_robotDrive.resetOdometry(startingPose);
     m_poseEstimatorSubsystem.setCurrentPose(startingPose);
+  }
+
+  /*
+   * allianceAprilTag - return the april tag associated with the current alliance.
+  * @param - the blue april tag id.
+  * @return - the april tag associated with the current alliance.
+   */
+  public int allianceAprilTag(int blueAprilTagId) {
+    if (currentAlliance == Alliance.Blue) {
+      return blueAprilTagId;
+    } else {
+      // For the red alliance, the april tag ids are offset by 100.
+      return FieldConstants.complementaryAprilTag[blueAprilTagId];
+    }
   }
 }
