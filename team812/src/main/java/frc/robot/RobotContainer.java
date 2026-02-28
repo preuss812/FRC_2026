@@ -51,6 +51,7 @@ import frc.robot.subsystems.BlackBoxSubsystem;
 import frc.robot.subsystems.DriveSubsystemSRX;
 import frc.robot.subsystems.DriveSubsystemSRX.DrivingMode;
 import frc.robot.subsystems.FeederSubsystem;
+import frc.robot.subsystems.IndexerSubsystem;
 import frc.robot.subsystems.IntakeSubsystem;
 import frc.robot.subsystems.PingResponseUltrasonicSubsystem;
 import frc.robot.subsystems.PoseEstimatorSubsystem;
@@ -90,6 +91,7 @@ public class RobotContainer {
   public static ShooterSubsystem m_ShooterSubsystem = new ShooterSubsystem(CANConstants.kShooterMotor1);
   private static IntakeSubsystem m_IntakeSubsystem = new IntakeSubsystem(CANConstants.kIntakeMotor);
   private static FeederSubsystem m_FeederSubsystem = new FeederSubsystem(CANConstants.kFeederMotor);
+  private static IndexerSubsystem m_IndexerSubsystem = new IndexerSubsystem(CANConstants.kIndexerMotor);
 
   public static PingResponseUltrasonicSubsystem m_pingResponseUltrasonicSubsystem =
     new PingResponseUltrasonicSubsystem(
@@ -148,7 +150,7 @@ public class RobotContainer {
     // By default this is not a simulation.
     // For convenience, set the simulation mode to true if this is not linux (ie if it is MacOS or Windows).
     RobotContainer.isSimulation = !Robot.isReal();
-
+    SmartDashboard.putNumber("FW RPM", 0.0);
     // Configure the button bindings
     configureButtonBindings();
 

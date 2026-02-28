@@ -40,9 +40,9 @@ public class ShooterSubsystem extends SubsystemBase {
     private final int slotIdx = 0;
     private final int timeoutMs = 10;
     private final SparkFlex motor1;
-    private final SparkFlex motor2;
+    //private final SparkFlex motor2;
     private final SparkFlexConfig motorConfig;
-    private final SparkFlexConfig motorFollowerConfig;
+    //private final SparkFlexConfig motorFollowerConfig;
     private final SparkClosedLoopController closedLoopController;
     private final RelativeEncoder encoder;
     
@@ -55,7 +55,7 @@ public class ShooterSubsystem extends SubsystemBase {
      * objects for later use.
      */
     motor1 = new SparkFlex(CANConstants.kShooterMotor1, MotorType.kBrushless);
-    motor2 = new SparkFlex(CANConstants.kShooterMotor2, MotorType.kBrushless);
+    //motor2 = new SparkFlex(CANConstants.kShooterMotor2, MotorType.kBrushless);
     closedLoopController = motor1.getClosedLoopController();
     encoder = motor1.getEncoder();
 
@@ -64,8 +64,8 @@ public class ShooterSubsystem extends SubsystemBase {
      * configuration parameters for the SPARK MAX that we will set below.
      */
     motorConfig = new SparkFlexConfig();
-    motorFollowerConfig = new SparkFlexConfig();
-
+    //motorFollowerConfig = new SparkFlexConfig();
+    motorConfig.inverted(true);
     /*
      * Configure the encoder. For this specific example, we are using the
      * integrated encoder of the NEO, and we don't need to configure it. If
@@ -78,10 +78,10 @@ public class ShooterSubsystem extends SubsystemBase {
     /*
      * Configure the 2nd motor on the Shooter to follow, inverted, the primary motor
      */
-    motorFollowerConfig
-      .apply(motorConfig)
-      .follow(motor1)
-      .inverted(true);
+    //motorFollowerConfig
+    //  .apply(motorConfig)
+    //  .follow(motor1)
+    //  .inverted(true);
 
     /*
      * Configure the closed loop controller. We want to make sure we set the
@@ -91,8 +91,8 @@ public class ShooterSubsystem extends SubsystemBase {
         .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
         // Set PID values for velocity control in slot 1
         .p(0.0001)
-        .i(0)
-        .d(0)
+        //.i(0)
+        //.d(0)
         .outputRange(-1, 1)
         .feedForward
           // kV is now in Volts, so we multiply by the nominal voltage (12V)
@@ -109,11 +109,13 @@ public class ShooterSubsystem extends SubsystemBase {
      * mid-operation.
      */
     motor1.configure(motorConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
+    /*
     motorFollowerConfig
       .apply(motorConfig)
       .follow(motor1)
       .inverted(true);
     motor2.configure(motorFollowerConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
+    */
 
     // Initialize dashboard values
     SmartDashboard.setDefaultNumber("Target Velocity", 0);
@@ -123,7 +125,8 @@ public class ShooterSubsystem extends SubsystemBase {
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
-
+    double rpm = SmartDashboard.getNumber("FW RPM", 0.0);
+    setRPM(rpm);
     // closed-loop velocity control
     if (Robot.isReal()) currentRPM = encoder.getVelocity();
     // telemetry

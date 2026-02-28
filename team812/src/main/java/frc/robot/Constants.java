@@ -47,7 +47,7 @@ public final class Constants {
         public static final int kSwerveLeftFrontCANCoder = 38;
 
         public static final int kShooterMotor1 = 45;
-        public static final int kShooterMotor2 = 40;
+        public static final int kShooterMotor2 = 40;// unused
 
         public static final int kElbowMotor2 = 44;
         public static final int kIntakeMotor = 43;

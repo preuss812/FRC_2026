@@ -16,16 +16,17 @@ import com.revrobotics.spark.SparkLowLevel.MotorType;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+
 import frc.robot.RobotContainer;
 
-public class FeederSubsystem extends SubsystemBase {
+public class IndexerSubsystem extends SubsystemBase {
 
-    // Feeder settings
+    // Indexer settings
     private final SparkFlex motor;
     private final SparkFlexConfig motorConfig;
     private final SparkClosedLoopController closedLoopController;    
 
-  public FeederSubsystem(int intakeCANId) {
+  public IndexerSubsystem(int intakeCANId) {
     
     motor = new SparkFlex(intakeCANId, MotorType.kBrushless);
     closedLoopController = motor.getClosedLoopController();
@@ -42,9 +43,9 @@ public class FeederSubsystem extends SubsystemBase {
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
-    double pOut = RobotContainer.m_blackBox.getPotValue(1);
+    double pOut = RobotContainer.m_blackBox.getPotValue(0);
     runMotor(pOut);
-    SmartDashboard.putNumber("Feeder%Out", pOut);
+    SmartDashboard.putNumber("Indexer%Out", pOut);
   }
 
   public void runMotor(double pOut){
