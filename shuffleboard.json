@@ -224,9 +224,9 @@
               "_showGlyph": false
             }
           },
-          "3,5": {
+          "10,5": {
             "size": [
-              1,
+              2,
               1
             ],
             "content": {
@@ -237,20 +237,33 @@
               "_showGlyph": false
             }
           },
-          "8,5": {
+          "12,4": {
             "size": [
               1,
               1
             ],
             "content": {
               "_type": "Text View",
-              "_source0": "network_table:///SmartDashboard/FW RPM",
-              "_title": "SmartDashboard/FW RPM",
+              "_source0": "network_table:///SmartDashboard/Feeder RPM",
+              "_title": "SmartDashboard/Feeder RPM",
               "_glyph": 148,
               "_showGlyph": false
             }
           },
-          "9,5": {
+          "10,4": {
+            "size": [
+              2,
+              1
+            ],
+            "content": {
+              "_type": "Text View",
+              "_source0": "network_table:///SmartDashboard/Feeder RPM Target",
+              "_title": "/SmartDashboard/Feeder RPM Target",
+              "_glyph": 148,
+              "_showGlyph": false
+            }
+          },
+          "12,5": {
             "size": [
               1,
               1

@@ -90,13 +90,13 @@ public class ShooterSubsystem extends SubsystemBase {
     motorConfig.closedLoop
         .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
         // Set PID values for velocity control in slot 1
-        .p(0.0001)
+        .p(0.0002)
         //.i(0)
         //.d(0)
         .outputRange(-1, 1)
         .feedForward
           // kV is now in Volts, so we multiply by the nominal voltage (12V)
-          .kV(12.0 / 5767);
+          .kV(1.0 / 6784);
 
     /*
      * Apply the configuration to the SPARK MAX.
@@ -118,14 +118,14 @@ public class ShooterSubsystem extends SubsystemBase {
     */
 
     // Initialize dashboard values
-    SmartDashboard.setDefaultNumber("Target Velocity", 0);
+    SmartDashboard.setDefaultNumber("Shooter RPM Target", 0);
     currentRPM = 0;
   }
 
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
-    double rpm = SmartDashboard.getNumber("FW RPM", 0.0);
+    double rpm = SmartDashboard.getNumber("Shooter RPM Target", 0.0);
     setRPM(rpm);
     // closed-loop velocity control
     if (Robot.isReal()) currentRPM = encoder.getVelocity();
@@ -153,7 +153,7 @@ public class ShooterSubsystem extends SubsystemBase {
     targetRPM = rpm;
     double targetVelocity = rpmToNativeUnits(rpm);
     closedLoopController.setSetpoint(targetVelocity, ControlType.kVelocity);
-    SmartDashboard.putNumber("Shooter Target RPM", targetRPM);
+    SmartDashboard.putNumber("Shooter RPM Target", targetRPM);
   }
 
   public double getRPM() {
