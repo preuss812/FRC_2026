@@ -6,18 +6,16 @@ package frc.robot.subsystems;
 
 import com.revrobotics.PersistMode;
 import com.revrobotics.ResetMode;
+import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkFlex;
-import com.revrobotics.spark.SparkBase.ControlType;
-import com.revrobotics.spark.config.SparkFlexConfig;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
-
+import com.revrobotics.spark.config.SparkFlexConfig;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-
-import frc.robot.RobotContainer;
+import frc.robot.Constants.IndexerConstants;
 
 public class IndexerSubsystem extends SubsystemBase {
 
@@ -53,13 +51,9 @@ public class IndexerSubsystem extends SubsystemBase {
   }
 
   public void runMotor(double pOut){
-    pOut = MathUtil.clamp(pOut, -1, 1);
+    pOut = MathUtil.clamp(pOut, IndexerConstants.minOutputPercent, IndexerConstants.maxOutputPercent);
     closedLoopController.setSetpoint(pOut, ControlType.kDutyCycle);
   }
-
-  
-
-
 
   public void stop() {
     closedLoopController.setSetpoint(0, ControlType.kDutyCycle);

@@ -9,7 +9,6 @@ package frc.robot;
 
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 
-import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
@@ -19,7 +18,6 @@ import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
-import frc.utils.PreussMotorConfig;
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
  * constants.  This class should not be used for any other purpose.  All constants should be
@@ -159,18 +157,14 @@ public final class Constants {
         public static double yCenter = (yMax - yMin)/2.0;
         public static double xSquareSize = xMax/8;
         public static double ySquareSize = yMax/4;
-        public static double bargeWidth = Units.inchesToMeters(46.0);
         public static double blueHubCenterX = Units.inchesToMeters(182.11);
         public static Translation2d blueHubCenter = new Translation2d(blueHubCenterX, yCenter);
         public static Translation2d redHubCenter = BlueToRedTranslation(blueHubCenter);
         public static double hubToStart = Units.inchesToMeters(88.0);
-        public static double zeroToHub = Units.inchesToMeters(144.0);
         
         // Handy X coordinates:
-        public static double blueStartLine =  Units.inchesToMeters(156.61);
-        public static double redStartLine = xMax - blueStartLine;   
-        public static Translation2d outpostCenter = new Translation2d(Units.inchesToMeters(0.3), Units.inchesToMeters(26.22));
-
+        public static final double blueStartLine =  Units.inchesToMeters(156.61);
+        public static final double redStartLine = xMax - blueStartLine;   
 
         // Helper functions to translate Blue coordinates to Red coordinates.
         // This is most likely to be used for creating red alliance autonomous routines
@@ -202,23 +196,6 @@ public final class Constants {
          */
         public static Pose2d BlueToRedPose(Pose2d bluePose) {
             return new Pose2d(BlueToRedTranslation(bluePose.getTranslation()), BlueToRedRotation(bluePose.getRotation()));
-        }
-
-        public static double robotHeadingForCameraToBlueHubCenter(double x, double y) {
-            return MathUtil.angleModulus(
-                Math.atan2(
-                    blueHubCenter.getY() - y
-                    , blueHubCenter.getX() - x
-                ) + VisionConstants.aprilCameraHeading
-            );
-        }
-        public static double robotHeadingForCameraToRedHubCenter(double x, double y) {
-            return MathUtil.angleModulus(
-                Math.atan2(
-                    redHubCenter.getY() - y
-                    , redHubCenter.getX() - x
-                ) + VisionConstants.aprilCameraHeading
-            );
         }
 
         // Field Coordinate transformations for alliances.
@@ -330,8 +307,10 @@ public final class Constants {
 
         public enum AprilTag {
             UNKNOWN(0),
-            RED_PROCESSOR(3),
-            BLUE_PROCESSOR(16);
+            RED_OUTPOST(13),
+            RED_TOWER(15),
+            BLUE_OUTPOST(29),
+            BLUE_TOWER(31);
             
             
             private int id;
@@ -344,36 +323,6 @@ public final class Constants {
     
     }
 
-    public static final class ShooterElevationConstants {
-        // This year we are using Lamprey 2 analog encoders.
-        // That means ther will be no homing of the arm because this 
-        // encoder remembers it orientation even when powered off.
-        // Units are still coded as ticks but there are now 360 ticks per revolution
-        // so ticks is that same as degrees.
-        public static final int kPidIdx = 0;
-        public static final int kTimeoutMs = 10;
-        public static final boolean kAbsoluteEncoder = false;
-        public static final boolean kMotorInverted = false;
-        public static final boolean kSensorInverted = false;
-        public static final double kShooterElevationEncoderCountPerRevolution = 360; 
-        public static final double kShooterElevationDegreesPerTick = 360.0/ShooterElevationConstants.kShooterElevationEncoderCountPerRevolution;
-        public static final double kShooterElevationTicksPerDegree = ShooterElevationConstants.kShooterElevationEncoderCountPerRevolution/360.0;
-        public static final double kShooterElevationPeakOutputForward =  1.0; // (percent) TODO: Tune this value.
-        public static final double kShooterElevationPeakOutputReverse = -1.0; // (percent) TODO: Tune this value.
-        public static final double kShooterElevationHomeTimeout = 3.0;        // (seconds) Wait for the ShooterElevation to rotate to the home position.
-        public static final double kShooterElevationTimeout = 3.0;            // (seconds) Wait for the ShooterElevation to rotate to any position.  TODO: Tune this value.
-        public static final double kShooterElevationMinEncoderVoltage = 0.0;  // (volts)
-        public static final double kShooterElevationMaxEncoderVoltage = 5.0;  // (volts)
-        public static final double kShooterElevationMinPosition = 0;       // (degrees) Smallest encoder value the software will rotate to. TODO: Tune this value.
-        public static final double kShooterElevationMaxPosition = 45;        // (degrees) Largest encoder value the software will rotote to. TODO: Tune this value.
-        public static final double kShooterElevationRotationThreshold = 1;    // (degrees) TODO: Tune this value.
-        public static final double kShooterElevationHomeSpeed = 0.2;          // (Percent) TODO: Tune this value.
-
-        // ShooterElevation positions correspond closely to degrees in cartesian coordinate with 0 parallel to the ground and 90 vertical.
-        public static final double kShooterElevationStartingPosition = 0;  // (degrees) Starting with shooting parallel to the ground.
-        public static final double kShooterElevationHomePosition = kShooterElevationStartingPosition; // (degrees) Unused.
-    }
-
     public static final class RotationConstants {
         public static final Rotation2d zero = new Rotation2d(0);
         public static final Rotation2d rotate90 = new Rotation2d(Math.PI/2.0);
@@ -381,13 +330,6 @@ public final class Constants {
         public static final Rotation2d rotate270 = new Rotation2d(Math.PI*3.0/2.0);
 
     }
-
-
-    public static final class CameraConstants {
-        public static final String kCamName="pv-812";
-    }
-
-    public static final int kBrakeLightRelay = 0;
 
     // The constants in DriveConstants and ModuleConstants are from 
     // https://github.com/REVrobotics/MAXSwerve-Java-Template/blob/main/src/main/java/frc/robot/subsystems/MAXSwerveModule.java
@@ -641,7 +583,7 @@ public final class Constants {
         */
 
         public static final double kColorConfidenceThreshold = 0.90;
-        public static final int     kColorProximityThreshold = 300; // higher closer, lower is further away
+        public static final int    kColorProximityThreshold  = 300; // higher closer, lower is further away
     }
 
     public static final class UltrasonicConstants {
@@ -651,6 +593,28 @@ public final class Constants {
         public static double kOffsetToBumper = 0.157; // Meters
     }
 
+    public static final class FeederConstants {
+        public static final double a = 2.61;
+        public static final double b = -26.01;
+        public static final double c = 388.7;
+        public static final double d = 498;
+        public static final double RPMTolerance = 20;
+        public static final double RPMToVolts = 442.5;
+        public static final double kP = 0.0002;
+        public static final double kI = 0.0;
+        public static final double kD = 0.0;
+        public static final double minOutputPercent = -0.8;
+        public static final double maxOutputPercent = 0.8;
+        public static final double maxRPM = 6784.0; // Neo Vortex
+        public static final double kV = 1.0/maxRPM; // Docs say 1.0 should be 12.0 but emperically 12.0 is not right.
+    }
+
+    public static final class IndexerConstants {
+        public static final double minOutputPercent = -0.8;
+        public static final double maxOutputPercent = 0.8;
+        public static final double maxRPM = 6784.0; // Neo Vortex
+    }
+    
     public static final class ShooterConstants {
         public static final double a = 2.61;
         public static final double b = -26.01;
@@ -658,17 +622,16 @@ public final class Constants {
         public static final double d = 498;
         public static final double RPMTolerance = 20;
         public static final double RPMToVolts = 442.5;
+        public static final double kP = 0.0002;
+        public static final double kI = 0.0;
+        public static final double kD = 0.0;
+        public static final double minOutputPercent = -0.8;
+        public static final double maxOutputPercent = 0.8;
+        public static final double maxRPM = 6784.0; // Neo Vortex
+        public static final double kV = 1.0/maxRPM; // Docs say 1.0 should be 12.0 but emperically 12.0 is not right.
     }
 
-    public static final PreussMotorConfig shooterMotor = new PreussMotorConfig(CANConstants.kShooterMotor1)
-    .setP(PidConstants.kShooterElevation_kP)
-        .setP(PidConstants.kShooterElevation_kI)
-        .setP(PidConstants.kShooterElevation_kD)
-        .setP(PidConstants.kShooterElevation_kF)
-        .setP(PidConstants.kShooterElevation_IntegralZone)
-        .setInverted(true)
-        ;
-        
+    
    
     
 }

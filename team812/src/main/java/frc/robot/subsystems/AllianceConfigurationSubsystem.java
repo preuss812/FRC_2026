@@ -10,12 +10,12 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.AutonomousPlans;
 import frc.robot.Constants.FieldConstants;
 import frc.robot.Constants.VisionConstants;
 import frc.robot.Constants.VisionConstants.AprilTag;
-import frc.robot.TrajectoryPlans;
+import frc.robot.Robot;
 
 /*
  * AllianceConfigurationSubsystem
@@ -34,18 +34,26 @@ public class AllianceConfigurationSubsystem extends SubsystemBase {
   private static boolean initialized = false;
   private static Alliance currentAlliance = Alliance.Blue;
   private static Translation2d hubCenter;
-  private static AprilTag processorAprilTag;
-  private static Pose2d[][] m_processorWaypoints ;
   private static boolean m_isAutonomous = true;
   private static double m_startLine;
-
-
-  //private static boolean hubCenterSet = false;
-
+private static AprilTag towerAprilTag;
+private static AprilTag outpostAprilTag;
+  public static final int AUTO_MODE_DO_NOTHING = 0;
+  public static final int AUTO_MODE_MOVE_OFF_LINE_AND_STOP = 1;
+  public static final int AUTO_MODE_CENTER_SHOOT = 2;
+  
   /** Creates a new AllianceConfigurationSubsystem. */
   public AllianceConfigurationSubsystem(DriveSubsystemSRX robotDrive, PoseEstimatorSubsystem poseEstimatorSubsystem) {
     m_robotDrive = robotDrive;
     m_poseEstimatorSubsystem = poseEstimatorSubsystem;
+    // Set up the list of possible autonomous modes.  This is used by the autonomous command to determine which plan to run.
+    Robot.autoChooser.addOption("Do Nothing", AUTO_MODE_DO_NOTHING);
+    Robot.autoChooser.addOption("Move Off Line and Stop", AUTO_MODE_MOVE_OFF_LINE_AND_STOP);
+    Robot.autoChooser.addOption("Center Shoot", AUTO_MODE_CENTER_SHOOT);
+  
+    // Add more commands here and define the plan number above.  Put the commands needed for each auto mode in AutonomousPlans.java.
+    SmartDashboard.putData("AutoSelector", Robot.autoChooser);
+
     // robotDrive and poseEstimatorSubsystem are not requirements.  In this class it is read only.  Saving here to avoid global references.
   }
 
@@ -87,13 +95,25 @@ public class AllianceConfigurationSubsystem extends SubsystemBase {
   public static void refreshAllianceConfiguration(Alliance alliance) {
     // Set the hub center location for the current alliance.
     setHubCenter(alliance);
-    setProcessorAprilTag(alliance);
+    setOutpostAprilTag(alliance);
+    setTowerAprilTag(alliance);
+
     //if (isAutonomous()) setStartingHeading(alliance); // Problems with debug switching from auto -> teleop -> auto
-    setProcessorWaypoints(alliance);
     setStartLine(alliance);
-    AutonomousPlans.buildAutoPlans(alliance);
     currentAlliance = alliance;
     
+  }
+  /*
+   * allianceAdjustedHeading - return the heading adjusted for the current alliance.
+   * @param heading - the heading in radians to be adjusted for the current alliance.
+   * @return - the heading adjusted for the current alliance.
+   */
+  public static double allianceAdjustedHeading(double heading) {
+    if (Alliance.Blue == currentAlliance) {
+      return heading;
+    } else {
+      return MathUtil.angleModulus(heading + Math.PI);
+    }
   }
 
   /*
@@ -171,40 +191,35 @@ public class AllianceConfigurationSubsystem extends SubsystemBase {
   }
 
   /*
-   * setProcessorAprilTag - memorize the april tag associated with the processor for the current alliance.
-   * This allows for easy access to the processor location without having to check alliance
+   * This allows for easy access to the outpost location without having to check alliance
    * for vision tracking or autonomous driving.
    * @param - alliance blue or red as the current alliance
    */
-  public static void setProcessorAprilTag(Alliance alliance) {
+  public static void setOutpostAprilTag(Alliance alliance) {
     if (alliance == Alliance.Blue) {
-      processorAprilTag = VisionConstants.AprilTag.BLUE_PROCESSOR;
+      outpostAprilTag = VisionConstants.AprilTag.BLUE_OUTPOST;
     } else if (alliance == Alliance.Red) {
-      processorAprilTag = VisionConstants.AprilTag.RED_PROCESSOR;
+      outpostAprilTag = VisionConstants.AprilTag.RED_OUTPOST;
     } else {
-      processorAprilTag = VisionConstants.AprilTag.BLUE_PROCESSOR;
+      outpostAprilTag = VisionConstants.AprilTag.BLUE_OUTPOST;
     }
   }
 
-  /*
-   * getProcessorAprilTag - return the april tag associated with the processor for the current robot alliance
+/*
+   * This allows for easy access to the tower location without having to check alliance
+   * for vision tracking or autonomous driving.
+   * @param - alliance blue or red as the current alliance
    */
-  public static AprilTag getProcessorAprilTag() {
-    return processorAprilTag;
-  }
-
-  public static void setProcessorWaypoints(Alliance alliance) {
-    if (alliance != Alliance.Red) {
-      m_processorWaypoints = TrajectoryPlans.blueProcessorWaypoints;
+  public static void setTowerAprilTag(Alliance alliance) {
+    if (alliance == Alliance.Blue) {
+      towerAprilTag = VisionConstants.AprilTag.BLUE_TOWER;
+    } else if (alliance == Alliance.Red) {
+      towerAprilTag = VisionConstants.AprilTag.RED_TOWER;
     } else {
-      m_processorWaypoints = TrajectoryPlans.redProcessorWaypoints;
+      towerAprilTag = VisionConstants.AprilTag.BLUE_TOWER;
     }
   }
 
-  public static Pose2d[][] getProcessorWaypoints() {
-    return m_processorWaypoints;
-  }
-  
   public static void setStartLine(Alliance alliance) {
     if (alliance != Alliance.Red) {
       m_startLine = FieldConstants.blueStartLine;
@@ -231,6 +246,20 @@ public class AllianceConfigurationSubsystem extends SubsystemBase {
   }
 
   /*
+   * getOutpostAprilTag - return the april tag associated with the outpost for the current robot alliance
+   */
+  public static AprilTag getOutpostAprilTag() {
+    return outpostAprilTag;
+  }
+
+  /*
+   * getTowerAprilTag - return the april tag associated with the tower for the current robot alliance
+   */
+  public static AprilTag getTowerAprilTag() {
+    return towerAprilTag;
+  }
+  
+  /*
    * allianceAprilTag - return the april tag associated with the current alliance.
   * @param - the blue april tag id.
   * @return - the april tag associated with the current alliance.
@@ -243,4 +272,15 @@ public class AllianceConfigurationSubsystem extends SubsystemBase {
       return FieldConstants.complementaryAprilTag[blueAprilTagId];
     }
   }
+
+  /**
+     * robotFrontFacingHub 
+     * @return - the rotation in radians for the robot's front to face the hub in field coordinates.
+     */
+    public static Rotation2d robotFrontFacingHub() {
+        Rotation2d rotation = new Rotation2d(
+            AllianceConfigurationSubsystem.robotHeadingToHub()
+        );
+        return rotation;
+    } 
 }

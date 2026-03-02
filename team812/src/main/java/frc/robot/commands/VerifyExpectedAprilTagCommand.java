@@ -22,7 +22,7 @@ public class VerifyExpectedAprilTagCommand extends SequentialCommandGroup {
         addCommands(
             new ConditionalCommand(
                 new WaitCommand(0.001), // Wait 1ms if we are close to the correct starting point, basically a NOP
-                new WaitCommand(15), // Wait long enough to make sure autonomous is over and no action is taken.
+                new WaitCommand(20), // Wait long enough to make sure autonomous is over and no action is taken.
                 () -> match(poseEstimator.lastAprilTagSeen(),FieldConstants.allianceAprilTag(allianceID, aprilTagID))
             )
         );

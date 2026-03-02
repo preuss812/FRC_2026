@@ -20,6 +20,7 @@ import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.CANConstants;
+import frc.robot.Constants.ShooterConstants;
 
 public class ShooterSubsystem extends SubsystemBase {
 
@@ -28,18 +29,13 @@ public class ShooterSubsystem extends SubsystemBase {
     // Shooter settings
     //private final double maxRPM = 5320; // For a CIM motor. 
     private final double defaultRPM = 3000;
-    private final double defaultRPMFeedForward = 1.0; // TODO: need a real number.
     private double targetRPM = defaultRPM;  // desired shooter wheel speed
     private double currentRPM; // the current rpm of the shooter.
     // native units are ticks per 100ms.
-    // the revrobotics through bore encoder I think has 4096 ticks per revolution.
-    // Therefore rpm to ticks is 1 rpm * (4096 ticks/rpm) * (1 minute/60 seconds) * (0.1 second/100ms) = rpm to native
-    private final double RPMToNativeUnits = 1.0 * (4096.0) * (1.0/60.0) * (0.1);
+    // With external through bore encoder this calculation would be more typical:
+    //  RPMToNativeUnits = 1 rpm * (4096 ticks/rpm) * (1 minute/60 seconds) * (0.1 second/100ms)
+    private final double RPMToNativeUnits = 1.0;
     private final double nativeUnitsToRPM = 1.0/RPMToNativeUnits; // Typical CTRE Mag Encoder CPR
-
-    private final int pidIdx = 0;
-    private final int slotIdx = 0;
-    private final int timeoutMs = 10;
     private final SparkFlex motor1;
     private final SparkFlexSim motor1Sim;
     private final DCMotor m_dcMotor = DCMotor.getNEO(1);
@@ -98,13 +94,13 @@ public class ShooterSubsystem extends SubsystemBase {
     motorConfig.closedLoop
         .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
         // Set PID values for velocity control in slot 1
-        .p(0.0002)
-        //.i(0)
-        //.d(0)
-        .outputRange(-1, 1)
+        .p(ShooterConstants.kP)
+        .i(ShooterConstants.kI)
+        .d(ShooterConstants.kD)
+        .outputRange(ShooterConstants.minOutputPercent, ShooterConstants.maxOutputPercent)
         .feedForward
           // kV is now in Volts, so we multiply by the nominal voltage (12V)
-          .kV(1.0 / 6784);
+          .kV(ShooterConstants.kV);
 
     /*
      * Apply the configuration to the SPARK MAX.
@@ -147,12 +143,12 @@ public class ShooterSubsystem extends SubsystemBase {
   }
 
   public void runMotor(double pOut){
-    pOut = MathUtil.clamp(pOut, -1, 1);
+    pOut = MathUtil.clamp(pOut, ShooterConstants.minOutputPercent, ShooterConstants.maxOutputPercent);
     closedLoopController.setSetpoint(pOut, ControlType.kDutyCycle);
   }
 
   public double rpmToNativeUnits(double rpm) {
-    return 1.0 * rpm;
+    return RPMToNativeUnits * rpm;
   }
 
   /**
@@ -167,10 +163,8 @@ public class ShooterSubsystem extends SubsystemBase {
   }
 
   public double getRPM() {
-    return currentRPM;
+    return currentRPM * nativeUnitsToRPM;
   }
-  
-
 
   public void stop() {
     closedLoopController.setSetpoint(0, ControlType.kDutyCycle);
@@ -180,7 +174,6 @@ public class ShooterSubsystem extends SubsystemBase {
   public void simulationPeriodic() {
     motor1Sim.setAppliedOutput(closedLoopController.getSetpoint());
     motor1Sim.iterate(closedLoopController.getSetpoint(), 12, 0.02);
-    //currentRPM = currentRPM + (targetRPM - currentRPM) * 0.1; // simple simulation of the shooter speed changing over time.
   }
   
 }

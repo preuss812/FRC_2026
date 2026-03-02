@@ -37,18 +37,14 @@ import frc.robot.commands.DriveRobotCommand;
 import frc.robot.commands.DriveWithoutVisionCommand;
 import frc.robot.commands.FireAtWillCommand;
 import frc.robot.commands.GotoPoseCommand;
-import frc.robot.commands.GotoProcessorCommand;
 import frc.robot.commands.PointCameraTowardHubCommand;
 import frc.robot.commands.RandomRobotPositionCommand;
 import frc.robot.commands.ResetDriveTrainCommand;
-import frc.robot.commands.RoombaG2PCommand;
 import frc.robot.commands.RotateRobotCommand;
 import frc.robot.commands.RotateRobotG2PCommand;
 import frc.robot.commands.ShooterTest;
 import frc.robot.commands.SimSetRobotPoseCommand;
-import frc.robot.commands.SwerveToProcessorCommand;
 import frc.robot.subsystems.AllianceConfigurationSubsystem;
-import frc.robot.subsystems.BlackBoxSubsystem;
 import frc.robot.subsystems.DriveSubsystemSRX;
 import frc.robot.subsystems.DriveSubsystemSRX.DrivingMode;
 import frc.robot.subsystems.FeederSubsystem;
@@ -79,7 +75,6 @@ public class RobotContainer {
   // The robot's subsystems
   public final static DriveSubsystemSRX m_robotDrive = new DriveSubsystemSRX();
   public final SparkFlex m_test = new SparkFlex(50, MotorType.kBrushless);
-  public static BlackBoxSubsystem m_blackBox = new BlackBoxSubsystem();
   public static PoseEstimatorCamera m_atagCamera = new PoseEstimatorCamera("atag812", VisionConstants.ROBOT_TO_APRIL_CAMERA);
   //public static PoseEstimatorCamera m_frontCamera = new PoseEstimatorCamera("Microsoft_LifeCam_HD-3000", VisionConstants.ROBOT_TO_FRONT_CAMERA);
 
@@ -252,7 +247,6 @@ public class RobotContainer {
       SmartDashboard.putData("Choreo1", new DriveChoreoPathCommand(m_robotDrive, m_poseEstimatorSubsystem, "CenterShoot", m_robotDrive.circleAutoConfig, 0.1, 0.0));
       SmartDashboard.putData("Y", new ResetDriveTrainCommand(this));
       SmartDashboard.putData("Z", new SimSetRobotPoseCommand(m_robotDrive, m_poseEstimatorSubsystem, new Pose2d(5.5 + 0.145916,4, Rotation2d.kZero)));
-      SmartDashboard.putData("TT", new SwerveToProcessorCommand(m_robotDrive, m_poseEstimatorSubsystem, true));
       SmartDashboard.putData("R", new RandomRobotPositionCommand(m_robotDrive, m_poseEstimatorSubsystem));
       SmartDashboard.putData("PR", new PointCameraTowardHubCommand(m_robotDrive, m_poseEstimatorSubsystem));
       SmartDashboard.putData("DR", new DriveRobotCommand(m_robotDrive, m_poseEstimatorSubsystem, new Pose2d(2,1,new Rotation2d(0)), false, null));
@@ -261,13 +255,11 @@ public class RobotContainer {
       SmartDashboard.putData("R90", new RotateRobotCommand(m_robotDrive, Units.degreesToRadians(90),false));
       SmartDashboard.putData("R180", new RotateRobotCommand(m_robotDrive, Units.degreesToRadians(180),false));
       SmartDashboard.putData("RG", new RotateRobotG2PCommand(m_robotDrive, m_poseEstimatorSubsystem, Units.degreesToRadians(180),false, null));
-      SmartDashboard.putData("GP", new GotoProcessorCommand(m_robotDrive, m_poseEstimatorSubsystem, null));
       SmartDashboard.putData("RR", new InstantCommand(()->m_robotDrive.drive(0.0, 0.0, 0.1, true)));
       SmartDashboard.putData(
         "G1", new GotoPoseCommand(m_robotDrive, m_poseEstimatorSubsystem, new Pose2d(6, 4, new Rotation2d(Math.PI)), null));
       SmartDashboard.putData(
         "G2", new GotoPoseCommand(m_robotDrive,  m_poseEstimatorSubsystem, new Pose2d(12, 6, new Rotation2d(0)), null));
-        SmartDashboard.putData("VV", new RoombaG2PCommand(m_robotDrive, m_poseEstimatorSubsystem, m_pingResponseUltrasonicSubsystem, null));
         SmartDashboard.putData("FW", new FireAtWillCommand());
         Utilities.toSmartDashboard("April17", m_poseEstimatorSubsystem.getAprilTagPose((17)));
         Utilities.toSmartDashboard("April31", m_poseEstimatorSubsystem.getAprilTagPose((31)));
@@ -301,7 +293,6 @@ public class RobotContainer {
    * The robot should be facing down-field when this command is called.
    * It will set the drive train's location to match the pose estimator.
    * This is based on the hope that the pose estimator has a good fix on the robot position.
-   * i.e. that an april tag is in sight of the vision processor.
    */
   public void alignGyroRotationToFieldRotation() {
     m_robotDrive.setAngleDegrees(AllianceConfigurationSubsystem.robotToFieldRotation().getDegrees());

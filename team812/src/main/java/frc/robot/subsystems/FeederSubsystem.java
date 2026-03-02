@@ -7,6 +7,7 @@ package frc.robot.subsystems;
 import com.revrobotics.PersistMode;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.ResetMode;
+import com.revrobotics.sim.SparkFlexSim;
 import com.revrobotics.spark.FeedbackSensor;
 import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkClosedLoopController;
@@ -15,31 +16,27 @@ import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.SparkFlexConfig;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.CANConstants;
+import frc.robot.Constants.FeederConstants;
 import frc.robot.Robot;
 
 public class FeederSubsystem extends SubsystemBase {
 
-
-
     // Feeder settings
-    //private final double maxRPM = 5320; // For a CIM motor. 
-    private final double defaultRPM = 3000;
-    private final double defaultRPMFeedForward = 1.0; // TODO: need a real number.
-    private double targetRPM = defaultRPM;  // desired feeder wheel speed
+    private double targetRPM = 0.0;  // desired feeder wheel speed
     private double currentRPM; // the current rpm of the feeder.
-    // native units are ticks per 100ms.
-    // the revrobotics through bore encoder I think has 4096 ticks per revolution.
-    // Therefore rpm to ticks is 1 rpm * (4096 ticks/rpm) * (1 minute/60 seconds) * (0.1 second/100ms) = rpm to native
-    private final double RPMToNativeUnits = 1.0 * (4096.0) * (1.0/60.0) * (0.1);
+    // native units are rpm for the Spark MAX closed loop controller.
+    // With external through bore encoder this calculation would be more typical:
+    //  RPMToNativeUnits = 1 rpm * (4096 ticks/rpm) * (1 minute/60 seconds) * (0.1 second/100ms)
+    private final double RPMToNativeUnits = 1.0;
     private final double nativeUnitsToRPM = 1.0/RPMToNativeUnits; // Typical CTRE Mag Encoder CPR
-
-    private final int pidIdx = 0;
-    private final int slotIdx = 0;
-    private final int timeoutMs = 10;
     private final SparkFlex motor1;
+    private final SparkFlexSim motor1Sim;
+    private final DCMotor m_dcMotor = DCMotor.getNEO(1);
+
     //private final SparkFlex motor2;
     private final SparkFlexConfig motorConfig;
     //private final SparkFlexConfig motorFollowerConfig;
@@ -55,6 +52,8 @@ public class FeederSubsystem extends SubsystemBase {
      * objects for later use.
      */
     motor1 = new SparkFlex(CANConstants.kFeederMotor, MotorType.kBrushless);
+    motor1Sim = new SparkFlexSim(motor1, m_dcMotor);
+
     //motor2 = new SparkFlex(CANConstants.kFeederMotor2, MotorType.kBrushless);
     closedLoopController = motor1.getClosedLoopController();
     encoder = motor1.getEncoder();
@@ -90,13 +89,13 @@ public class FeederSubsystem extends SubsystemBase {
     motorConfig.closedLoop
         .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
         // Set PID values for velocity control in slot 1
-        .p(0.0002)
-        //.i(0)
-        //.d(0)
-        .outputRange(-1, 1)
+        .p(FeederConstants.kP)
+        .i(FeederConstants.kI)
+        .d(FeederConstants.kD)
+        .outputRange(FeederConstants.minOutputPercent, FeederConstants.maxOutputPercent)
         .feedForward
           // kV is now in Volts, so we multiply by the nominal voltage (12V)
-          .kV(1.0 / 6784);
+          .kV(FeederConstants.kV);
 
     /*
      * Apply the configuration to the SPARK MAX.
@@ -137,12 +136,12 @@ public class FeederSubsystem extends SubsystemBase {
   }
 
   public void runMotor(double pOut){
-    pOut = MathUtil.clamp(pOut, -1, 1);
+    pOut = MathUtil.clamp(pOut, FeederConstants.minOutputPercent, FeederConstants.maxOutputPercent);
     closedLoopController.setSetpoint(pOut, ControlType.kDutyCycle);
   }
 
   public double rpmToNativeUnits(double rpm) {
-    return 1.0 * rpm;
+    return RPMToNativeUnits * rpm;
   }
 
   /**
@@ -157,14 +156,7 @@ public class FeederSubsystem extends SubsystemBase {
   }
 
   public double getRPM() {
-    return currentRPM;
-  }
-  
-
-  public double rpmToFeedForward(double rpm) { 
-     //TODO: find a good value/equation for the conversion.
-    double feedForward = rpm / defaultRPM * defaultRPMFeedForward;
-    return feedForward;
+    return currentRPM * nativeUnitsToRPM;
   }
 
   public void stop() {
@@ -173,7 +165,8 @@ public class FeederSubsystem extends SubsystemBase {
 
   @Override
   public void simulationPeriodic() {
-    currentRPM = currentRPM + (targetRPM - currentRPM) * 0.1; // simple simulation of the feeder speed changing over time.
+    motor1Sim.setAppliedOutput(closedLoopController.getSetpoint());
+    motor1Sim.iterate(closedLoopController.getSetpoint(), 12, 0.02);
   }
   
 }

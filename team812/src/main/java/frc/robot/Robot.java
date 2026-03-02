@@ -7,16 +7,16 @@
 
 package frc.robot;
 
-import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.networktables.NetworkTable;
-import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.subsystems.DriveSubsystemSRX.DrivingMode;
-import edu.wpi.first.cameraserver.CameraServer;
 
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to
@@ -92,9 +92,10 @@ public class Robot extends TimedRobot {
 
     // schedule the autonomous command (example)
     if (m_autonomousCommand != null) {
-      m_autonomousCommand.schedule();
+      CommandScheduler.getInstance().schedule(m_autonomousCommand);
     }
-    m_timer.reset();
+    // For debug, reset the autonomous timer so we can see if autonomous completes in the alloted time.
+    // m_timer.reset();
     m_timer.start();
   }
 
@@ -103,7 +104,8 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void autonomousPeriodic() {
-    SmartDashboard.putNumber("Match Time", 15 - m_timer.get());
+    // Display countdown to the end of autonomous for testing purposes.
+    SmartDashboard.putNumber("Match Time", 20 - m_timer.get());
   }
 
   @Override
@@ -115,6 +117,7 @@ public class Robot extends TimedRobot {
     if (m_autonomousCommand != null) {
       m_autonomousCommand.cancel();
     }
+    // Reset the timer for teleop.
     m_timer.reset();
     m_timer.start();
     // Ensure that at startup, the robot is in a known speed mode.
@@ -126,7 +129,8 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void teleopPeriodic() {
-    SmartDashboard.putNumber("Match Time", 165 - m_timer.get());
+    // Display a countdown to the end of the match for testing purposes. 160 seconds is the typical length of a match, but this can be adjusted as needed.
+    SmartDashboard.putNumber("Match Time", 160 - m_timer.get());
 
   }
 
