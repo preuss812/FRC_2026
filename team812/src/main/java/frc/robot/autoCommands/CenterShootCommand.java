@@ -39,14 +39,28 @@ public class CenterShootCommand extends SequentialCommandGroup {
         new ShooterTest(RobotContainer.m_ShooterSubsystem, RobotContainer.m_poseEstimatorSubsystem),
         new FireAtWillCommand().withTimeout(10.0) // TODO fix FireAtWill to use ShooterSubsystem.canshoot() and check rotation of robot toward the hub.
         ),
-
+        new DriveChoreoPathCommand(
+          RobotContainer.m_robotDrive,
+          RobotContainer.m_poseEstimatorSubsystem,
+          "CenterShootToMidField",
+          RobotContainer.m_robotDrive.defaultAutoConfig,
+          1.0,
+          1.0),
+          new DriveChoreoPathCommand(
+          RobotContainer.m_robotDrive,
+          RobotContainer.m_poseEstimatorSubsystem,
+          "MidFieldGather",
+          RobotContainer.m_robotDrive.defaultAutoConfig,
+          1.0,
+          1.0),
+        //,
         new GotoPoseCommand(
           RobotContainer.m_robotDrive,
           RobotContainer.m_poseEstimatorSubsystem,
           DriveConstants.robotLeftAtPose(
             RobotContainer.m_poseEstimatorSubsystem.getAprilTagPose(AllianceConfigurationSubsystem.getOutpostAprilTag().id()),
             0.0),
-          RobotContainer.m_robotDrive.defaultAutoConfig
+          RobotContainer.m_robotDrive.aggressiveAutoConfig
       )
     );
   }

@@ -4,8 +4,8 @@
 
 package frc.robot.subsystems;
 
-import edu.preuss.sensors.AHRSInvertable;
 import choreo.trajectory.SwerveSample;
+import edu.preuss.sensors.AHRSInvertable;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -18,11 +18,11 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.SerialPort;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants.DriveConstants;
+import frc.robot.RobotContainer;
 import frc.robot.Utilities;
 import frc.utils.DrivingConfig;
 import frc.utils.ModifiedSlewRateLimiter;
-import frc.robot.Constants.DriveConstants;
-import frc.robot.RobotContainer;
 
 
 public class DriveSubsystemSRX extends SubsystemBase {
@@ -101,6 +101,7 @@ public class DriveSubsystemSRX extends SubsystemBase {
   public DrivingConfig defaultAutoConfig;
   public DrivingConfig debugAutoConfig;
   public DrivingConfig circleAutoConfig;
+  public DrivingConfig aggressiveAutoConfig;
 
 
   private final boolean debug = true;
@@ -139,7 +140,16 @@ public class DriveSubsystemSRX extends SubsystemBase {
     .setAngularP(0.5)
     .setAngularIZone(Units.degreesToRadians(10.0))
     .setAngularTolerance(Units.degreesToRadians(2.0));
-
+  
+  aggressiveAutoConfig = new DrivingConfig()
+    .setMaxThrottle(0.8)
+    .setMaxRotation(0.8)
+    .setLinearP(0.40)
+    .setLinearIZone(Units.inchesToMeters(4.0))
+    .setLinearTolerance(Units.inchesToMeters(2.0))
+    .setAngularP(0.5)
+    .setAngularIZone(Units.degreesToRadians(10.0))
+    .setAngularTolerance(Units.degreesToRadians(2.0));
     // TODO Do we need to reset the gyro here?
   }
 // TODO: This seems redundant to the code below in periodic.  Perhaps should refactor.

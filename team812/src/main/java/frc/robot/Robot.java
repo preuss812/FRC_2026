@@ -95,7 +95,7 @@ public class Robot extends TimedRobot {
       CommandScheduler.getInstance().schedule(m_autonomousCommand);
     }
     // For debug, reset the autonomous timer so we can see if autonomous completes in the alloted time.
-    // m_timer.reset();
+    m_timer.reset();
     m_timer.start();
   }
 
