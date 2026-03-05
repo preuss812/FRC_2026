@@ -132,8 +132,7 @@ public class ShooterSubsystem extends SubsystemBase {
     double rpm = SmartDashboard.getNumber("Shooter RPM Target", 0.0);
     setRPM(rpm);
     // closed-loop velocity control
-    //if (Robot.isReal()) 
-      currentRPM = encoder.getVelocity();
+    currentRPM = encoder.getVelocity();
     // telemetry
     SmartDashboard.putNumber("Shooter RPM", currentRPM);
     SmartDashboard.putNumber("Shooter Vout", motor1.getAppliedOutput());
@@ -174,6 +173,14 @@ public class ShooterSubsystem extends SubsystemBase {
   public void simulationPeriodic() {
     motor1Sim.setAppliedOutput(closedLoopController.getSetpoint());
     motor1Sim.iterate(closedLoopController.getSetpoint(), 12, 0.02);
+  }
+
+  /* readyToShoot - helper function to determine if the shooter is up to speed and ready to shoot.
+   * @param rpmTolerance (double) the tolerance in rpm for determining if the shooter is up to speed.
+   * @return (boolean) true if the shooter is up to speed, false otherwise.
+   */
+  public boolean readyToShoot(double rpmTolerance) {
+    return Math.abs(currentRPM - targetRPM) < rpmTolerance;
   }
   
 }

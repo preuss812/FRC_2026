@@ -21,7 +21,6 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.CANConstants;
 import frc.robot.Constants.FeederConstants;
-import frc.robot.Robot;
 
 public class FeederSubsystem extends SubsystemBase {
 
@@ -127,7 +126,7 @@ public class FeederSubsystem extends SubsystemBase {
     double rpm = SmartDashboard.getNumber("Feeder RPM Target", 0.0);
     setRPM(rpm);
     // closed-loop velocity control
-    if (Robot.isReal()) currentRPM = encoder.getVelocity();
+    currentRPM = encoder.getVelocity();
     // telemetry
     SmartDashboard.putNumber("Feeder RPM", currentRPM);
 
@@ -169,4 +168,12 @@ public class FeederSubsystem extends SubsystemBase {
     motor1Sim.iterate(closedLoopController.getSetpoint(), 12, 0.02);
   }
   
+  /* readyToShoot - helper function to determine if the shooter is up to speed and ready to shoot.
+   * @param rpmTolerance (double) the tolerance in rpm for determining if the shooter is up to speed.
+   * @return (boolean) true if the shooter is up to speed, false otherwise.
+   */
+  public boolean readyToShoot(double rpmTolerance) {
+    return Math.abs(currentRPM - targetRPM) < rpmTolerance;
+  }
+
 }

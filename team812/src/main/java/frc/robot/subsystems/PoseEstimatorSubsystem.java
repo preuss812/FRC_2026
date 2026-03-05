@@ -59,6 +59,7 @@ public class PoseEstimatorSubsystem extends SubsystemBase {
   public final Field2d field2d = new Field2d();
   private int m_lastAprilTagSeen = VisionConstants.NO_TAG_FOUND;
   private boolean debug = true;
+  private double m_rotationErrorToHub = Math.PI; // Large value to prevent false return of onTarget().
 
   public PoseEstimatorSubsystem(PoseEstimatorCamera[] cameras, DriveSubsystemSRX drivetrainSubsystem) {
     
@@ -197,5 +198,20 @@ public class PoseEstimatorSubsystem extends SubsystemBase {
     return DriveConstants.robotFrontAtPose(getAprilTagPose(id), offset);
   }  
   
-  
+  /*
+   * setRotationErrorToHub - set the current rotation error to the hub. This is used for the FaceHubCommand to determine if the robot is facing the hub.
+   * @param rotationErrorToHub - the current rotation error to the hub in radians.
+   */
+  public void setRotationErrorToHub(double rotationErrorToHub) {
+    m_rotationErrorToHub = rotationErrorToHub;
+  }
+
+  /*
+    * facingHub - returns true if the robot is facing the hub within the specified tolerance.
+    @param rotationTolerance - the tolerance in radians for considering the robot to be facing the hub.
+    @return true if the robot is facing the hub within the specified tolerance, false otherwise.
+   */
+  public boolean facingHub(double rotationTolerance) {
+    return Math.abs(m_rotationErrorToHub) <= rotationTolerance;
+  }
 }

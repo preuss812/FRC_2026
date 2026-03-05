@@ -85,9 +85,9 @@ public class RobotContainer {
   public static PreussDriveSimulation m_preussDriveSimulation = new PreussDriveSimulation(m_poseEstimatorSubsystem);
   private static boolean debug = true; // To enable debugging in this module, change false to true.
   public static ShooterSubsystem m_ShooterSubsystem = new ShooterSubsystem(CANConstants.kShooterMotor1);
-  private static IntakeSubsystem m_IntakeSubsystem = new IntakeSubsystem(CANConstants.kIntakeMotor);
-  private static FeederSubsystem m_FeederSubsystem = new FeederSubsystem(CANConstants.kFeederMotor);
-  private static IndexerSubsystem m_IndexerSubsystem = new IndexerSubsystem(CANConstants.kIndexerMotor);
+  public static IntakeSubsystem m_IntakeSubsystem = new IntakeSubsystem(CANConstants.kIntakeMotor);
+  public static FeederSubsystem m_FeederSubsystem = new FeederSubsystem(CANConstants.kFeederMotor);
+  public static IndexerSubsystem m_IndexerSubsystem = new IndexerSubsystem(CANConstants.kIndexerMotor);
 
   public static PingResponseUltrasonicSubsystem m_pingResponseUltrasonicSubsystem =
     new PingResponseUltrasonicSubsystem(
@@ -260,7 +260,12 @@ public class RobotContainer {
         "G1", new GotoPoseCommand(m_robotDrive, m_poseEstimatorSubsystem, new Pose2d(6, 4, new Rotation2d(Math.PI)), null));
       SmartDashboard.putData(
         "G2", new GotoPoseCommand(m_robotDrive,  m_poseEstimatorSubsystem, new Pose2d(12, 6, new Rotation2d(0)), null));
-        SmartDashboard.putData("FW", new FireAtWillCommand());
+        SmartDashboard.putData("FW", new FireAtWillCommand(
+          m_ShooterSubsystem,
+          m_FeederSubsystem,
+          m_IndexerSubsystem,
+          m_poseEstimatorSubsystem
+        ));
         Utilities.toSmartDashboard("April17", m_poseEstimatorSubsystem.getAprilTagPose((17)));
         Utilities.toSmartDashboard("April31", m_poseEstimatorSubsystem.getAprilTagPose((31)));
         SmartDashboard.putData("OP", new GotoPoseCommand(m_robotDrive, m_poseEstimatorSubsystem, DriveConstants.robotFrontAtPose(m_poseEstimatorSubsystem.getAprilTagPose(19), 0.0) , m_robotDrive.defaultAutoConfig));

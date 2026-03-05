@@ -31,6 +31,7 @@ public class FaceHubCommand extends Command {
   @Override
   public void initialize() {
     m_preussAutoDrive.reset();
+    m_PoseEstimatorSubsystem.setRotationErrorToHub(Math.PI); // Large value to prevent false return of onTarget() until we have a valid reading.
   }
 
   // Called every time the scheduler runs while the command is scheduled.
@@ -39,6 +40,7 @@ public class FaceHubCommand extends Command {
     double currentRotation = m_PoseEstimatorSubsystem.getCurrentPose().getRotation().getRadians();
     double desiredRotation = AllianceConfigurationSubsystem.robotFrontFacingHub().getRadians();
     double rotationError = MathUtil.angleModulus(currentRotation - desiredRotation);
+    m_PoseEstimatorSubsystem.setRotationErrorToHub(rotationError);
     double rotationPercent = m_preussAutoDrive.calculateClampedRotation(rotationError);
     m_DriveSubsystemSRX.allianceRelativeDrive(0.0, 0.0, rotationPercent, true, true);
   }
@@ -50,9 +52,10 @@ public class FaceHubCommand extends Command {
     m_DriveSubsystemSRX.drive(0.0,0.0, 0.0, true,false);
   }
 
-  // Returns true when the command should end.
+  // Returns false.
   @Override
   public boolean isFinished() {
-    return false;
+  return false; // This command must be managed externally and will not finish on its own.
   }
+
 }
