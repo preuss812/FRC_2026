@@ -50,6 +50,7 @@ import frc.robot.subsystems.DriveSubsystemSRX.DrivingMode;
 import frc.robot.subsystems.FeederSubsystem;
 import frc.robot.subsystems.IndexerSubsystem;
 import frc.robot.subsystems.IntakeSubsystem;
+import frc.robot.subsystems.IntakeDeploymentSubsystem;
 import frc.robot.subsystems.PingResponseUltrasonicSubsystem;
 import frc.robot.subsystems.PoseEstimatorSubsystem;
 import frc.robot.subsystems.ShooterSubsystem;
@@ -86,6 +87,7 @@ public class RobotContainer {
   private static boolean debug = true; // To enable debugging in this module, change false to true.
   public static ShooterSubsystem m_ShooterSubsystem = new ShooterSubsystem(CANConstants.kShooterMotor1);
   public static IntakeSubsystem m_IntakeSubsystem = new IntakeSubsystem(CANConstants.kIntakeMotor);
+  public static IntakeDeploymentSubsystem m_IntakeDeploymentSubsystem = new IntakeDeploymentSubsystem(CANConstants.kIntakeDeploymentMotor);
   public static FeederSubsystem m_FeederSubsystem = new FeederSubsystem(CANConstants.kFeederMotor);
   public static IndexerSubsystem m_IndexerSubsystem = new IndexerSubsystem(CANConstants.kIndexerMotor);
 
@@ -208,7 +210,7 @@ public class RobotContainer {
     );
 
     new JoystickButton(m_driverController, Button.kA.value).onTrue(
-      new InstantCommand(()->m_IntakeSubsystem.runMotor(0.2), m_IntakeSubsystem)
+      new InstantCommand(()->m_IntakeSubsystem.runMotor(0.4), m_IntakeSubsystem)
     );
     new JoystickButton(m_driverController, Button.kB.value).onTrue(
       new InstantCommand(()->m_IntakeSubsystem.runMotor(0), m_IntakeSubsystem)

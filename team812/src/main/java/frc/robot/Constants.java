@@ -44,15 +44,15 @@ public final class Constants {
         public static final int kSwerveLeftFrontDrive = 28;
         public static final int kSwerveLeftFrontCANCoder = 38;
 
-        public static final int kShooterMotor1 = 45;
-        public static final int kShooterMotor2 = 40;// unused
+        //public static final int kShooterMotor2 = 40;// unused
 
-        public static final int kElbowMotor2 = 44;
+        //public static final int kElbowMotor2 = 44;
         public static final int kIntakeMotor = 43;
+        public static final int kShooterMotor1 = 45;
         public static final int kFeederMotor = 46;
         public static final int kIndexerMotor = 47;
-        public static final int kShooterElevationMotor = 41;
-        public static final int kIntakeLiftMotor = 48;
+        //public static final int kShooterElevationMotor = 41;
+        public static final int kIntakeDeploymentMotor = 48;
 
         public static final int kPDP = 0; // was 50 until 3/12/2024
         public static final int kPCM = 51;
@@ -636,6 +636,18 @@ public final class Constants {
     public static final class IntakeConstants {
         public static final double pickupFuelSpeed = 0.5;
         public static final double liftPercentOutput = 0.5;
+    }
+
+    public static final class IntakeDeploymentConstants {
+        public static final double raiseIntakeSpeed = 0.1;
+        public static final double lowerIntakeSpeed = -0.1;
+        public static final double kP = 0.0002;
+        public static final double kI = 0.0;
+        public static final double kD = 0.0;
+        public static final double minOutputPercent = -0.2;
+        public static final double maxOutputPercent = 0.2;
+        public static final double maxRPM = 6784.0; // Neo Vortex
+        public static final double kV = 1.0/maxRPM; // Docs say 1.0 should be 12.0 but emperically 12.0 is not right.
     }
 
     
