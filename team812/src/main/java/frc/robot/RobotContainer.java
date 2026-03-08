@@ -20,12 +20,14 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.XboxController.Button;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.POVButton;
 import frc.robot.Constants.CANConstants;
 import frc.robot.Constants.DriveConstants;
+import frc.robot.Constants.IndexerConstants;
 import frc.robot.Constants.OIConstants;
 import frc.robot.Constants.UltrasonicConstants;
 import frc.robot.Constants.VisionConstants;
@@ -49,8 +51,8 @@ import frc.robot.subsystems.DriveSubsystemSRX;
 import frc.robot.subsystems.DriveSubsystemSRX.DrivingMode;
 import frc.robot.subsystems.FeederSubsystem;
 import frc.robot.subsystems.IndexerSubsystem;
-import frc.robot.subsystems.IntakeSubsystem;
 import frc.robot.subsystems.IntakeDeploymentSubsystem;
+import frc.robot.subsystems.IntakeSubsystem;
 import frc.robot.subsystems.PingResponseUltrasonicSubsystem;
 import frc.robot.subsystems.PoseEstimatorSubsystem;
 import frc.robot.subsystems.ShooterSubsystem;
@@ -165,8 +167,21 @@ public class RobotContainer {
             true,  true),
         m_robotDrive)
     );
-    //m_ShooterSubsystem.setDefaultCommand(new ShooterTest(m_ShooterSubsystem, m_blackBox, m_poseEstimatorSubsystem));
+
+    // The XBox right trigger will control the indexer motor turning it on when the trigger is > 50%.
+    m_IndexerSubsystem.setDefaultCommand(
+      new ConditionalCommand(
+        new InstantCommand(() -> m_IndexerSubsystem.runMotor(IndexerConstants.indexerPercentOutput), m_IndexerSubsystem),
+        new InstantCommand(() -> m_IndexerSubsystem.runMotor(0.0), m_IndexerSubsystem),
+        () -> (m_driverController.getRightTriggerAxis() > 0.5)
+      )
+    );
     
+  }
+
+  public void setShooterFeederSpeed(double rpm) {
+    m_ShooterSubsystem.setRPM(rpm);
+    m_FeederSubsystem.setRPM(rpm);
   }
 
   /**
@@ -226,7 +241,18 @@ public class RobotContainer {
       Utilities.toSmartDashboard("April Tag 19 pose: ", m_poseEstimatorSubsystem.getAprilTagPose(19));
       Utilities.toSmartDashboard("A19 Robot: ", DriveConstants.robotFrontAtPose(m_poseEstimatorSubsystem.getAprilTagPose(19), 0.0) );
 
-
+    new JoystickButton(leftJoystick, 7).onTrue(
+      new InstantCommand(() -> setShooterFeederSpeed(0), m_ShooterSubsystem, m_FeederSubsystem)
+    );
+    new JoystickButton(leftJoystick, 8).onTrue(
+      new InstantCommand(() -> setShooterFeederSpeed(3000), m_ShooterSubsystem, m_FeederSubsystem)
+    );
+    new JoystickButton(leftJoystick, 9).onTrue(
+      new InstantCommand(() -> setShooterFeederSpeed(m_ShooterSubsystem.getTargetRPM()-25), m_ShooterSubsystem, m_FeederSubsystem)
+    );
+    new JoystickButton(leftJoystick, 10).onTrue(
+      new InstantCommand(() -> setShooterFeederSpeed(m_ShooterSubsystem.getTargetRPM()+25), m_ShooterSubsystem, m_FeederSubsystem)
+    );
 
 
 

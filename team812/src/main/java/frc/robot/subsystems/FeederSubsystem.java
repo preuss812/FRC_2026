@@ -116,22 +116,22 @@ public class FeederSubsystem extends SubsystemBase {
     */
 
     // Initialize dashboard values
-    SmartDashboard.setDefaultNumber("Feeder RPM Target", 0);
+    //SmartDashboard.setDefaultNumber("Feeder RPM Target", 0);
     currentRPM = 0;
   }
 
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
-    double rpm = SmartDashboard.getNumber("Feeder RPM Target", 0.0);
-    setRPM(rpm);
+    //double rpm = SmartDashboard.getNumber("Feeder RPM Target", 0.0);
+    //setRPM(rpm);
     // closed-loop velocity control
     currentRPM = encoder.getVelocity();
     // telemetry
     SmartDashboard.putNumber("Feeder RPM", currentRPM);
 
     // = SmartDashboard.getNumber("Target Velocity", 0);
-    closedLoopController.setSetpoint(targetRPM, ControlType.kVelocity);
+    //closedLoopController.setSetpoint(targetRPM, ControlType.kVelocity);
   }
 
   public void runMotor(double pOut){
@@ -174,6 +174,10 @@ public class FeederSubsystem extends SubsystemBase {
    */
   public boolean readyToShoot(double rpmTolerance) {
     return Math.abs(currentRPM - targetRPM) < rpmTolerance;
+  }
+
+  public double getTargetRPM() {
+    return targetRPM;
   }
 
 }

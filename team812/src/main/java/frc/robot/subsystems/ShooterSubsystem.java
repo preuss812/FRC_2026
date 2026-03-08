@@ -28,8 +28,7 @@ public class ShooterSubsystem extends SubsystemBase {
 
     // Shooter settings
     //private final double maxRPM = 5320; // For a CIM motor. 
-    private final double defaultRPM = 3000;
-    private double targetRPM = defaultRPM;  // desired shooter wheel speed
+    private double targetRPM = 0;  // desired shooter wheel speed
     private double currentRPM; // the current rpm of the shooter.
     // native units are ticks per 100ms.
     // With external through bore encoder this calculation would be more typical:
@@ -129,8 +128,8 @@ public class ShooterSubsystem extends SubsystemBase {
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
-    double rpm = SmartDashboard.getNumber("Shooter RPM Target", 0.0);
-    setRPM(rpm);
+    //double rpm = SmartDashboard.getNumber("Shooter RPM Target", 0.0);
+   //setRPM(rpm);
     // closed-loop velocity control
     currentRPM = encoder.getVelocity();
     // telemetry
@@ -138,7 +137,7 @@ public class ShooterSubsystem extends SubsystemBase {
     SmartDashboard.putNumber("Shooter Vout", motor1.getAppliedOutput());
 
     // = SmartDashboard.getNumber("Target Velocity", 0);
-    closedLoopController.setSetpoint(targetRPM, ControlType.kVelocity);
+    //closedLoopController.setSetpoint(targetRPM, ControlType.kVelocity);
   }
 
   public void runMotor(double pOut){
@@ -181,6 +180,10 @@ public class ShooterSubsystem extends SubsystemBase {
    */
   public boolean readyToShoot(double rpmTolerance) {
     return Math.abs(currentRPM - targetRPM) < rpmTolerance;
+  }
+
+  public double getTargetRPM() {
+    return targetRPM;
   }
   
 }

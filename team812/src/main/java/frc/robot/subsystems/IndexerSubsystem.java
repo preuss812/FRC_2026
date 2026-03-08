@@ -42,18 +42,19 @@ public class IndexerSubsystem extends SubsystemBase {
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
-    double pOut; // = RobotContainer.m_blackBox.getPotValue(0);
-    pOut = SmartDashboard.getNumber("Indexer%In", 0.0);
+    //double pOut; // = RobotContainer.m_blackBox.getPotValue(0);
+    //pOut = SmartDashboard.getNumber("Indexer%In", 0.0);
 
     //pOut = 0.0;
-    runMotor(pOut);
-    SmartDashboard.putNumber("Indexer%Out", pOut);
+    //runMotor(pOut);
+    //SmartDashboard.putNumber("Indexer%Out", pOut);
   }
 
   public void runMotor(double pOut){
     pOut = MathUtil.clamp(pOut, IndexerConstants.minOutputPercent, IndexerConstants.maxOutputPercent);
     closedLoopController.setSetpoint(pOut, ControlType.kDutyCycle);
-  }
+    SmartDashboard.putNumber("Indexer%Out", pOut);
+}
 
   public void stop() {
     closedLoopController.setSetpoint(0, ControlType.kDutyCycle);
