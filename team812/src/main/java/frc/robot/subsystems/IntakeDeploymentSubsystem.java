@@ -12,6 +12,7 @@ import com.revrobotics.spark.FeedbackSensor;
 import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkFlex;
+import com.revrobotics.spark.SparkLimitSwitch;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.SparkFlexConfig;
 
@@ -41,7 +42,10 @@ public class IntakeDeploymentSubsystem extends SubsystemBase {
     //private final SparkFlexConfig motorFollowerConfig;
     private final SparkClosedLoopController closedLoopController;
     private final RelativeEncoder encoder;
-    
+    private final SparkLimitSwitch m_fwdLimitSwitch;
+    private final SparkLimitSwitch m_revLimitSwitch;
+    private boolean m_atFwdLimit = true; // dont allow motion until after periodic sets this.
+    private boolean m_atRevLimit = true; // dont allow motion until after periodic sets this.
 
   public IntakeDeploymentSubsystem(int intakedeploymentCANId) {
       /** Creates a new IntakeDeploymentSubsystem. */
@@ -52,7 +56,7 @@ public class IntakeDeploymentSubsystem extends SubsystemBase {
      */
     motor1 = new SparkFlex(intakedeploymentCANId, MotorType.kBrushless);
     motor1Sim = new SparkFlexSim(motor1, m_dcMotor);
-
+    
     closedLoopController = motor1.getClosedLoopController();
     encoder = motor1.getEncoder();
 
@@ -113,6 +117,8 @@ public class IntakeDeploymentSubsystem extends SubsystemBase {
       .inverted(true);
     motor2.configure(motorFollowerConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
     */
+    m_fwdLimitSwitch = motor1.getForwardLimitSwitch();
+    m_revLimitSwitch = motor1.getReverseLimitSwitch();
 
     // Initialize dashboard values
     SmartDashboard.setDefaultNumber("IntakeDeployment RPM Target", 0);
@@ -131,6 +137,12 @@ public class IntakeDeploymentSubsystem extends SubsystemBase {
 
     // = SmartDashboard.getNumber("Target Velocity", 0);
     closedLoopController.setSetpoint(targetRPM, ControlType.kVelocity);
+    m_atFwdLimit = m_fwdLimitSwitch.isPressed();
+    m_atRevLimit = m_revLimitSwitch.isPressed();
+    SmartDashboard.putBoolean("IntakeFwdLimit", m_atFwdLimit);
+    SmartDashboard.putBoolean("IntakeRevLimit", m_atRevLimit); 
+    SmartDashboard.putBoolean("IntakeUp", m_atFwdLimit);
+    SmartDashboard.putBoolean("IntakeDown", m_atRevLimit);
   }
 
   public void runMotor(double pOut){
