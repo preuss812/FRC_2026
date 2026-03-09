@@ -14,6 +14,7 @@ import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLimitSwitch;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
+import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkFlexConfig;
 
 import edu.wpi.first.math.MathUtil;
@@ -67,6 +68,7 @@ public class IntakeDeploymentSubsystem extends SubsystemBase {
     motorConfig = new SparkFlexConfig();
     //motorFollowerConfig = new SparkFlexConfig();
     motorConfig.inverted(false); // This makes negative RPM deploy the shooter
+    motorConfig.idleMode(IdleMode.kBrake);
     /*
      * Configure the encoder. For this specific example, we are using the
      * integrated encoder of the NEO, and we don't need to configure it. If

@@ -651,8 +651,8 @@ public final class Constants {
         public static final double kP = 0.0002;
         public static final double kI = 0.0;
         public static final double kD = 0.0;
-        public static final double minOutputPercent = -0.2;
-        public static final double maxOutputPercent = 0.2;
+        public static final double minOutputPercent = -0.80;
+        public static final double maxOutputPercent = 0.80;
         public static final double maxRPM = 6784.0; // Neo Vortex
         public static final double kV = 1.0/maxRPM; // Docs say 1.0 should be 12.0 but emperically 12.0 is not right.
     }
