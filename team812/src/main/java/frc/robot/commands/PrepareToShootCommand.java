@@ -6,6 +6,7 @@ package frc.robot.commands;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants.ShooterConstants;
@@ -42,6 +43,7 @@ public class PrepareToShootCommand extends Command {
     //Distance from the center of the robot (Adjust later)
     double shooterOffset = 0;
     double distance = robotPose.getTranslation().getDistance(hubPos) - shooterOffset;
+    SmartDashboard.putString("Distance to Hub", String.format("%1dft %1din", (int)Units.metersToInches(distance)/12, (int)Units.metersToInches(distance)%12));
     double RPM = distanceToRPM(distance);
     shooter.setRPM(RPM);
     feeder.setRPM(RPM);

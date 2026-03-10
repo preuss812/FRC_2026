@@ -21,7 +21,6 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Constants.CANConstants;
 import frc.robot.Constants.IntakeDeploymentConstants;
 
 public class IntakeDeploymentSubsystem extends SubsystemBase {
@@ -181,12 +180,20 @@ public class IntakeDeploymentSubsystem extends SubsystemBase {
     motor1Sim.iterate(closedLoopController.getSetpoint(), 12, 0.02);
   }
   
-  /* readyToShoot - helper function to determine if the shooter is up to speed and ready to shoot.
-   * @param rpmTolerance (double) the tolerance in rpm for determining if the shooter is up to speed.
-   * @return (boolean) true if the shooter is up to speed, false otherwise.
+  /*
+   * fullyRaised - return true if the intake is fully raised (i.e. at the forward limit).
+   * @return (boolean) true if the intake is fully raised, false otherwise.
    */
-  public boolean readyToShoot(double rpmTolerance) {
-    return Math.abs(currentRPM - targetRPM) < rpmTolerance;
+  public boolean fullyRaised() {
+    return m_atFwdLimit;
+  }
+
+  /*
+   * fullyLowered - return true if the intake is fully lowered (i.e. at the reverse limit).
+   * @return (boolean) true if the intake is fully lowered, false otherwise.
+   */
+  public boolean fullyLowered() {
+    return m_atRevLimit;
   }
 
 }

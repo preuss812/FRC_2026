@@ -642,12 +642,11 @@ public final class Constants {
 
     public static final class IntakeConstants {
         public static final double pickupFuelSpeed = 0.5;
-        public static final double liftPercentOutput = 0.5;
     }
 
     public static final class IntakeDeploymentConstants {
-        public static final double raiseIntakeSpeed = 0.1;
-        public static final double lowerIntakeSpeed = -0.1;
+        public static final double kIntakeDeploymentUpRPM = 320;
+        public static final double kIntakeDeploymentDownRPM = -160;
         public static final double kP = 0.0002;
         public static final double kI = 0.0;
         public static final double kD = 0.0;

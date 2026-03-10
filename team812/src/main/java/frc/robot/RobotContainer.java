@@ -22,12 +22,15 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.POVButton;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.CANConstants;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.Constants.IndexerConstants;
+import frc.robot.Constants.IntakeConstants;
 import frc.robot.Constants.OIConstants;
 import frc.robot.Constants.UltrasonicConstants;
 import frc.robot.Constants.VisionConstants;
@@ -39,7 +42,10 @@ import frc.robot.commands.DriveRobotCommand;
 import frc.robot.commands.DriveWithoutVisionCommand;
 import frc.robot.commands.FireAtWillCommand;
 import frc.robot.commands.GotoPoseCommand;
+import frc.robot.commands.LowerIntakeCommand;
 import frc.robot.commands.PointCameraTowardHubCommand;
+import frc.robot.commands.PrepareToShootCommand;
+import frc.robot.commands.RaiseIntakeCommand;
 import frc.robot.commands.RandomRobotPositionCommand;
 import frc.robot.commands.ResetDriveTrainCommand;
 import frc.robot.commands.RotateRobotCommand;
@@ -208,6 +214,8 @@ public class RobotContainer {
     
       // Xbox Y button resets the robot coorinate system
     new JoystickButton(m_driverController, Button.kY.value).onTrue(new ResetDriveTrainCommand(this));
+
+    // X button sets the robot pose to (0,0,0) for testing. This is a bit of a hack but it is really useful for testing and simulation when we don't have AprilTags in view to correct our pose.
     new JoystickButton(m_driverController, Button.kX.value).onTrue(new InstantCommand(()->m_poseEstimatorSubsystem.setCurrentPose(new Pose2d(0,0, Rotation2d.kZero))));
 
     // Xbox start button puts thte robot in fast/speed driving mode.
@@ -215,32 +223,50 @@ public class RobotContainer {
       new InstantCommand(()->m_robotDrive.setDrivingMode(DrivingMode.SPEED))
     );
     
-        // Xbox start button puts thte robot in slow/precision driving mode.
+    // Xbox start button puts thte robot in slow/precision driving mode.
     new JoystickButton(m_driverController, Button.kBack.value).onTrue(
       new InstantCommand(()->m_robotDrive.setDrivingMode(DrivingMode.PRECISION))
     );
+
+    // Right bumper puts the robot in a mode where the left stick controls translation but the robot automatically faces the hub.
     new JoystickButton(m_driverController, Button.kRightBumper.value)
     .onTrue(
-      new DriveFacingHub(m_robotDrive, m_poseEstimatorSubsystem, m_driverController)
+      new ParallelCommandGroup(
+        new PrepareToShootCommand(m_ShooterSubsystem, m_FeederSubsystem, m_poseEstimatorSubsystem),
+        new DriveFacingHub(m_robotDrive, m_poseEstimatorSubsystem, m_driverController)
+      )
     );
 
+    // A button starts the intake and leavs it running
     new JoystickButton(m_driverController, Button.kA.value).onTrue(
-      new InstantCommand(()->m_IntakeSubsystem.runMotor(0.4), m_IntakeSubsystem)
+      new InstantCommand(()->m_IntakeSubsystem.runMotor(IntakeConstants.pickupFuelSpeed), m_IntakeSubsystem)
     );
+
+    // B button stops the intake.
     new JoystickButton(m_driverController, Button.kB.value).onTrue(
       new InstantCommand(()->m_IntakeSubsystem.runMotor(0), m_IntakeSubsystem)
     );
 
+    
+    // Left bumper raises the intake.
     new JoystickButton(m_driverController, Button.kLeftBumper.value).whileTrue(
-      new InstantCommand(()->m_FeederSubsystem.runMotor(10), m_IntakeSubsystem)
+      new RaiseIntakeCommand(m_IntakeDeploymentSubsystem)
     );
 
+    // Left trigger lowers the intake.
+    Trigger leftTriggerButton = new Trigger(() -> m_driverController.getLeftTriggerAxis() >= 0.5);
+    leftTriggerButton.whileTrue(
+      new LowerIntakeCommand(m_IntakeDeploymentSubsystem)
+    );
+
+    // Left Joystick button 11 drives to apriltag 19.  This is just for testing.
     new JoystickButton(leftJoystick, 11).whileTrue(
       new GotoPoseCommand(m_robotDrive, m_poseEstimatorSubsystem, DriveConstants.robotFrontAtPose(m_poseEstimatorSubsystem.getAprilTagPose(19), 0.0) , m_robotDrive.debugAutoConfig)
       );
       Utilities.toSmartDashboard("April Tag 19 pose: ", m_poseEstimatorSubsystem.getAprilTagPose(19));
       Utilities.toSmartDashboard("A19 Robot: ", DriveConstants.robotFrontAtPose(m_poseEstimatorSubsystem.getAprilTagPose(19), 0.0) );
 
+    // Left Joystick buttons 7,8,9,10 control the shooter and feeder speed for testing. 7 is stop, 8 is 3000 RPM, 9 is current target RPM - 25, 10 is current target RPM + 25.
     new JoystickButton(leftJoystick, 7).onTrue(
       new InstantCommand(() -> setShooterFeederSpeed(0), m_ShooterSubsystem, m_FeederSubsystem)
     );
