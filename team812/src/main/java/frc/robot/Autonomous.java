@@ -17,6 +17,7 @@ import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.Constants.FieldConstants;
 import frc.robot.Constants.VisionConstants;
 import frc.robot.autoCommands.CenterShootCommand;
+import frc.robot.autoCommands.FarRightShootOutpostShootCommand;
 import frc.robot.commands.DriveWithoutVisionCommand;
 import frc.robot.subsystems.AllianceConfigurationSubsystem;
 import frc.robot.subsystems.DriveSubsystemSRX;
@@ -123,6 +124,8 @@ public class Autonomous extends SequentialCommandGroup {
       case AllianceConfigurationSubsystem.AUTO_MODE_CENTER_SHOOT:
         addCommands(new CenterShootCommand());
         break;
+      case AllianceConfigurationSubsystem.AUTO_MODE_FAR_RIGHT_SHOOT_OUTPOST_SHOOT:
+        addCommands(new FarRightShootOutpostShootCommand());
       default:
       }
     
