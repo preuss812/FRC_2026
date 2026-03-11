@@ -232,8 +232,8 @@ public class RobotContainer {
     new JoystickButton(m_driverController, Button.kRightBumper.value)
     .onTrue(
       new ParallelCommandGroup(
-        new PrepareToShootCommand(m_ShooterSubsystem, m_FeederSubsystem, m_poseEstimatorSubsystem),
-        new DriveFacingHub(m_robotDrive, m_poseEstimatorSubsystem, m_driverController)
+        new PrepareToShootCommand(m_ShooterSubsystem, m_FeederSubsystem, m_poseEstimatorSubsystem)
+        //new DriveFacingHub(m_robotDrive, m_poseEstimatorSubsystem, m_driverController)
       )
     );
 
@@ -327,7 +327,14 @@ public class RobotContainer {
         SmartDashboard.putData("A29L", new GotoPoseCommand(m_robotDrive, m_poseEstimatorSubsystem, DriveConstants.robotLeftAtPose(m_poseEstimatorSubsystem.getAprilTagPose(29), 0.0) , m_robotDrive.defaultAutoConfig));
         SmartDashboard.putData("A29R", new GotoPoseCommand(m_robotDrive, m_poseEstimatorSubsystem, DriveConstants.robotRightAtPose(m_poseEstimatorSubsystem.getAprilTagPose(29), 0.0) , m_robotDrive.defaultAutoConfig));
     } // (isSimulation()
-        SmartDashboard.putData("RTest", new ShooterTest(m_ShooterSubsystem, m_poseEstimatorSubsystem));      } // (configureButtonBindings)
+        SmartDashboard.putData("RTest", new ShooterTest(m_ShooterSubsystem, m_poseEstimatorSubsystem));     
+        SmartDashboard.putData("RI", new RaiseIntakeCommand(m_IntakeDeploymentSubsystem));
+        SmartDashboard.putData("LI", new LowerIntakeCommand(m_IntakeDeploymentSubsystem));
+        SmartDashboard.putData("PS", new ParallelCommandGroup(
+        new PrepareToShootCommand(m_ShooterSubsystem, m_FeederSubsystem, m_poseEstimatorSubsystem),
+        new DriveFacingHub(m_robotDrive, m_poseEstimatorSubsystem, m_driverController)
+      ));
+ } // (configureButtonBindings)
 
   /**
    * Use this to pass the autonomous command to the main {@link Robot} class.

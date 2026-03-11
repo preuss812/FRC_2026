@@ -129,8 +129,8 @@ public class IntakeDeploymentSubsystem extends SubsystemBase {
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
-    double rpm = SmartDashboard.getNumber("IntakeDeployment RPM Target", 0.0);
-    setRPM(rpm);
+    //double rpm = SmartDashboard.getNumber("IntakeDeployment RPM Target", 0.0);
+    //setRPM(rpm);
     // closed-loop velocity control
     currentRPM = encoder.getVelocity();
     // telemetry

@@ -28,7 +28,7 @@ public class RaiseIntakeCommand extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    m_intakeDeploymentSubsystem.setRPM(320);
+    //m_intakeDeploymentSubsystem.setRPM(320); // this is debug
   }
 
   // Called once the command ends or is interrupted.
