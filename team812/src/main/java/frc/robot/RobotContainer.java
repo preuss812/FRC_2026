@@ -249,7 +249,7 @@ public class RobotContainer {
 
     
     // Left bumper raises the intake.
-    new JoystickButton(m_driverController, Button.kLeftBumper.value).whileTrue(
+    new JoystickButton(m_driverController, Button.kLeftBumper.value).onTrue(
       new RaiseIntakeCommand(m_IntakeDeploymentSubsystem)
     );
 

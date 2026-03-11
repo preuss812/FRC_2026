@@ -27,7 +27,9 @@ public class RaiseIntakeCommand extends Command {
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
-  public void execute() {}
+  public void execute() {
+    m_intakeDeploymentSubsystem.setRPM(320);
+  }
 
   // Called once the command ends or is interrupted.
   @Override
@@ -38,6 +40,6 @@ public class RaiseIntakeCommand extends Command {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return m_intakeDeploymentSubsystem.fullyRaised();
+    return false; //m_intakeDeploymentSubsystem.fullyRaised();
   }
 }
