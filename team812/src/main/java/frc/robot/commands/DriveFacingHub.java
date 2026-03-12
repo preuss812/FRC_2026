@@ -5,8 +5,10 @@
 package frc.robot.commands;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.Constants.FieldConstants;
 import frc.robot.Constants.OIConstants;
 import frc.robot.subsystems.AllianceConfigurationSubsystem;
 import frc.robot.subsystems.DriveSubsystemSRX;
@@ -43,7 +45,16 @@ public class DriveFacingHub extends Command {
     double x = -MathUtil.applyDeadband(m_XboxController.getLeftY(), OIConstants.kDriveDeadband);
     double y = -MathUtil.applyDeadband(m_XboxController.getLeftX(), OIConstants.kDriveDeadband);
     double currentRotation = m_PoseEstimatorSubsystem.getCurrentPose().getRotation().getRadians();
-    double desiredRotation = AllianceConfigurationSubsystem.robotFrontFacingHub().getRadians();
+    double desiredRotation;
+    Pose2d robotPose = m_PoseEstimatorSubsystem.getCurrentPose();
+    // If the robot is not in the scoring zone, point directly down field, otherwise point at the hub.
+    if (AllianceConfigurationSubsystem.isBlueAlliance() && robotPose.getX() >= FieldConstants.blueHubCenterX) {
+      desiredRotation = Math.PI;
+    } else if (AllianceConfigurationSubsystem.isRedAlliance() && robotPose.getX() <= FieldConstants.redHubCenterX) {
+        desiredRotation = 0.0;
+    } else {
+      desiredRotation = AllianceConfigurationSubsystem.robotFrontFacingHub().getRadians();
+    }
     double rotationError = MathUtil.angleModulus(currentRotation - desiredRotation);
     double rotationPercent = m_preussAutoDrive.calculateClampedRotation(rotationError);
     m_DriveSubsystemSRX.allianceRelativeDrive(x, y, rotationPercent, true, true);

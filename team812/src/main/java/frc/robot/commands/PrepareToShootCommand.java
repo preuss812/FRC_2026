@@ -4,6 +4,7 @@
 
 package frc.robot.commands;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
@@ -44,7 +45,7 @@ public class PrepareToShootCommand extends Command {
     double shooterOffset = 0;
     double distance = robotPose.getTranslation().getDistance(hubPos) - shooterOffset;
     SmartDashboard.putString("Distance to Hub", String.format("%1dft %1din", (int)Units.metersToInches(distance)/12, (int)Units.metersToInches(distance)%12));
-    double RPM = distanceToRPM(distance);
+    double RPM = distanceToRPM(MathUtil.clamp(distance, 1.0, 6.0)); // The cubic is not fit beyond this range.
     shooter.setRPM(RPM);
     feeder.setRPM(RPM);
     //shooter.runMotor(RPM*ShooterConstants.RPMToVolts/12.0);

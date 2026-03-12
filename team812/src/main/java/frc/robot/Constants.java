@@ -149,18 +149,19 @@ public final class Constants {
         public static final double fieldWidth = Units.inchesToMeters(317.69); // This is Y
 
         // Handy values
-        public static double xMin = 0.00;
-        public static double xMax = fieldLength; // Meters 
-        public static double yMin = 0.00;
-        public static double yMax = fieldWidth; // Meters
-        public static double xCenter = (xMax - xMin)/2.0;
-        public static double yCenter = (yMax - yMin)/2.0;
-        public static double xSquareSize = xMax/8;
-        public static double ySquareSize = yMax/4;
-        public static double blueHubCenterX = Units.inchesToMeters(182.11);
-        public static Translation2d blueHubCenter = new Translation2d(blueHubCenterX, yCenter);
-        public static Translation2d redHubCenter = BlueToRedTranslation(blueHubCenter);
-        public static double hubToStart = Units.inchesToMeters(88.0);
+        public static final double xMin = 0.00;
+        public static final double xMax = fieldLength; // Meters 
+        public static final double yMin = 0.00;
+        public static final double yMax = fieldWidth; // Meters
+        public static final double xCenter = (xMax - xMin)/2.0;
+        public static final double yCenter = (yMax - yMin)/2.0;
+        public static final double xSquareSize = xMax/8;
+        public static final double ySquareSize = yMax/4;
+        public static final double blueHubCenterX = Units.inchesToMeters(182.11);
+        public static final Translation2d blueHubCenter = new Translation2d(blueHubCenterX, yCenter);
+        public static final Translation2d redHubCenter = BlueToRedTranslation(blueHubCenter);
+        public static final double redHubCenterX = redHubCenter.getX();
+        public static final double hubToStart = Units.inchesToMeters(88.0);
         
         // Handy X coordinates:
         public static final double blueStartLine =  Units.inchesToMeters(156.61);
