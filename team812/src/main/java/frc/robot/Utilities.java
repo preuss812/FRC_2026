@@ -7,15 +7,17 @@
 
 package frc.robot;
 
+import java.util.List;
+import java.util.function.BooleanSupplier;
+
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.Constants.FieldConstants;
-import java.util.List;
-import java.util.function.BooleanSupplier;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
+import frc.robot.subsystems.PingResponseUltrasonicSubsystem;
 
 /**
  * Add your docs here.
@@ -119,9 +121,9 @@ public class Utilities {
      * rotated to -90 degrees (ie back facing the amp wall) and near the 
      * amp wall.
     */
-    public static void refineYCoordinate() {
+    public static void refineYCoordinate(PingResponseUltrasonicSubsystem pingResponseUltrasonicSubsystem) {
         boolean reset = false;
-        double ultrasonicRange = RobotContainer.m_pingResponseUltrasonicSubsystem.getRange();
+        double ultrasonicRange = pingResponseUltrasonicSubsystem.getRange();
         if (ultrasonicRange < 2.0 /* Meters */) {
             Pose2d currentPose = RobotContainer.m_poseEstimatorSubsystem.getCurrentPose();
             if (Math.abs(currentPose.getRotation().getDegrees() -  -90.0) < 5.0 /* degrees */) {

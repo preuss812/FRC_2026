@@ -20,7 +20,6 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.XboxController.Button;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.RunCommand;
@@ -29,10 +28,8 @@ import edu.wpi.first.wpilibj2.command.button.POVButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.CANConstants;
 import frc.robot.Constants.DriveConstants;
-import frc.robot.Constants.IndexerConstants;
 import frc.robot.Constants.IntakeConstants;
 import frc.robot.Constants.OIConstants;
-import frc.robot.Constants.UltrasonicConstants;
 import frc.robot.Constants.VisionConstants;
 import frc.robot.commands.DriveChoreoPathCommand;
 import frc.robot.commands.DriveCircle;
@@ -52,6 +49,7 @@ import frc.robot.commands.RotateRobotCommand;
 import frc.robot.commands.RotateRobotG2PCommand;
 import frc.robot.commands.ShooterTest;
 import frc.robot.commands.SimSetRobotPoseCommand;
+import frc.robot.commands.SpinIndexerCommand;
 import frc.robot.subsystems.AllianceConfigurationSubsystem;
 import frc.robot.subsystems.DriveSubsystemSRX;
 import frc.robot.subsystems.DriveSubsystemSRX.DrivingMode;
@@ -59,7 +57,6 @@ import frc.robot.subsystems.FeederSubsystem;
 import frc.robot.subsystems.IndexerSubsystem;
 import frc.robot.subsystems.IntakeDeploymentSubsystem;
 import frc.robot.subsystems.IntakeSubsystem;
-import frc.robot.subsystems.PingResponseUltrasonicSubsystem;
 import frc.robot.subsystems.PoseEstimatorSubsystem;
 import frc.robot.subsystems.ShooterSubsystem;
 import frc.utils.PoseEstimatorCamera;
@@ -99,12 +96,14 @@ public class RobotContainer {
   public static FeederSubsystem m_FeederSubsystem = new FeederSubsystem(CANConstants.kFeederMotor);
   public static IndexerSubsystem m_IndexerSubsystem = new IndexerSubsystem(CANConstants.kIndexerMotor);
 
+  /*
   public static PingResponseUltrasonicSubsystem m_pingResponseUltrasonicSubsystem =
     new PingResponseUltrasonicSubsystem(
       UltrasonicConstants.kPingChannel,
       UltrasonicConstants.kEchoChannel,
       UltrasonicConstants.kOffsetToBumper
     );
+  */
 
   // Controller definitions
   private final Joystick leftJoystick = new Joystick(OIConstants.kLeftJoystick);
@@ -174,6 +173,7 @@ public class RobotContainer {
         m_robotDrive)
     );
 
+    /*
     // The XBox right trigger will control the indexer motor turning it on when the trigger is > 50%.
     m_IndexerSubsystem.setDefaultCommand(
       new ConditionalCommand(
@@ -182,6 +182,7 @@ public class RobotContainer {
         () -> (m_driverController.getRightTriggerAxis() > 0.5)
       )
     );
+    */
     
   }
 
@@ -259,6 +260,12 @@ public class RobotContainer {
       new LowerIntakeCommand(m_IntakeDeploymentSubsystem)
     );
 
+    // Right trigger shoots but running the indexer
+    Trigger rightTriggerButton = new Trigger(() -> m_driverController.getRightTriggerAxis() >= 0.5);
+    rightTriggerButton.whileTrue(
+      new SpinIndexerCommand(m_IndexerSubsystem)
+    );
+
     // Left Joystick button 11 drives to apriltag 19.  This is just for testing.
     new JoystickButton(leftJoystick, 11).whileTrue(
       new GotoPoseCommand(m_robotDrive, m_poseEstimatorSubsystem, DriveConstants.robotFrontAtPose(m_poseEstimatorSubsystem.getAprilTagPose(19), 0.0) , m_robotDrive.debugAutoConfig)
@@ -280,7 +287,29 @@ public class RobotContainer {
       new InstantCommand(() -> setShooterFeederSpeed(m_ShooterSubsystem.getTargetRPM()+25), m_ShooterSubsystem, m_FeederSubsystem)
     );
 
-
+    // Right Joystick bindings
+    new JoystickButton(rightJoystick, 7).onTrue(
+      new LowerIntakeCommand(m_IntakeDeploymentSubsystem)
+    );
+    new JoystickButton(rightJoystick, 8).onTrue(
+      new RaiseIntakeCommand(m_IntakeDeploymentSubsystem)
+    );
+    new JoystickButton(rightJoystick, 9).onTrue(
+      new InstantCommand(()->m_IntakeSubsystem.runMotor(IntakeConstants.pickupFuelSpeed), m_IntakeSubsystem)
+    );
+    new JoystickButton(rightJoystick, 10).onTrue(
+      new InstantCommand(()->m_IntakeSubsystem.runMotor(0.0), m_IntakeSubsystem)
+    );
+    new JoystickButton(rightJoystick, 11).onTrue(
+      new PrepareToShootCommand(m_ShooterSubsystem, m_FeederSubsystem, m_poseEstimatorSubsystem)
+    );
+    new JoystickButton(rightJoystick, 12).onTrue(
+      new InstantCommand(() -> setShooterFeederSpeed(0), m_ShooterSubsystem, m_FeederSubsystem)
+    ); 
+    // Left trigger lowers the intake.
+    new JoystickButton(rightJoystick, 1).whileTrue(
+      new SpinIndexerCommand(m_IndexerSubsystem)
+    );
 
     // POV buttons to point robot to a given heading where 0 is
     // straight downfield from the driver's perspective.
