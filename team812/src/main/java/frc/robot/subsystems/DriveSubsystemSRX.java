@@ -104,7 +104,7 @@ public class DriveSubsystemSRX extends SubsystemBase {
   public DrivingConfig aggressiveAutoConfig;
 
 
-  private final boolean debug = true;
+  private final boolean debug = false;
 
   /** Creates a new DriveSubsystemSRXSRX. */
   public DriveSubsystemSRX() {
@@ -477,10 +477,10 @@ public class DriveSubsystemSRX extends SubsystemBase {
   public void simulationPeriodic() {
     double timestep = 20e-3;
     ChassisSpeeds chassisSpeeds = getFieldCentricChassisSpeeds(); // only using this for robot rotation.
-    m_frontLeft.simulationPeriodic(timestep);
-    m_frontRight.simulationPeriodic(timestep);
-    m_rearLeft.simulationPeriodic(timestep);
-    m_rearRight.simulationPeriodic(timestep);
+    m_frontLeft.pseudoSimulationPeriodic(timestep);
+    m_frontRight.pseudoSimulationPeriodic(timestep);
+    m_rearLeft.pseudoSimulationPeriodic(timestep);
+    m_rearRight.pseudoSimulationPeriodic(timestep);
     m_gyro.iterate(chassisSpeeds.omegaRadiansPerSecond, timestep);
   }
 }

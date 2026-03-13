@@ -26,7 +26,7 @@ public class PoseEstimatorCamera extends PhotonCamera {
     private int m_lastAprilTagSeen = VisionConstants.NO_TAG_FOUND;
     private static final PhotonPipelineResult m_emptyPipeline = new PhotonPipelineResult();
     private PhotonPipelineResult lastPipeLineResult = m_emptyPipeline;
-    private final boolean debug = true;
+    private final boolean debug = false;
 
     public PoseEstimatorCamera(String name, Transform3d cameraToRobotTransform) {
         super(name);
@@ -51,7 +51,16 @@ public class PoseEstimatorCamera extends PhotonCamera {
                 // If we have a field location for this tag, use it to update the robot's position.
                 if (tagPose.isPresent()) {
                     var targetPose = tagPose.get();
-                    Transform3d camToTarget = target.getBestCameraToTarget();                Pose3d camPose = targetPose.transformBy(camToTarget.inverse());
+                    Transform3d camToTarget = target.getBestCameraToTarget();
+                    // Scale the camera measurement by the camera scale factor
+                    double scaleFactor = 58.5/57.5; // TODO: Use measurements from recalibrated camera.   // Measured vs camera measurement.
+                    Transform3d camToTargetScaled = new Transform3d(
+                      camToTarget.getX() * scaleFactor,
+                      camToTarget.getY() * scaleFactor,
+                      camToTarget.getZ() * scaleFactor,
+                      camToTarget.getRotation()
+                    );
+                    Pose3d camPose = targetPose.transformBy(camToTargetScaled.inverse());
 
                     visionMeasurement = new VisionResult(camPose.transformBy(cameraToRobotTransform), fiducialId, resultTimestamp);
                 }
@@ -75,7 +84,7 @@ public class PoseEstimatorCamera extends PhotonCamera {
             var target = getBestTarget((pipelineResult.getTargets()));
             if (target != null) {
               var bestFiducialId = target.getFiducialId();
-              SmartDashboard.putNumber("PV ambiguity", target.getPoseAmbiguity());
+              if (debug) SmartDashboard.putNumber("PV ambiguity", target.getPoseAmbiguity());
 
               if (target.getPoseAmbiguity() <= VisionConstants.maximumAmbiguity 
               && bestFiducialId >= VisionConstants.MIN_FIDUCIAL_ID 
@@ -151,7 +160,7 @@ public class PoseEstimatorCamera extends PhotonCamera {
             }
             }
         }
-        SmartDashboard.putString("PV s", s);
+        if (debug) SmartDashboard.putString("PV s", s);
         return result;
     }
 

@@ -31,9 +31,9 @@ public class DriveCircle extends GotoPoseCommand {
   /** Creates a new DriveCircleCommand. */
   public DriveCircle(DriveSubsystemSRX robotDrive, PoseEstimatorSubsystem poseEstimatorSubsystem, DrivingConfig config, double radius) {
     super(robotDrive, poseEstimatorSubsystem, dummy, config); // The relative movePose will be overwritten in the initialize method.
-    SmartDashboard.putNumber("inits", initcalls);
-    SmartDashboard.putNumber("executes", executecalls);
-    SmartDashboard.putNumber("isFinished", isFinishedcalls);
+    //SmartDashboard.putNumber("inits", initcalls);
+    //SmartDashboard.putNumber("executes", executecalls);
+    //SmartDashboard.putNumber("isFinished", isFinishedcalls);
     this.radius = radius;
   }
 
@@ -50,7 +50,7 @@ public class DriveCircle extends GotoPoseCommand {
     count = 0;
     initcalls++;
     executecalls = 0;
-    SmartDashboard.putNumber("inits", initcalls);
+    //SmartDashboard.putNumber("inits", initcalls);
 
     // No need to call super.initialize() because the GotoPoseCommand constructor handles that
   }
@@ -71,7 +71,7 @@ public class DriveCircle extends GotoPoseCommand {
     count+= 1;  // Increment the angle
 
     executecalls++;
-    SmartDashboard.putNumber("executes", executecalls);
+    //SmartDashboard.putNumber("executes", executecalls);
   }
 
   @Override

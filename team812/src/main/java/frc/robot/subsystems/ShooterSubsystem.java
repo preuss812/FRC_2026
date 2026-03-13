@@ -135,8 +135,8 @@ public class ShooterSubsystem extends SubsystemBase {
     currentRPM = encoder.getVelocity();
     // telemetry
     SmartDashboard.putNumber("Shooter RPM", currentRPM);
-    SmartDashboard.putNumber("Shooter Vout", motor1.getAppliedOutput());
-    SmartDashboard.putNumber("Throttle", RobotContainer.leftJoystick.getRawAxis(3));
+    //SmartDashboard.putNumber("Shooter Vout", motor1.getAppliedOutput());
+    //SmartDashboard.putNumber("Throttle", RobotContainer.leftJoystick.getRawAxis(3));
 
     // = SmartDashboard.getNumber("Target Velocity", 0);
     //closedLoopController.setSetpoint(targetRPM, ControlType.kVelocity);

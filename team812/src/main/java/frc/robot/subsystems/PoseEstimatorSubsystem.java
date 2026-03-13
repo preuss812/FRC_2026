@@ -58,7 +58,7 @@ public class PoseEstimatorSubsystem extends SubsystemBase {
 
   public final Field2d field2d = new Field2d();
   private int m_lastAprilTagSeen = VisionConstants.NO_TAG_FOUND;
-  private boolean debug = true;
+  private boolean debug = false;
   private double m_rotationErrorToHub = Math.PI; // Large value to prevent false return of onTarget().
 
   public PoseEstimatorSubsystem(PoseEstimatorCamera[] cameras, DriveSubsystemSRX drivetrainSubsystem) {
@@ -104,7 +104,7 @@ public class PoseEstimatorSubsystem extends SubsystemBase {
     for (PoseEstimatorCamera camera : cameras) {
       VisionResult visionMeasurement = camera.getNewVisionMeasurement();
       if (visionMeasurement != null) {
-        SmartDashboard.putString("VM", visionMeasurement.pose().toPose2d().toString());
+        //SmartDashboard.putString("VM", visionMeasurement.pose().toPose2d().toString());
         poseEstimator.addVisionMeasurement(visionMeasurement.pose().toPose2d(), visionMeasurement.timestamp());
         fiducialId = visionMeasurement.fiducialId();
       }

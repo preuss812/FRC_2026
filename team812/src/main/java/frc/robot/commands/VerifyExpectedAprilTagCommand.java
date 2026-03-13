@@ -3,7 +3,7 @@ package frc.robot.commands;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
-import frc.robot.Constants.FieldConstants;
+import frc.robot.RobotContainer;
 import frc.robot.subsystems.PoseEstimatorSubsystem;
 
 /**
@@ -23,7 +23,7 @@ public class VerifyExpectedAprilTagCommand extends SequentialCommandGroup {
             new ConditionalCommand(
                 new WaitCommand(0.001), // Wait 1ms if we are close to the correct starting point, basically a NOP
                 new WaitCommand(20), // Wait long enough to make sure autonomous is over and no action is taken.
-                () -> match(poseEstimator.lastAprilTagSeen(),FieldConstants.allianceAprilTag(allianceID, aprilTagID))
+                () -> match(poseEstimator.lastAprilTagSeen(),RobotContainer.m_allianceConfigurationSubsystem.allianceAprilTag(aprilTagID))
             )
         );
     }

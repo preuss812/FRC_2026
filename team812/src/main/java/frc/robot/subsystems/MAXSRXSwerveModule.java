@@ -13,7 +13,6 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.Angle;
-import edu.wpi.first.wpilibj.simulation.EncoderSim;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 import com.revrobotics.spark.SparkMax;
@@ -27,13 +26,10 @@ import com.revrobotics.spark.config.SparkMaxConfig;
 //import com.revrobotics.spark.config.ClosedLoopConfig;
 import com.revrobotics.spark.FeedbackSensor;
 import com.revrobotics.RelativeEncoder;
-import com.revrobotics.sim.SparkAbsoluteEncoderSim;
 import com.revrobotics.sim.SparkMaxSim;
 import com.ctre.phoenix6.StatusSignal;
 
 import com.ctre.phoenix6.hardware.CANcoder;
-import com.ctre.phoenix6.sim.CANcoderSimState;
-
 import frc.robot.Constants.ModuleConstants;
 import frc.robot.Constants.CANConstants;
 
@@ -53,12 +49,12 @@ public class MAXSRXSwerveModule {
   private SwerveModuleState m_desiredState = new SwerveModuleState(0.0, new Rotation2d());
   private SwerveModuleState m_correctedDesiredState = new SwerveModuleState(0.0, new Rotation2d());
 
-  private boolean debug = true;
+  private boolean debug = false;
   private final DCMotor m_driveMotor = DCMotor.getNEO(1);
-  private final DCMotor m_turnMotor = DCMotor.getNEO(1);
+  //private final DCMotor m_turnMotor = DCMotor.getNEO(1);
   private final SparkMaxSim m_drivingSparkSim;
-  private final SparkMaxSim m_turningSparkSim;
-  private final CANcoderSimState m_turningEncoderSim;
+  //private final SparkMaxSim m_turningSparkSim;
+  //private final CANcoderSimState m_turningEncoderSim;
 
   /**
    * Constructs a MAXSRXSwerveModule and configures the driving and turning motor,
@@ -73,7 +69,7 @@ public class MAXSRXSwerveModule {
 
     // Include simulation motors and encoders in case we are simulating.
     m_drivingSparkSim = new SparkMaxSim(m_drivingSparkMax, m_driveMotor);
-    m_turningSparkSim = new SparkMaxSim(m_turningSparkMax, m_turnMotor);
+    //m_turningSparkSim = new SparkMaxSim(m_turningSparkMax, m_turnMotor);
     // m_turningSparkSim.getAbsoluteEncoderSim();
 
     m_drivingConfig = new SparkMaxConfig(); // New for 2025
@@ -82,7 +78,7 @@ public class MAXSRXSwerveModule {
     // get the encoder objects for easier access later.
     m_drivingEncoder = m_drivingSparkMax.getEncoder();
     m_turningEncoder = new CANcoder(turningEncoderCANId);
-    m_turningEncoderSim = new CANcoderSimState(m_turningEncoder); 
+    //m_turningEncoderSim = new CANcoderSimState(m_turningEncoder); 
 
     // Get the PID controllers for the driving and turning motors.
     m_drivingPIDController = m_drivingSparkMax.getClosedLoopController();
@@ -262,7 +258,7 @@ public class MAXSRXSwerveModule {
 
   // During simulation, refresh the encoders and motors based on the normal
   // controls.
-  public void simulationPeriodic(double timestep) {
+  public void pseudoSimulationPeriodic(double timestep) {
     // double timestep = 20e-3;
     m_drivingSparkMax.getAbsoluteEncoder().getPosition();
     m_drivingSparkSim.iterate(m_correctedDesiredState.speedMetersPerSecond, 12, timestep);

@@ -22,10 +22,12 @@ public class IndexerSubsystem extends SubsystemBase {
     // Indexer settings
     private final SparkFlex motor;
     private final SparkFlexConfig motorConfig;
-    private final SparkClosedLoopController closedLoopController;    
+    private final SparkClosedLoopController closedLoopController; 
+    private final boolean debug = false;  
 
   public IndexerSubsystem(int intakeCANId) {
-        SmartDashboard.putNumber("Indexer%In", 0);
+    if (debug) 
+       SmartDashboard.putNumber("Indexer%In", 0);
 
     motor = new SparkFlex(intakeCANId, MotorType.kBrushless);
     closedLoopController = motor.getClosedLoopController();
@@ -53,7 +55,8 @@ public class IndexerSubsystem extends SubsystemBase {
   public void runMotor(double pOut){
     pOut = MathUtil.clamp(pOut, IndexerConstants.minOutputPercent, IndexerConstants.maxOutputPercent);
     closedLoopController.setSetpoint(pOut, ControlType.kDutyCycle);
-    SmartDashboard.putNumber("Indexer%Out", pOut);
+    if (debug) 
+        SmartDashboard.putNumber("Indexer%Out", pOut);
 }
 
   public void stop() {

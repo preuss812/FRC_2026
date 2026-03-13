@@ -89,7 +89,7 @@ public class RobotContainer {
   public final static AllianceConfigurationSubsystem m_allianceConfigurationSubsystem = new AllianceConfigurationSubsystem(m_robotDrive, m_poseEstimatorSubsystem);
   private static  boolean isSimulation = !Robot.isReal();
   public static PreussDriveSimulation m_preussDriveSimulation = new PreussDriveSimulation(m_poseEstimatorSubsystem);
-  private static boolean debug = true; // To enable debugging in this module, change false to true.
+  private static boolean debug = false; // To enable debugging in this module, change false to true.
   public static ShooterSubsystem m_ShooterSubsystem = new ShooterSubsystem(CANConstants.kShooterMotor1);
   public static IntakeSubsystem m_IntakeSubsystem = new IntakeSubsystem(CANConstants.kIntakeMotor);
   public static IntakeDeploymentSubsystem m_IntakeDeploymentSubsystem = new IntakeDeploymentSubsystem(CANConstants.kIntakeDeploymentMotor);
@@ -155,7 +155,7 @@ public class RobotContainer {
     // By default this is not a simulation.
     // For convenience, set the simulation mode to true if this is not linux (ie if it is MacOS or Windows).
     RobotContainer.isSimulation = !Robot.isReal();
-    SmartDashboard.putNumber("FW RPM", 0.0);
+    //SmartDashboard.putNumber("FW RPM", 0.0);
     // Configure the button bindings
     configureButtonBindings();
 
@@ -270,12 +270,14 @@ public class RobotContainer {
       new SpinIndexerCommand(m_IndexerSubsystem)
     );
 
+    /*
     // Left Joystick button 11 drives to apriltag 19.  This is just for testing.
     new JoystickButton(leftJoystick, 11).whileTrue(
       new GotoPoseCommand(m_robotDrive, m_poseEstimatorSubsystem, DriveConstants.robotFrontAtPose(m_poseEstimatorSubsystem.getAprilTagPose(19), 0.0) , m_robotDrive.debugAutoConfig)
       );
       Utilities.toSmartDashboard("April Tag 19 pose: ", m_poseEstimatorSubsystem.getAprilTagPose(19));
       Utilities.toSmartDashboard("A19 Robot: ", DriveConstants.robotFrontAtPose(m_poseEstimatorSubsystem.getAprilTagPose(19), 0.0) );
+    */
 
     // Left Joystick buttons 7,8,9,10 control the shooter and feeder speed for testing. 7 is stop, 8 is 3000 RPM, 9 is current target RPM - 25, 10 is current target RPM + 25.
     new JoystickButton(leftJoystick, 7).onTrue(
@@ -328,7 +330,7 @@ public class RobotContainer {
     POVButton dPad315 = dPadButton(315);
 
     /* Debugging below */
-    if (isSimulation()) {
+    if (debug && isSimulation()) {
       SmartDashboard.putData("Circle", new DriveCircleThrottle(m_robotDrive, m_poseEstimatorSubsystem, m_robotDrive.circleAutoConfig, 1.0));
       SmartDashboard.putData("DCG2P", new DriveCircle(m_robotDrive, m_poseEstimatorSubsystem, m_robotDrive.circleAutoConfig, 1.145916));
       SmartDashboard.putData("Choreo1", new DriveChoreoPathCommand(m_robotDrive, m_poseEstimatorSubsystem, "CenterShoot", m_robotDrive.circleAutoConfig, 0.1, 0.0));
@@ -353,13 +355,12 @@ public class RobotContainer {
           m_IndexerSubsystem,
           m_poseEstimatorSubsystem
         ));
-        Utilities.toSmartDashboard("April17", m_poseEstimatorSubsystem.getAprilTagPose((17)));
-        Utilities.toSmartDashboard("April31", m_poseEstimatorSubsystem.getAprilTagPose((31)));
+        //Utilities.toSmartDashboard("April17", m_poseEstimatorSubsystem.getAprilTagPose((17)));
+        //Utilities.toSmartDashboard("April31", m_poseEstimatorSubsystem.getAprilTagPose((31)));
         SmartDashboard.putData("OP", new GotoPoseCommand(m_robotDrive, m_poseEstimatorSubsystem, DriveConstants.robotFrontAtPose(m_poseEstimatorSubsystem.getAprilTagPose(19), 0.0) , m_robotDrive.defaultAutoConfig));
         SmartDashboard.putData("A29", new GotoPoseCommand(m_robotDrive, m_poseEstimatorSubsystem, DriveConstants.robotRearAtPose(m_poseEstimatorSubsystem.getAprilTagPose(29), 0.0) , m_robotDrive.defaultAutoConfig));
         SmartDashboard.putData("A29L", new GotoPoseCommand(m_robotDrive, m_poseEstimatorSubsystem, DriveConstants.robotLeftAtPose(m_poseEstimatorSubsystem.getAprilTagPose(29), 0.0) , m_robotDrive.defaultAutoConfig));
         SmartDashboard.putData("A29R", new GotoPoseCommand(m_robotDrive, m_poseEstimatorSubsystem, DriveConstants.robotRightAtPose(m_poseEstimatorSubsystem.getAprilTagPose(29), 0.0) , m_robotDrive.defaultAutoConfig));
-    } // (isSimulation()
         SmartDashboard.putData("RTest", new ShooterTest(m_ShooterSubsystem, m_poseEstimatorSubsystem));     
         SmartDashboard.putData("RI", new RaiseIntakeCommand(m_IntakeDeploymentSubsystem));
         SmartDashboard.putData("LI", new LowerIntakeCommand(m_IntakeDeploymentSubsystem));
@@ -367,7 +368,8 @@ public class RobotContainer {
         new PrepareToShootCommand(m_ShooterSubsystem, m_FeederSubsystem, m_poseEstimatorSubsystem),
         new DriveFacingHub(m_robotDrive, m_poseEstimatorSubsystem, m_driverController)
       ));
- } // (configureButtonBindings)
+     } // (isSimulation()
+} // (configureButtonBindings)
 
   /**
    * Use this to pass the autonomous command to the main {@link Robot} class.

@@ -240,24 +240,7 @@ public final class Constants {
             16 
         };
 
-        // for autonomous, get the alliance appropriate april tag using the tag mapping.
-        public static int allianceAprilTag(int allianceID, int fiducialID) {
-            int result = 0;
-            if (allianceID == BlueAlliance) {
-                if (fiducialID >= 12 && fiducialID <= 22) {
-                    result = fiducialID;
-                } else if (fiducialID >= 1 && fiducialID <= 11) {
-                    result = complementaryAprilTag[fiducialID];
-                }
-            } else if (allianceID == RedAlliance) {
-                if (fiducialID >= 12 && fiducialID <= 22) {
-                    result = complementaryAprilTag[fiducialID];
-                } else if (fiducialID >= 1 && fiducialID <= 11) {
-                    result = fiducialID;
-                }
-            }
-            return result; // The compiler wasnt sure I was return an int.
-        }
+        
     }
     
     public static final class BrakeConstants {
