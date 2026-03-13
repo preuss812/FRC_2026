@@ -13,6 +13,7 @@ import frc.robot.RobotContainer;
 import frc.robot.commands.DriveChoreoPathCommand;
 import frc.robot.commands.FaceHubAndShootCommand;
 import frc.robot.commands.GotoPoseCommand;
+import frc.robot.commands.PrepareToShootCommand;
 import frc.robot.subsystems.AllianceConfigurationSubsystem;
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
@@ -21,38 +22,17 @@ public class CenterShootCommand extends SequentialCommandGroup {
   public CenterShootCommand() {
     addCommands(
       new ParallelCommandGroup(
-        new InstantCommand(() -> RobotContainer.m_ShooterSubsystem.setRPM(3000.0)), // Start the flywheel spinning at an initial guess at the required rpm.  Could do better - TODO
+        new InstantCommand(() -> RobotContainer.m_ShooterSubsystem.setRPM(2500.0), RobotContainer.m_ShooterSubsystem), // Start the flywheel spinning at an initial guess at the required rpm.  Could do better - TODO
+        new InstantCommand(() -> RobotContainer.m_FeederSubsystem.setRPM(2500.0), RobotContainer.m_FeederSubsystem), // Start the flywheel spinning at an initial guess at the required rpm.  Could do better - TODO
         new DriveChoreoPathCommand(
           RobotContainer.m_robotDrive,
           RobotContainer.m_poseEstimatorSubsystem,
-          "CenterShoot",
+          "CenterLeftShoot",
           RobotContainer.m_robotDrive.defaultAutoConfig,
           1.0,
           1.0)
       ),
-      new FaceHubAndShootCommand().withTimeout(10.0), // TODO: tune the timeout to shoot 8 fuel cells.
-
-      // Drive to mid field and collect more fuel cells from the trench run and return to a viable shooting position.
-      new DriveChoreoPathCommand(
-        RobotContainer.m_robotDrive,
-        RobotContainer.m_poseEstimatorSubsystem,
-        "CenterShootToMidField",
-        RobotContainer.m_robotDrive.defaultAutoConfig,
-        1.0,
-        1.0),
-      new ParallelCommandGroup(
-        new InstantCommand(()->RobotContainer.m_IntakeSubsystem.runMotor(IntakeConstants.pickupFuelSpeed), RobotContainer.m_IntakeSubsystem).withTimeout(1.5),
-        new DriveChoreoPathCommand(
-        RobotContainer.m_robotDrive,
-          RobotContainer.m_poseEstimatorSubsystem,
-          "MidFieldToRightShoot",
-          RobotContainer.m_robotDrive.defaultAutoConfig,
-          1.0,
-          1.0
-        )
-      ),
-      // Shoot the fuel cells we just picked up.
-      new FaceHubAndShootCommand().withTimeout(10.0), // TODO: tune the timeout to shoot 8 fuel cells.
+      new FaceHubAndShootCommand().withTimeout(5.0), // TODO: tune the timeout to shoot 8 fuel cells.
 
       // This positions the robot in front of the outpost tag, so we can get fed by the human operator.
       new GotoPoseCommand(

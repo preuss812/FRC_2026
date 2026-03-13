@@ -45,7 +45,7 @@ public class FireAtWillCommand extends Command {
       && feederSubsystem.readyToShoot(FeederConstants.RPMTolerance)) {
         indexerSubsystem.runMotor(IndexerConstants.indexerPercentOutput);
     } else {
-      indexerSubsystem.runMotor(0.0);
+      indexerSubsystem.stop();
     }
     
   }
@@ -53,7 +53,7 @@ public class FireAtWillCommand extends Command {
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    indexerSubsystem.runMotor(0.0);
+    indexerSubsystem.stop();
   }
 
   /*
