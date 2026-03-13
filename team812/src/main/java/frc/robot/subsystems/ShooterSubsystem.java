@@ -19,6 +19,7 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.RobotContainer;
 import frc.robot.Constants.CANConstants;
 import frc.robot.Constants.ShooterConstants;
 
@@ -135,6 +136,7 @@ public class ShooterSubsystem extends SubsystemBase {
     // telemetry
     SmartDashboard.putNumber("Shooter RPM", currentRPM);
     SmartDashboard.putNumber("Shooter Vout", motor1.getAppliedOutput());
+    SmartDashboard.putNumber("Throttle", RobotContainer.leftJoystick.getRawAxis(3));
 
     // = SmartDashboard.getNumber("Target Velocity", 0);
     //closedLoopController.setSetpoint(targetRPM, ControlType.kVelocity);

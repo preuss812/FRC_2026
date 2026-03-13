@@ -34,7 +34,7 @@ public class RaiseIntakeCommand extends Command {
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    m_intakeDeploymentSubsystem.setRPM(0.0);
+    m_intakeDeploymentSubsystem.stop();
   }
 
   // Returns true when the command should end.

@@ -104,6 +104,7 @@ public class PoseEstimatorSubsystem extends SubsystemBase {
     for (PoseEstimatorCamera camera : cameras) {
       VisionResult visionMeasurement = camera.getNewVisionMeasurement();
       if (visionMeasurement != null) {
+        SmartDashboard.putString("VM", visionMeasurement.pose().toPose2d().toString());
         poseEstimator.addVisionMeasurement(visionMeasurement.pose().toPose2d(), visionMeasurement.timestamp());
         fiducialId = visionMeasurement.fiducialId();
       }

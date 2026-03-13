@@ -55,7 +55,7 @@ public final class Constants {
         public static final int kIntakeDeploymentMotor = 48;
 
         public static final int kPDP = 0; // was 50 until 3/12/2024
-        public static final int kPCM = 51;
+        //public static final int kPCM = 51;
     }
 
     
@@ -274,7 +274,7 @@ public final class Constants {
 
         public static final int NO_TAG_FOUND = -1;
         public static final int MIN_FIDUCIAL_ID = 1;
-        public static final int MAX_FIDUCIAL_ID = 22;
+        public static final int MAX_FIDUCIAL_ID = 32;
         public static final double maximumAmbiguity = 0.2;
         
 
@@ -292,9 +292,9 @@ public final class Constants {
         public static final Transform3d ROBOT_TO_FRONT_CAMERA = FRONT_CAMERA_TO_ROBOT.inverse();
 
 
-        public static double aprilCameraXOffsetToRobot = Units.inchesToMeters(13.5);
-        public static double aprilCameraYOffsetToRobot = Units.inchesToMeters(6.5);
-        public static double aprilCameraHeightToGround = Units.inchesToMeters(12);
+        public static double aprilCameraXOffsetToRobot = Units.inchesToMeters(-3.0);
+        public static double aprilCameraYOffsetToRobot = Units.inchesToMeters(9.0);
+        public static double aprilCameraHeightToGround = Units.inchesToMeters(20.5);
         public static double aprilCameraRoll  = Units.degreesToRadians(0.0);
         public static double aprilCameraPitch = Units.degreesToRadians(0.0); 
         public static double aprilCameraYaw   = Units.degreesToRadians(0.0); // Front facing camera.
@@ -614,7 +614,7 @@ public final class Constants {
         public static final double minOutputPercent = -0.8;
         public static final double maxOutputPercent = 0.8;
         public static final double maxRPM = 6784.0; // Neo Vortex
-        public static final double indexerPercentOutput = 0.2;
+        public static final double indexerPercentOutput = 0.4;
     }
     
     public static final class ShooterConstants {
@@ -646,8 +646,8 @@ public final class Constants {
     }
 
     public static final class IntakeDeploymentConstants {
-        public static final double kIntakeDeploymentUpRPM = 320;
-        public static final double kIntakeDeploymentDownRPM = -160;
+        public static final double kIntakeDeploymentUpRPM = 400;
+        public static final double kIntakeDeploymentDownRPM = -320;
         public static final double kP = 0.0002;
         public static final double kI = 0.0;
         public static final double kD = 0.0;

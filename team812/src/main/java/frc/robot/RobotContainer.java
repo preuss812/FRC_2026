@@ -106,7 +106,7 @@ public class RobotContainer {
   */
 
   // Controller definitions
-  private final Joystick leftJoystick = new Joystick(OIConstants.kLeftJoystick);
+  public static final Joystick leftJoystick = new Joystick(OIConstants.kLeftJoystick);
   private final Joystick rightJoystick = new Joystick(OIConstants.kRightJoystick);
   public static XboxController m_driverController = new XboxController(OIConstants.kDriverControllerPort);
   public static double startingHeading;
@@ -191,6 +191,10 @@ public class RobotContainer {
     m_FeederSubsystem.setRPM(rpm);
   }
 
+  public void stopShooterFeeder() {
+    m_ShooterSubsystem.stop();
+    m_FeederSubsystem.stop();
+  }
   /**
    * Use this method to define your button->command mappings. Buttons can be
    * created by
@@ -245,7 +249,7 @@ public class RobotContainer {
 
     // B button stops the intake.
     new JoystickButton(m_driverController, Button.kB.value).onTrue(
-      new InstantCommand(()->m_IntakeSubsystem.runMotor(0), m_IntakeSubsystem)
+      new InstantCommand(()->m_IntakeSubsystem.stop(), m_IntakeSubsystem)
     );
 
     
@@ -275,7 +279,7 @@ public class RobotContainer {
 
     // Left Joystick buttons 7,8,9,10 control the shooter and feeder speed for testing. 7 is stop, 8 is 3000 RPM, 9 is current target RPM - 25, 10 is current target RPM + 25.
     new JoystickButton(leftJoystick, 7).onTrue(
-      new InstantCommand(() -> setShooterFeederSpeed(0), m_ShooterSubsystem, m_FeederSubsystem)
+      new InstantCommand(() -> stopShooterFeeder(), m_ShooterSubsystem, m_FeederSubsystem)
     );
     new JoystickButton(leftJoystick, 8).onTrue(
       new InstantCommand(() -> setShooterFeederSpeed(3000), m_ShooterSubsystem, m_FeederSubsystem)
@@ -298,13 +302,13 @@ public class RobotContainer {
       new InstantCommand(()->m_IntakeSubsystem.runMotor(IntakeConstants.pickupFuelSpeed), m_IntakeSubsystem)
     );
     new JoystickButton(rightJoystick, 10).onTrue(
-      new InstantCommand(()->m_IntakeSubsystem.runMotor(0.0), m_IntakeSubsystem)
+      new InstantCommand(()->m_IntakeSubsystem.stop(), m_IntakeSubsystem)
     );
     new JoystickButton(rightJoystick, 11).onTrue(
       new PrepareToShootCommand(m_ShooterSubsystem, m_FeederSubsystem, m_poseEstimatorSubsystem)
     );
     new JoystickButton(rightJoystick, 12).onTrue(
-      new InstantCommand(() -> setShooterFeederSpeed(0), m_ShooterSubsystem, m_FeederSubsystem)
+      new InstantCommand(() -> stopShooterFeeder(), m_ShooterSubsystem, m_FeederSubsystem)
     ); 
     // Left trigger lowers the intake.
     new JoystickButton(rightJoystick, 1).whileTrue(
