@@ -19,7 +19,7 @@ public class RightShootTwoCyclesCommand extends SequentialCommandGroup {
     addCommands(
         new ParallelCommandGroup(
 
-            new LowerIntakeCommand(RobotContainer.m_IntakeDeploymentSubsystem).withTimeout(3.0),
+            new LowerIntakeCommand(RobotContainer.m_IntakeDeploymentSubsystem).withTimeout(1.5),
             new InstantCommand(()->RobotContainer.m_IntakeSubsystem.runMotor(IntakeConstants.pickupFuelSpeed), RobotContainer.m_IntakeSubsystem),
             new DriveChoreoPathCommand(
                 RobotContainer.m_robotDrive,

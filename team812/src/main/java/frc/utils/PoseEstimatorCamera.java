@@ -53,7 +53,7 @@ public class PoseEstimatorCamera extends PhotonCamera {
                     var targetPose = tagPose.get();
                     Transform3d camToTarget = target.getBestCameraToTarget();
                     // Scale the camera measurement by the camera scale factor
-                    double scaleFactor = 58.5/57.5; // TODO: Use measurements from recalibrated camera.   // Measured vs camera measurement.
+                    double scaleFactor = 200.0/219.0; // TODO: Use measurements from recalibrated camera.   // Measured vs camera measurement.
                     Transform3d camToTargetScaled = new Transform3d(
                       camToTarget.getX() * scaleFactor,
                       camToTarget.getY() * scaleFactor,
