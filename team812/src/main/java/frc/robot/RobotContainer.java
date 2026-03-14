@@ -23,6 +23,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.RunCommand;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.POVButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -80,7 +81,7 @@ public class RobotContainer {
   //private final DriveTrain m_DriveTrain = new DriveTrain();
   // The robot's subsystems
   public final static DriveSubsystemSRX m_robotDrive = new DriveSubsystemSRX();
-  public final SparkFlex m_test = new SparkFlex(50, MotorType.kBrushless);
+  //public final SparkFlex m_test = new SparkFlex(50, MotorType.kBrushless);
   public static PoseEstimatorCamera m_atagCamera = new PoseEstimatorCamera("atag812", VisionConstants.ROBOT_TO_APRIL_CAMERA);
   //public static PoseEstimatorCamera m_frontCamera = new PoseEstimatorCamera("Microsoft_LifeCam_HD-3000", VisionConstants.ROBOT_TO_FRONT_CAMERA);
 
@@ -220,8 +221,13 @@ public class RobotContainer {
       // Xbox Y button resets the robot coorinate system
     new JoystickButton(m_driverController, Button.kY.value).onTrue(new ResetDriveTrainCommand(this));
 
-    // X button sets the robot pose to (0,0,0) for testing. This is a bit of a hack but it is really useful for testing and simulation when we don't have AprilTags in view to correct our pose.
-    new JoystickButton(m_driverController, Button.kX.value).onTrue(new InstantCommand(()->m_poseEstimatorSubsystem.setCurrentPose(new Pose2d(0,0, Rotation2d.kZero))));
+    // X button reverses and the forwards the intake to try and dislodge stuck fuel.
+    new JoystickButton(m_driverController, Button.kX.value).onTrue(
+      new SequentialCommandGroup(
+      new RunCommand(()->m_IntakeSubsystem.runMotor(-IntakeConstants.pickupFuelSpeed), m_IntakeSubsystem).withTimeout(0.08),
+      new RunCommand(()->m_IntakeSubsystem.runMotor(IntakeConstants.pickupFuelSpeed), m_IntakeSubsystem).withTimeout(0.5),
+      new InstantCommand(()->m_IntakeSubsystem.stop(), m_IntakeSubsystem)
+      ));
 
     // Xbox start button puts thte robot in fast/speed driving mode.
     new JoystickButton(m_driverController, Button.kStart.value).onTrue(

@@ -630,7 +630,7 @@ public final class Constants {
 
     public static final class IntakeDeploymentConstants {
         public static final double kIntakeDeploymentUpRPM = 400;
-        public static final double kIntakeDeploymentDownRPM = -320;
+        public static final double kIntakeDeploymentDownRPM = -800;
         public static final double kP = 0.0002;
         public static final double kI = 0.0;
         public static final double kD = 0.0;
