@@ -25,3 +25,8 @@ replay_pid*
 
 # visual studio debug files
 .DS_Store
+
+# simulation drive station files
+simgui-ds.json
+simgui-ds.json
+*.swp
