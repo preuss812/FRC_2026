@@ -8,6 +8,7 @@ import com.revrobotics.PersistMode;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.ResetMode;
 import com.revrobotics.sim.SparkFlexSim;
+import com.revrobotics.spark.ClosedLoopSlot;
 import com.revrobotics.spark.FeedbackSensor;
 import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkClosedLoopController;
@@ -46,6 +47,7 @@ public class IntakeDeploymentSubsystem extends SubsystemBase {
     private final SparkLimitSwitch m_revLimitSwitch;
     private boolean m_atFwdLimit = true; // dont allow motion until after periodic sets this.
     private boolean m_atRevLimit = true; // dont allow motion until after periodic sets this.
+    private final boolean debug = true;
 
   public IntakeDeploymentSubsystem(int intakedeploymentCANId) {
       /** Creates a new IntakeDeploymentSubsystem. */
@@ -91,11 +93,17 @@ public class IntakeDeploymentSubsystem extends SubsystemBase {
      */
     motorConfig.closedLoop
         .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
-        // Set PID values for velocity control in slot 1
+        // Set PID values for velocity control in slot 0
         .p(IntakeDeploymentConstants.kP)
         .i(IntakeDeploymentConstants.kI)
         .d(IntakeDeploymentConstants.kD)
         .outputRange(IntakeDeploymentConstants.minOutputPercent, IntakeDeploymentConstants.maxOutputPercent)
+        // Set PID values for position control in slot 1
+        .p(0.1, ClosedLoopSlot.kSlot1)
+        .i(0.0, ClosedLoopSlot.kSlot1)
+        .d(0.0, ClosedLoopSlot.kSlot1)
+        .outputRange(IntakeDeploymentConstants.minOutputPercent, IntakeDeploymentConstants.maxOutputPercent, ClosedLoopSlot.kSlot1)
+
         .feedForward
           // kV is now in Volts, so we multiply by the nominal voltage (12V)
           .kV(IntakeDeploymentConstants.kV);
@@ -135,7 +143,11 @@ public class IntakeDeploymentSubsystem extends SubsystemBase {
     currentRPM = encoder.getVelocity();
     // telemetry
     SmartDashboard.putNumber("IntakeDeployment RPM", currentRPM);
-
+    if (debug) {
+      double position = encoder.getPosition();
+      SmartDashboard.putNumber("Intake Position", position);
+    }
+    
     // = SmartDashboard.getNumber("Target Velocity", 0);
     closedLoopController.setSetpoint(targetRPM, ControlType.kVelocity);
     m_atFwdLimit = m_fwdLimitSwitch.isPressed();
@@ -168,6 +180,10 @@ public class IntakeDeploymentSubsystem extends SubsystemBase {
 
   public double getRPM() {
     return currentRPM * nativeUnitsToRPM;
+  }
+
+  public void setPosition(double targetPosition) {
+    closedLoopController.setSetpoint(targetPosition, ControlType.kPosition, ClosedLoopSlot.kSlot1);
   }
 
   public void stop() {

@@ -241,11 +241,10 @@ public class RobotContainer {
 
     // Right bumper puts the robot in a mode where the left stick controls translation but the robot automatically faces the hub.
     new JoystickButton(m_driverController, Button.kRightBumper.value)
-    .onTrue(
-      new ParallelCommandGroup(
-        new PrepareToShootCommand(m_ShooterSubsystem, m_FeederSubsystem, m_poseEstimatorSubsystem)
+    .toggleOnTrue(
+      new PrepareToShootCommand(m_ShooterSubsystem, m_FeederSubsystem, m_poseEstimatorSubsystem)
         //new DriveFacingHub(m_robotDrive, m_poseEstimatorSubsystem, m_driverController)
-      )
+      
     );
 
     // A button starts the intake and leavs it running
