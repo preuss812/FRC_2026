@@ -22,7 +22,7 @@ public class FaceHubCommand extends Command {
     // Use addRequirements() here to declare subsystem dependencies.
     m_DriveSubsystemSRX = driveSubsystemSRX;
     m_PoseEstimatorSubsystem = poseEstimatorSubsystem;
-    m_preussAutoDrive = new PreussAutoDrive(driveSubsystemSRX, poseEstimatorSubsystem, driveSubsystemSRX.defaultAutoConfig);
+    m_preussAutoDrive = new PreussAutoDrive(driveSubsystemSRX, poseEstimatorSubsystem, driveSubsystemSRX.aggressiveAutoConfig);
     addRequirements(driveSubsystemSRX);
   }
   

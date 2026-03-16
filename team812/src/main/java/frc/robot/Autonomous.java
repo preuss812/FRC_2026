@@ -12,13 +12,18 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.Constants.FieldConstants;
 import frc.robot.Constants.VisionConstants;
 import frc.robot.autoCommands.CenterShootCommand;
 import frc.robot.autoCommands.FarRightShootOutpostShootCommand;
+import frc.robot.autoCommands.LeftBumpCommand;
+import frc.robot.autoCommands.LeftTrenchCommand;
+import frc.robot.autoCommands.RightBumpCommand;
 import frc.robot.autoCommands.RightShootTwoCyclesCommand;
+import frc.robot.autoCommands.RightTrenchCommand;
 import frc.robot.commands.DriveWithoutVisionCommand;
 import frc.robot.subsystems.AllianceConfigurationSubsystem;
 import frc.robot.subsystems.DriveSubsystemSRX;
@@ -99,7 +104,8 @@ public class Autonomous extends SequentialCommandGroup {
 
     // Initialize the robot before moving.  This will happen for all autonomous modes.
     addCommands(
-      new SequentialCommandGroup(
+        new InstantCommand(()->SmartDashboard.putString("AutoStep", "Start")),
+        new SequentialCommandGroup(
         new InstantCommand(
           () -> AllianceConfigurationSubsystem.setStartingPose(
             new Pose2d(
@@ -109,11 +115,11 @@ public class Autonomous extends SequentialCommandGroup {
             )
           )
         ),
-        new InstantCommand(() -> RobotContainer.m_robotDrive.setDrivingMode(DrivingMode.SPEED)),
-        new InstantCommand(() -> RobotContainer.m_ShooterSubsystem.setRPM(3000.0)) // Initial guess at required rpm.  Could do better - TODO
+        new InstantCommand(() -> RobotContainer.m_robotDrive.setDrivingMode(DrivingMode.SPEED))
+        //new InstantCommand(() -> RobotContainer.m_ShooterSubsystem.setRPM(3000.0)) // Initial guess at required rpm.  Could do better - TODO
       )
     );
-
+    addCommands(new InstantCommand(()->SmartDashboard.putString("AutoStep", "modeAction")));
     switch(m_autoMode) {
       
       case AllianceConfigurationSubsystem.AUTO_MODE_MOVE_OFF_LINE_AND_STOP:
@@ -130,6 +136,18 @@ public class Autonomous extends SequentialCommandGroup {
         break;
       case AllianceConfigurationSubsystem.AUTO_MODE_RIGHT_SHOOT_TWICE:
         addCommands(new RightShootTwoCyclesCommand());
+        break;
+      case AllianceConfigurationSubsystem.AUTO_MODE_RIGHT_TRENCH:
+        addCommands(new RightTrenchCommand());
+        break;
+      case AllianceConfigurationSubsystem.AUTO_MODE_RIGHT_BUMP:
+        addCommands(new RightBumpCommand());
+        break;
+      case AllianceConfigurationSubsystem.AUTO_MODE_LEFT_BUMP:
+        addCommands(new LeftBumpCommand());
+        break;
+      case AllianceConfigurationSubsystem.AUTO_MODE_LEFT_TRENCH:
+        addCommands(new LeftTrenchCommand());
         break;
       default:
       }

@@ -43,6 +43,10 @@ private static AprilTag outpostAprilTag;
   public static final int AUTO_MODE_CENTER_SHOOT = 2;
   public static final int AUTO_MODE_FAR_RIGHT_SHOOT_OUTPOST_SHOOT = 3;
   public static final int AUTO_MODE_RIGHT_SHOOT_TWICE = 4;
+  public static final int AUTO_MODE_RIGHT_TRENCH = 5;
+  public static final int AUTO_MODE_RIGHT_BUMP = 6;
+  public static final int AUTO_MODE_LEFT_BUMP = 7;
+  public static final int AUTO_MODE_LEFT_TRENCH = 8;
   
   /** Creates a new AllianceConfigurationSubsystem. */
   public AllianceConfigurationSubsystem(DriveSubsystemSRX robotDrive, PoseEstimatorSubsystem poseEstimatorSubsystem) {
@@ -54,6 +58,10 @@ private static AprilTag outpostAprilTag;
     Robot.autoChooser.addOption("Center Shoot", AUTO_MODE_CENTER_SHOOT);
     Robot.autoChooser.addOption("Far Right", AUTO_MODE_FAR_RIGHT_SHOOT_OUTPOST_SHOOT);
     Robot.autoChooser.addOption("Right Shoot Twice", AUTO_MODE_RIGHT_SHOOT_TWICE);
+    Robot.autoChooser.addOption("Right Trench", AUTO_MODE_RIGHT_TRENCH);
+    Robot.autoChooser.addOption("Right Bump", AUTO_MODE_RIGHT_BUMP);
+    Robot.autoChooser.addOption("Left Bump", AUTO_MODE_LEFT_BUMP);
+    Robot.autoChooser.addOption("Left Trench", AUTO_MODE_LEFT_TRENCH);
   
     // Add more commands here and define the plan number above.  Put the commands needed for each auto mode in AutonomousPlans.java.
     SmartDashboard.putData("AutoSelector", Robot.autoChooser);

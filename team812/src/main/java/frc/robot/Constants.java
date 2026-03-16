@@ -625,12 +625,15 @@ public final class Constants {
     }
 
     public static final class IntakeConstants {
-        public static final double pickupFuelSpeed = 0.5;
+        public static final double pickupFuelSpeed = 0.25;
     }
 
     public static final class IntakeDeploymentConstants {
         public static final double kIntakeDeploymentUpRPM = 400;
+        public static final double kIntakeDeploymentUpSlowlyRPM = 100;
         public static final double kIntakeDeploymentDownRPM = -800;
+        public static final double kIntakeDeploymentShakeUpRPM = -800;
+        public static final double kIntakeDeploymentShakeDownRPM = 400;
         public static final double kP = 0.0002;
         public static final double kI = 0.0;
         public static final double kD = 0.0;
@@ -638,6 +641,7 @@ public final class Constants {
         public static final double maxOutputPercent = 0.80;
         public static final double maxRPM = 6784.0; // Neo Vortex
         public static final double kV = 1.0/maxRPM; // Docs say 1.0 should be 12.0 but emperically 12.0 is not right.
+        public static final int shakeCycles = 5; // number of periods to move in the same direction before reversing.
     }
 
     
