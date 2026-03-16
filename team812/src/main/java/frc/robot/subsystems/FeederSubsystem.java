@@ -26,6 +26,7 @@ public class FeederSubsystem extends SubsystemBase {
 
     // Feeder settings
     private double targetRPM = 0.0;  // desired feeder wheel speed
+    private double savedTargetRPM = 0.0;
     private double currentRPM; // the current rpm of the feeder.
     // native units are rpm for the Spark MAX closed loop controller.
     // With external through bore encoder this calculation would be more typical:
@@ -140,13 +141,15 @@ public class FeederSubsystem extends SubsystemBase {
     // = SmartDashboard.getNumber("Target Velocity", 0);
     //closedLoopController.setSetpoint(targetRPM, ControlType.kVelocity);
 
+    /*
     // Check for a jammed motor.
     if (stuckMotorCoolDownCount > 0) {
       stop(); // Keep reapplying stop to be sure we are stopped.
+      savedTargetRPM = targetRPM;
       stuckMotorCoolDownCount--;
       if (stuckMotorCoolDownCount <= 0) {
         stuckMotorCoolDownCount = 0; // just to be sure.
-        setRPM(targetRPM);
+        setRPM(savedTargetRPM);
         SmartDashboard.putBoolean("Feeder OK", true);
         stuckMotorCount = 0;
       }
@@ -154,6 +157,7 @@ public class FeederSubsystem extends SubsystemBase {
       if (Math.abs(currentRPM) < stuckMotorPercentOkay * Math.abs(targetRPM)) {
         stuckMotorCount++;
         if (stuckMotorCount >= stuckMotorThreshold) {
+          savedTargetRPM = targetRPM;
           stop();
           SmartDashboard.putBoolean("Feeder OK", false);
           stuckMotorCoolDownCount = stuckMotorCoolDownDelay;
@@ -162,6 +166,7 @@ public class FeederSubsystem extends SubsystemBase {
         stuckMotorCount = 0; // reset the counter we are not stuck.
       }
     }
+    */
   }
 
   public void runMotor(double pOut){
@@ -185,11 +190,14 @@ public class FeederSubsystem extends SubsystemBase {
   }
 
   public double getRPM() {
-    return currentRPM * nativeUnitsToRPM;
+    return targetRPM * nativeUnitsToRPM;
   }
 
   public void stop() {
     closedLoopController.setSetpoint(0, ControlType.kDutyCycle);
+    targetRPM = 0.0;
+    SmartDashboard.putBoolean("Feeder RPM OK", true);
+    SmartDashboard.putNumber("Feeder RPM Error", 0.0);
   }
 
   @Override
@@ -203,6 +211,7 @@ public class FeederSubsystem extends SubsystemBase {
    * @return (boolean) true if the shooter is up to speed, false otherwise.
    */
   public boolean readyToShoot(double rpmTolerance) {
+    SmartDashboard.putNumber("Feeder RPM Error", targetRPM - currentRPM);
     return Math.abs(currentRPM - targetRPM) < rpmTolerance;
   }
 

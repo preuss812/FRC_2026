@@ -51,6 +51,7 @@ import frc.robot.commands.ResetDriveTrainCommand;
 import frc.robot.commands.ReverseShooterFeederCommand;
 import frc.robot.commands.RotateRobotCommand;
 import frc.robot.commands.RotateRobotG2PCommand;
+import frc.robot.commands.ShakeTheIntakeCommand;
 import frc.robot.commands.ShakeThingsUpCommand;
 import frc.robot.commands.ShooterTest;
 import frc.robot.commands.SimSetRobotPoseCommand;
@@ -331,6 +332,7 @@ public class RobotContainer {
     new JoystickButton(rightJoystick, 3).whileTrue(new ShakeThingsUpCommand(m_robotDrive));
     // reverse the shooter to clear stuck fuel.
     new JoystickButton(rightJoystick, 4).whileTrue(new ReverseShooterFeederCommand(m_ShooterSubsystem, m_FeederSubsystem));
+    new JoystickButton(rightJoystick, 5).whileTrue(new ShakeTheIntakeCommand(m_IntakeDeploymentSubsystem));
 
     // POV buttons to point robot to a given heading where 0 is
     // straight downfield from the driver's perspective.

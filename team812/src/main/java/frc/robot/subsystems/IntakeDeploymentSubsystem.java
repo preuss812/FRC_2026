@@ -188,6 +188,7 @@ public class IntakeDeploymentSubsystem extends SubsystemBase {
 
   public void stop() {
     closedLoopController.setSetpoint(0, ControlType.kDutyCycle);
+    targetRPM = 0.0;
   }
 
   @Override

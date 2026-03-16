@@ -28,7 +28,8 @@ public class ShooterSubsystem extends SubsystemBase {
 
     // Shooter settings
     //private final double maxRPM = 5320; // For a CIM motor. 
-    private double targetRPM = 0;  // desired shooter wheel speed
+    private double targetRPM = 0.0;  // desired shooter wheel speed
+    private double savedTargetRPM = 0.0;
     private double currentRPM; // the current rpm of the shooter.
     // native units are ticks per 100ms.
     // With external through bore encoder this calculation would be more typical:
@@ -98,8 +99,10 @@ public class ShooterSubsystem extends SubsystemBase {
         .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
         // Set PID values for velocity control in slot 1
         .p(ShooterConstants.kP)
-        .i(ShooterConstants.kI)
+        .i(ShooterConstants.kI+0.000)
         .d(ShooterConstants.kD)
+        //.iMaxAccum(50.0)
+        //.iZone(100)
         .outputRange(ShooterConstants.minOutputPercent, ShooterConstants.maxOutputPercent)
         .feedForward
           // kV is now in Volts, so we multiply by the nominal voltage (12V)
@@ -145,12 +148,13 @@ public class ShooterSubsystem extends SubsystemBase {
     // = SmartDashboard.getNumber("Target Velocity", 0);
     //closedLoopController.setSetpoint(targetRPM, ControlType.kVelocity);
     // Check for a jammed motor.
+    /*
     if (stuckMotorCoolDownCount > 0) {
       stop(); // Keep reapplying stop to be sure we are stopped.
       stuckMotorCoolDownCount--;
       if (stuckMotorCoolDownCount <= 0) {
         stuckMotorCoolDownCount = 0; // just to be sure.
-        setRPM(targetRPM);
+        setRPM(savedTargetRPM);
         SmartDashboard.putBoolean("Shooter OK", true);
         stuckMotorCount = 0;
       }
@@ -158,6 +162,7 @@ public class ShooterSubsystem extends SubsystemBase {
       if (Math.abs(currentRPM) < stuckMotorPercentOkay * Math.abs(targetRPM)) {
         stuckMotorCount++;
         if (stuckMotorCount >= stuckMotorThreshold) {
+          savedTargetRPM = targetRPM;
           stop();
           SmartDashboard.putBoolean("Shooter OK", false);
           stuckMotorCoolDownCount = stuckMotorCoolDownDelay;
@@ -166,6 +171,7 @@ public class ShooterSubsystem extends SubsystemBase {
         stuckMotorCount = 0; // reset the counter we are not stuck.
       }
     }
+      */
   }
 
   public void runMotor(double pOut){
@@ -195,6 +201,7 @@ public class ShooterSubsystem extends SubsystemBase {
 
   public void stop() {
     closedLoopController.setSetpoint(0, ControlType.kDutyCycle);
+    targetRPM = 0.0;
   }
 
   @Override

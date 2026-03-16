@@ -49,7 +49,7 @@ public class PrepareToShootCommand extends Command {
     shooter.setRPM(RPM);
     feeder.setRPM(RPM);
     //shooter.runMotor(RPM*ShooterConstants.RPMToVolts/12.0);
-    SmartDashboard.putBoolean("RPM OK", canShoot(RPM));
+    SmartDashboard.putBoolean("Shooter RPM OK", canShoot(RPM));
 
     
 
@@ -62,7 +62,12 @@ public class PrepareToShootCommand extends Command {
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    shooter.runMotor(0);
+    shooter.stop();
+    feeder.stop();
+    SmartDashboard.putBoolean("Shooter RPM OK", true);
+    SmartDashboard.putNumber("Shooter RPM Error", 0.0);
+
+
   }
 
   // Returns true when the command should end.
@@ -78,6 +83,7 @@ public class PrepareToShootCommand extends Command {
 
   public boolean canShoot(double targetRPM){
     double actualRPM = shooter.getRPM();
+    SmartDashboard.putNumber("Shooter RPM Error", targetRPM - actualRPM);
     return Math.abs(actualRPM-targetRPM) < ShooterConstants.RPMTolerance;
   }
 

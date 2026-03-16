@@ -582,9 +582,9 @@ public final class Constants {
         public static final double b = ShooterConstants.b;
         public static final double c = ShooterConstants.c;
         public static final double d = ShooterConstants.d;
-        public static final double RPMTolerance = 20;
+        public static final double RPMTolerance = 75;
         public static final double RPMToVolts = 442.5;
-        public static final double kP = 0.0010;
+        public static final double kP = 0.0005;
         public static final double kI = 0.0;
         public static final double kD = 0.0;
         public static final double minOutputPercent = -0.8;
@@ -612,9 +612,9 @@ public final class Constants {
         public static final double b = 377.17263;
         public static final double c = -883.33910;
         public static final double d = 3063.16870;
-        public static final double RPMTolerance = 20;
+        public static final double RPMTolerance = 75;
         public static final double RPMToVolts = 442.5;
-        public static final double kP = 0.0010;
+        public static final double kP = 0.0005;
         public static final double kI = 0.0;
         public static final double kD = 0.0;
         public static final double minOutputPercent = -0.8;
