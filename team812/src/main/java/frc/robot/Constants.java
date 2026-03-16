@@ -261,18 +261,18 @@ public final class Constants {
         public static final double maximumAmbiguity = 0.2;
         
 
-        public static double frontCameraXOffsetToRobot = Units.inchesToMeters(13.5);
-        public static double frontCameraYOffsetToRobot = Units.inchesToMeters(6.5);
-        public static double frontCameraHeightToGround = Units.inchesToMeters(12.0);
-        public static double frontCameraRoll  = Units.degreesToRadians(0.0);
-        public static double frontCameraPitch = Units.degreesToRadians(0.0); 
-        public static double frontCameraYaw   = Units.degreesToRadians(0.0); // Front facing camera.
-        public static final double frontCameraHeading = Units.degreesToRadians(0.0); // Front facing camera
-        public static final Transform3d FRONT_CAMERA_TO_ROBOT = new Transform3d(
-            new Translation3d(frontCameraXOffsetToRobot,frontCameraYOffsetToRobot,frontCameraHeightToGround),
-            new Rotation3d(frontCameraRoll, frontCameraPitch, frontCameraYaw)
+        public static double rearCameraXOffsetToRobot = Units.inchesToMeters(-13.5);
+        public static double rearCameraYOffsetToRobot = Units.inchesToMeters(6.5);
+        public static double rearCameraHeightToGround = Units.inchesToMeters(20.0);
+        public static double rearCameraRoll  = Units.degreesToRadians(0.0);
+        public static double rearCameraPitch = Units.degreesToRadians(0.0); 
+        public static double rearCameraYaw   = Units.degreesToRadians(0.0); // Rear facing camera.
+        public static final double rearCameraHeading = Units.degreesToRadians(180.0); // Rear facing camera
+        public static final Transform3d REAR_APRIL_CAMERA_TO_ROBOT = new Transform3d(
+            new Translation3d(rearCameraXOffsetToRobot,rearCameraYOffsetToRobot,rearCameraHeightToGround),
+            new Rotation3d(rearCameraRoll, rearCameraPitch, rearCameraYaw)
         );
-        public static final Transform3d ROBOT_TO_FRONT_CAMERA = FRONT_CAMERA_TO_ROBOT.inverse();
+        public static final Transform3d ROBOT_TO_REAR_APRIL_CAMERA = REAR_APRIL_CAMERA_TO_ROBOT.inverse();
 
 
         public static double aprilCameraXOffsetToRobot = Units.inchesToMeters(-3.0);
@@ -320,7 +320,7 @@ public final class Constants {
     // Which is where I sourced the MAXSwerve template - dph - 2024-01-12
     public static final class DriveConstants {
         public static final double kMaxSpeedMetersPerSecond = 4.5; //4.5; 1.0 in the lab // Limit how violently swerve works
-        public static final double kMaxAngularSpeed = 4 * Math.PI; // radians per second
+        public static final double kMaxAngularSpeed = 3 * Math.PI; // radians per second
     
         public static final double kDirectionSlewRate = 1.2; // radians per second
         public static final double kMagnitudeIncreaseSlewRate = 0.6; // percent per second (1 = 100%)

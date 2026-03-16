@@ -7,6 +7,7 @@
 
 package frc.robot;
 
+import com.ctre.phoenix6.signals.ReverseLimitValue;
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 
@@ -22,6 +23,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
+import edu.wpi.first.wpilibj2.command.ParallelRaceGroup;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
@@ -46,8 +48,10 @@ import frc.robot.commands.PrepareToShootCommand;
 import frc.robot.commands.RaiseIntakeCommand;
 import frc.robot.commands.RandomRobotPositionCommand;
 import frc.robot.commands.ResetDriveTrainCommand;
+import frc.robot.commands.ReverseShooterFeederCommand;
 import frc.robot.commands.RotateRobotCommand;
 import frc.robot.commands.RotateRobotG2PCommand;
+import frc.robot.commands.ShakeThingsUpCommand;
 import frc.robot.commands.ShooterTest;
 import frc.robot.commands.SimSetRobotPoseCommand;
 import frc.robot.commands.SpinIndexerCommand;
@@ -82,10 +86,9 @@ public class RobotContainer {
   // The robot's subsystems
   public final static DriveSubsystemSRX m_robotDrive = new DriveSubsystemSRX();
   //public final SparkFlex m_test = new SparkFlex(50, MotorType.kBrushless);
-  public static PoseEstimatorCamera m_atagCamera = new PoseEstimatorCamera("atag812", VisionConstants.ROBOT_TO_APRIL_CAMERA);
-  //public static PoseEstimatorCamera m_frontCamera = new PoseEstimatorCamera("Microsoft_LifeCam_HD-3000", VisionConstants.ROBOT_TO_FRONT_CAMERA);
-
-  public static final PoseEstimatorCamera[] cameras = new PoseEstimatorCamera[]{m_atagCamera/*,m_frontCamera*/};
+  public static PoseEstimatorCamera m_atagCamera = new PoseEstimatorCamera("atag812", VisionConstants.ROBOT_TO_APRIL_CAMERA,200.0/219.0 );
+  public static PoseEstimatorCamera m_rearAtagCamera = new PoseEstimatorCamera("rearAtag812", VisionConstants.ROBOT_TO_REAR_APRIL_CAMERA, 100.0/97.0 );
+  public static final PoseEstimatorCamera[] cameras = new PoseEstimatorCamera[]{m_atagCamera, m_rearAtagCamera};
   public static PoseEstimatorSubsystem m_poseEstimatorSubsystem = new PoseEstimatorSubsystem( cameras, m_robotDrive);
   public final static AllianceConfigurationSubsystem m_allianceConfigurationSubsystem = new AllianceConfigurationSubsystem(m_robotDrive, m_poseEstimatorSubsystem);
   private static  boolean isSimulation = !Robot.isReal();
@@ -241,10 +244,11 @@ public class RobotContainer {
 
     // Right bumper puts the robot in a mode where the left stick controls translation but the robot automatically faces the hub.
     new JoystickButton(m_driverController, Button.kRightBumper.value)
-    .toggleOnTrue(
-      new PrepareToShootCommand(m_ShooterSubsystem, m_FeederSubsystem, m_poseEstimatorSubsystem)
-        //new DriveFacingHub(m_robotDrive, m_poseEstimatorSubsystem, m_driverController)
-      
+    .onTrue(
+      new ParallelRaceGroup(
+        new PrepareToShootCommand(m_ShooterSubsystem, m_FeederSubsystem, m_poseEstimatorSubsystem),
+        new DriveFacingHub(m_robotDrive, m_poseEstimatorSubsystem, m_driverController)
+      )
     );
 
     // A button starts the intake and leavs it running
@@ -295,6 +299,7 @@ public class RobotContainer {
       new InstantCommand(() -> setShooterFeederSpeed(m_ShooterSubsystem.getTargetRPM()-25), m_ShooterSubsystem, m_FeederSubsystem)
     );
     new JoystickButton(leftJoystick, 10).onTrue(
+
       new InstantCommand(() -> setShooterFeederSpeed(m_ShooterSubsystem.getTargetRPM()+25), m_ShooterSubsystem, m_FeederSubsystem)
     );
 
@@ -321,6 +326,11 @@ public class RobotContainer {
     new JoystickButton(rightJoystick, 1).whileTrue(
       new SpinIndexerCommand(m_IndexerSubsystem)
     );
+
+    // Shake the robot to facilitate ball movement.
+    new JoystickButton(rightJoystick, 3).whileTrue(new ShakeThingsUpCommand(m_robotDrive));
+    // reverse the shooter to clear stuck fuel.
+    new JoystickButton(rightJoystick, 4).whileTrue(new ReverseShooterFeederCommand(m_ShooterSubsystem, m_FeederSubsystem));
 
     // POV buttons to point robot to a given heading where 0 is
     // straight downfield from the driver's perspective.

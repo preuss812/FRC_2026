@@ -26,11 +26,13 @@ public class PoseEstimatorCamera extends PhotonCamera {
     private int m_lastAprilTagSeen = VisionConstants.NO_TAG_FOUND;
     private static final PhotonPipelineResult m_emptyPipeline = new PhotonPipelineResult();
     private PhotonPipelineResult lastPipeLineResult = m_emptyPipeline;
+    private final double m_scaleFactor;
     private final boolean debug = false;
 
-    public PoseEstimatorCamera(String name, Transform3d cameraToRobotTransform) {
+    public PoseEstimatorCamera(String name, Transform3d cameraToRobotTransform, double scaleFactor) {
         super(name);
         this.cameraToRobotTransform = cameraToRobotTransform;
+        this.m_scaleFactor = scaleFactor;
     }
 
     public VisionResult getNewVisionMeasurement() {
@@ -53,11 +55,10 @@ public class PoseEstimatorCamera extends PhotonCamera {
                     var targetPose = tagPose.get();
                     Transform3d camToTarget = target.getBestCameraToTarget();
                     // Scale the camera measurement by the camera scale factor
-                    double scaleFactor = 200.0/219.0; // TODO: Use measurements from recalibrated camera.   // Measured vs camera measurement.
                     Transform3d camToTargetScaled = new Transform3d(
-                      camToTarget.getX() * scaleFactor,
-                      camToTarget.getY() * scaleFactor,
-                      camToTarget.getZ() * scaleFactor,
+                      camToTarget.getX() * m_scaleFactor,
+                      camToTarget.getY() * m_scaleFactor,
+                      camToTarget.getZ() * m_scaleFactor,
                       camToTarget.getRotation()
                     );
                     Pose3d camPose = targetPose.transformBy(camToTargetScaled.inverse());
