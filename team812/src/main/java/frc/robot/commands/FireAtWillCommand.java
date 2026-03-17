@@ -56,8 +56,6 @@ public class FireAtWillCommand extends Command {
   @Override
   public void end(boolean interrupted) {
     indexerSubsystem.stop();
-    SmartDashboard.putBoolean("Feeder RPM OK", true);
-    SmartDashboard.putNumber("Feeder RPM Error", 0.0);
   }
 
   /*

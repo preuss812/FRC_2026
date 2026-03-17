@@ -10,6 +10,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.Constants.FeederConstants;
 import frc.robot.Constants.ShooterConstants;
 import frc.robot.subsystems.AllianceConfigurationSubsystem;
 import frc.robot.subsystems.FeederSubsystem;
@@ -48,15 +49,7 @@ public class PrepareToShootCommand extends Command {
     double RPM = distanceToRPM(MathUtil.clamp(distance, 1.0, 6.0)); // The cubic is not fit beyond this range.
     shooter.setRPM(RPM);
     feeder.setRPM(RPM);
-    //shooter.runMotor(RPM*ShooterConstants.RPMToVolts/12.0);
-    SmartDashboard.putBoolean("Shooter RPM OK", canShoot(RPM));
-
-    
-
-    // double knobPos = blackBox.getPotValue(0);
-    // SmartDashboard.putNumber("Black Box Rotation", knobPos);
-    // motor.runMotor(knobPos);
-
+    SmartDashboard.putBoolean("Shooter Ready", readyToShoot(RPM));
   }
 
   // Called once the command ends or is interrupted.
@@ -64,10 +57,11 @@ public class PrepareToShootCommand extends Command {
   public void end(boolean interrupted) {
     shooter.stop();
     feeder.stop();
-    SmartDashboard.putBoolean("Shooter RPM OK", true);
-    SmartDashboard.putNumber("Shooter RPM Error", 0.0);
-
-
+    SmartDashboard.putBoolean("Shooter Ready", false);
+    SmartDashboard.putNumber("Shooter RPM Error", -1); // -1 is a sentinel value indicating we are open loop.
+    SmartDashboard.putBoolean("Shooter RPM OK", false);
+    SmartDashboard.putNumber("Feeder RPM Error", -1); // -1 is a sentinel value indicating we are open loop.
+    SmartDashboard.putBoolean("Feeder RPM OK", false);
   }
 
   // Returns true when the command should end.
@@ -81,10 +75,16 @@ public class PrepareToShootCommand extends Command {
     return ShooterConstants.a*Math.pow(x, 3) + ShooterConstants.b*Math.pow(x,2) + ShooterConstants.c*x + ShooterConstants.d;
   }
 
-  public boolean canShoot(double targetRPM){
-    double actualRPM = shooter.getRPM();
-    SmartDashboard.putNumber("Shooter RPM Error", targetRPM - actualRPM);
-    return Math.abs(actualRPM-targetRPM) < ShooterConstants.RPMTolerance;
+  public boolean readyToShoot(double targetRPM){
+    double shooterRPM = shooter.getRPM();
+    double feederRPM = feeder.getRPM();
+    boolean shooterRPMOkay = Math.abs(shooterRPM-targetRPM) < ShooterConstants.RPMTolerance;
+    boolean feederRPMOkay = Math.abs(feederRPM-targetRPM) < FeederConstants.RPMTolerance;
+    SmartDashboard.putNumber("Shooter RPM Error", shooterRPM - targetRPM);
+    SmartDashboard.putNumber("Feeder RPM Error", feederRPM - targetRPM);
+    SmartDashboard.putBoolean("Shooter RPM OK", shooterRPMOkay);
+    SmartDashboard.putBoolean("Feeder RPM OK", feederRPMOkay);
+    return feederRPMOkay && shooterRPMOkay;
   }
 
 
