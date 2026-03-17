@@ -625,7 +625,7 @@ public final class Constants {
     }
 
     public static final class IntakeConstants {
-        public static final double pickupFuelSpeed = 0.25;
+        public static final double pickupFuelSpeed = 0.35;
     }
 
     public static final class IntakeDeploymentConstants {

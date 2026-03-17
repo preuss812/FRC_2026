@@ -14,6 +14,7 @@ import com.revrobotics.spark.SparkLowLevel.MotorType;
 
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class IntakeSubsystem extends SubsystemBase {
@@ -22,6 +23,15 @@ public class IntakeSubsystem extends SubsystemBase {
     private final SparkMax motor;
     private final SparkMaxConfig motorConfig;
     private final SparkClosedLoopController closedLoopController;    
+
+    /* State variables related to addressing intake jams
+     */
+    private int highCurrentCounter = 0;
+    private int cycleCounter = 0;
+    private int oscillationCounter =0;
+    private boolean isOscillating = false;
+    private double targetOutput = 0.0; // exposes the set point to the class
+    
 
   public IntakeSubsystem(int intakeCANId) {
     
@@ -37,23 +47,88 @@ public class IntakeSubsystem extends SubsystemBase {
     motor.configure(motorConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
   }
 
+    /*
+     * 2026-03-16 dano added these states to periodic to handle jams
+     * States: Normal, High Current in Normal, High Current Warning, Oscilation, Jammed
+     * State transition is dependent upon this
+     * data: motor output current, high current timer, isOscillating, oscillationCounter
+     */
+    private void oscillateIntake() {
+    	cycleCounter++;
+	    if( cycleCounter < 10 ) {
+	      closedLoopController.setSetpoint(targetOutput, ControlType.kDutyCycle);
+	} else if( oscillationCounter < 20) { // maybe twice the counter?
+	      closedLoopController.setSetpoint(0, ControlType.kDutyCycle);
+	} else {
+	    cycleCounter = 0;
+	    oscillationCounter++;
+	}
+    }
+    private void resetOscillation(boolean setPointZero) {
+	    isOscillating = false;
+	    oscillationCounter =0;
+	    cycleCounter = 0;
+    	highCurrentCounter = 0;
+      if( setPointZero ) {
+        targetOutput = 0;
+	      closedLoopController.setSetpoint(targetOutput, ControlType.kDutyCycle);
+      }
+    }
+    
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
+      double currentAmps = motor.getOutputCurrent();
+      SmartDashboard.putNumber("Intake Motor Current", currentAmps);
+      SmartDashboard.putBoolean("Intake Motor Jammed", !isOscillating);
 
+      if( currentAmps > 70.0 && 
+          targetOutput > 0.1 &&
+          !isOscillating ) {
+	       highCurrentCounter++;
+      } else if ( !isOscillating ) {
+	       highCurrentCounter = 0; // reset if > 70 didn't last for the number of cycles listed below
+      }
+      // Periodic runs 20ms, therefore 100 counts is 2 seconds
+      if( highCurrentCounter > 100 &&
+	        !isOscillating ) {
+	        isOscillating = true;
+	        oscillationCounter = 0;
+	        cycleCounter = 0;
+	        highCurrentCounter = 0;
+      }
+      if( isOscillating ) {
+        if( oscillationCounter > 10 ) {
+          //closedLoopController.setSetpoint(0, ControlType.kDutyCycle);
+          resetOscillation(true);
+        } else {
+	        oscillateIntake();
+        }
+        
+        if( currentAmps < 70.0 &&
+	          cycleCounter < 10 ) {
+	            resetOscillation(false);
+            }
+      } else {
+	      closedLoopController.setSetpoint(targetOutput, ControlType.kDutyCycle);
+      }
   }
 
   public void runMotor(double pOut){
-    pOut = MathUtil.clamp(pOut, -1, 1);
-    closedLoopController.setSetpoint(pOut, ControlType.kDutyCycle);
+    targetOutput = MathUtil.clamp(pOut, -1, 1);
+    if( targetOutput <= 0.01 ) {
+      resetOscillation(false);
+    }
+    // adjusting the setSetpoint has been moved into the period function
+    // state machine.
+    //    closedLoopController.setSetpoint(targetOutput, ControlType.kDutyCycle);
   }
 
   
-
-
-
   public void stop() {
-    closedLoopController.setSetpoint(0, ControlType.kDutyCycle);
+    targetOutput = 0.0;
+    resetOscillation(false);
+    closedLoopController.setSetpoint(targetOutput, ControlType.kDutyCycle);
   }
 
 }
