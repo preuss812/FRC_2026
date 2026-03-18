@@ -38,6 +38,7 @@ public class IndexerSubsystem extends SubsystemBase {
      * configuration parameters for the SPARK MAX that we will set below.
      */
     motorConfig = new SparkFlexConfig();
+    motorConfig.smartCurrentLimit(IndexerConstants.currentLimit);
     motor.configure(motorConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
   }
 

@@ -598,6 +598,7 @@ public final class Constants {
         public static final double maxOutputPercent = 0.8;
         public static final double maxRPM = 6784.0; // Neo Vortex
         public static final double indexerPercentOutput = 0.4;
+        public static final int currentLimit = 60;
     }
     
     public static final class ShooterConstants {
@@ -614,18 +615,20 @@ public final class Constants {
         public static final double d = 3063.16870;
         public static final double RPMTolerance = 75;
         public static final double RPMToVolts = 442.5;
-        public static final double kP = 0.0005;
-        public static final double kI = 0.0;
+        public static final double kP = 0.0010;
+        public static final double kI = 0.0003/FeederConstants.maxRPM;
         public static final double kD = 0.0;
         public static final double minOutputPercent = -0.8;
         public static final double maxOutputPercent = 0.8;
         public static final double maxRPM = 6784.0; // Neo Vortex
         public static final double kV = 1.0/maxRPM; // Docs say 1.0 should be 12.0 but emperically 12.0 is not right.
         public static final double rotationTolerance = Units.degreesToRadians(2.0);
+        public static final int currentLimit = 60;
     }
 
     public static final class IntakeConstants {
         public static final double pickupFuelSpeed = 0.35;
+        public static final int currentLimit = 60;
     }
 
     public static final class IntakeDeploymentConstants {

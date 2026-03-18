@@ -16,6 +16,7 @@ import com.revrobotics.spark.SparkLowLevel.MotorType;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants.IntakeConstants;
 
 public class IntakeSubsystem extends SubsystemBase {
 
@@ -38,12 +39,12 @@ public class IntakeSubsystem extends SubsystemBase {
     motor = new SparkMax(intakeCANId, MotorType.kBrushless);
     closedLoopController = motor.getClosedLoopController();
 
-
     /*
      * Create a new SPARK MAX configuration object. This will store the
      * configuration parameters for the SPARK MAX that we will set below.
      */
     motorConfig = new SparkMaxConfig();
+    motorConfig.smartCurrentLimit(IntakeConstants.currentLimit);
     motor.configure(motorConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
   }
 
@@ -80,6 +81,7 @@ public class IntakeSubsystem extends SubsystemBase {
     // This method will be called once per scheduler run
       double currentAmps = motor.getOutputCurrent();
       SmartDashboard.putNumber("Intake Motor Current", currentAmps);
+      /*
       SmartDashboard.putBoolean("Intake Motor Jammed", !isOscillating);
 
       if( currentAmps > 70.0 && 
@@ -112,22 +114,24 @@ public class IntakeSubsystem extends SubsystemBase {
       } else {
 	      closedLoopController.setSetpoint(targetOutput, ControlType.kDutyCycle);
       }
+      */
   }
 
   public void runMotor(double pOut){
     targetOutput = MathUtil.clamp(pOut, -1, 1);
+    /*
     if( targetOutput <= 0.01 ) {
       resetOscillation(false);
     }
-    // adjusting the setSetpoint has been moved into the period function
-    // state machine.
-    //    closedLoopController.setSetpoint(targetOutput, ControlType.kDutyCycle);
+    */
+
+    closedLoopController.setSetpoint(targetOutput, ControlType.kDutyCycle);
   }
 
   
   public void stop() {
     targetOutput = 0.0;
-    resetOscillation(false);
+    // resetOscillation(false);
     closedLoopController.setSetpoint(targetOutput, ControlType.kDutyCycle);
   }
 

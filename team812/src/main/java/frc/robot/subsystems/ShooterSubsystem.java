@@ -72,6 +72,7 @@ public class ShooterSubsystem extends SubsystemBase {
     motorConfig = new SparkFlexConfig();
     //motorFollowerConfig = new SparkFlexConfig();
     motorConfig.inverted(true);
+    motorConfig.smartCurrentLimit(ShooterConstants.currentLimit);
     /*
      * Configure the encoder. For this specific example, we are using the
      * integrated encoder of the NEO, and we don't need to configure it. If
