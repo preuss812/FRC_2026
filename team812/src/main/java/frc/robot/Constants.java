@@ -578,18 +578,18 @@ public final class Constants {
     }
 
     public static final class FeederConstants {
+        public static final double maxRPM = 6784.0; // Neo Vortex
         public static final double a = ShooterConstants.a;
         public static final double b = ShooterConstants.b;
         public static final double c = ShooterConstants.c;
         public static final double d = ShooterConstants.d;
         public static final double RPMTolerance = 75;
         public static final double RPMToVolts = 442.5;
-        public static final double kP = 0.0005;
-        public static final double kI = 0.0;
+        public static final double kP = 0.0010;
+        public static final double kI = 0.0003/FeederConstants.maxRPM;
         public static final double kD = 0.0;
         public static final double minOutputPercent = -0.8;
         public static final double maxOutputPercent = 0.8;
-        public static final double maxRPM = 6784.0; // Neo Vortex
         public static final double kV = 1.0/maxRPM; // Docs say 1.0 should be 12.0 but emperically 12.0 is not right.
     }
 

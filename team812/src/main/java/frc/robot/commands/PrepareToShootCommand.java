@@ -12,6 +12,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants.FeederConstants;
 import frc.robot.Constants.ShooterConstants;
+import frc.robot.RobotContainer;
 import frc.robot.subsystems.AllianceConfigurationSubsystem;
 import frc.robot.subsystems.FeederSubsystem;
 import frc.robot.subsystems.PoseEstimatorSubsystem;
@@ -45,8 +46,9 @@ public class PrepareToShootCommand extends Command {
     //Distance from the center of the robot (Adjust later)
     double shooterOffset = 0;
     double distance = robotPose.getTranslation().getDistance(hubPos) - shooterOffset;
+    double correction = RobotContainer.getShooterCorrection();
     SmartDashboard.putString("Distance to Hub", String.format("%1dft %1din", (int)Units.metersToInches(distance)/12, (int)Units.metersToInches(distance)%12));
-    double RPM = distanceToRPM(MathUtil.clamp(distance, 1.0, 6.0)); // The cubic is not fit beyond this range.
+    double RPM = distanceToRPM(MathUtil.clamp(distance+correction, 1.0, 6.0)); // The cubic is not fit beyond this range.
     shooter.setRPM(RPM);
     feeder.setRPM(RPM);
     SmartDashboard.putBoolean("Shooter Ready", readyToShoot(RPM));

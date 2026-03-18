@@ -100,6 +100,7 @@ public class RobotContainer {
   public static IntakeDeploymentSubsystem m_IntakeDeploymentSubsystem = new IntakeDeploymentSubsystem(CANConstants.kIntakeDeploymentMotor);
   public static FeederSubsystem m_FeederSubsystem = new FeederSubsystem(CANConstants.kFeederMotor);
   public static IndexerSubsystem m_IndexerSubsystem = new IndexerSubsystem(CANConstants.kIndexerMotor);
+  private static double shooterCorrection = 0.0;
 
   /*
   public static PingResponseUltrasonicSubsystem m_pingResponseUltrasonicSubsystem =
@@ -188,7 +189,8 @@ public class RobotContainer {
       )
     );
     */
-    
+    SmartDashboard.putNumber("Shooter Correction", Units.metersToFeet(shooterCorrection));
+
   }
 
   public void setShooterFeederSpeed(double rpm) {
@@ -303,6 +305,14 @@ public class RobotContainer {
 
       new InstantCommand(() -> setShooterFeederSpeed(m_ShooterSubsystem.getTargetRPM()+25), m_ShooterSubsystem, m_FeederSubsystem)
     );
+
+    new JoystickButton(leftJoystick, 11).onTrue(
+      new InstantCommand(() -> incrementShooterCorrection(Units.inchesToMeters(-6.0)))
+    );
+    new JoystickButton(leftJoystick, 12).onTrue(
+      new InstantCommand(() -> incrementShooterCorrection(Units.inchesToMeters(6.0)))
+    );
+
 
     // Right Joystick bindings
     new JoystickButton(rightJoystick, 7).onTrue(
@@ -445,6 +455,15 @@ public class RobotContainer {
     m_robotDrive.setAngleDegrees(pose.getRotation().getDegrees());
     m_robotDrive.resetOdometry(pose);
     m_poseEstimatorSubsystem.setCurrentPose(pose);
+  }
+
+  static public double getShooterCorrection() {
+    return shooterCorrection;
+  }
+
+  static public void incrementShooterCorrection(double increment) {
+    shooterCorrection += increment;
+    SmartDashboard.putNumber("Shooter Correction", Units.metersToFeet(shooterCorrection));
   }
 
 }
