@@ -100,10 +100,10 @@ public class ShooterSubsystem extends SubsystemBase {
         .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
         // Set PID values for velocity control in slot 1
         .p(ShooterConstants.kP)
-        .i(ShooterConstants.kI+0.000)
+        .i(ShooterConstants.kI)
         .d(ShooterConstants.kD)
         //.iMaxAccum(50.0)
-        //.iZone(100)
+        //.iZone(50)
         .outputRange(ShooterConstants.minOutputPercent, ShooterConstants.maxOutputPercent)
         .feedForward
           // kV is now in Volts, so we multiply by the nominal voltage (12V)
