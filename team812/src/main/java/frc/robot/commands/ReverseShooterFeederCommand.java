@@ -9,7 +9,6 @@ import frc.robot.Constants.ShooterConstants;
 import frc.robot.subsystems.FeederSubsystem;
 import frc.robot.subsystems.ShooterSubsystem;
 
-/* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
 public class ReverseShooterFeederCommand extends Command {
   private final ShooterSubsystem m_shooterSubsystem;
 private final FeederSubsystem m_feederSubsystem;

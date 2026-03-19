@@ -507,7 +507,7 @@ public final class Constants {
         public static final double kDrivingP = 0.04;
         public static final double kDrivingI = 0;
         public static final double kDrivingD = 0;
-        public static final double kDrivingFF = 1 / kDriveWheelFreeSpeedRps;
+        public static final double kDrivingFF = 12.0 / kDriveWheelFreeSpeedRps;
         public static final double kDrivingMinOutput = -1;
         public static final double kDrivingMaxOutput = 1;
     
@@ -586,11 +586,11 @@ public final class Constants {
         public static final double RPMTolerance = 75;
         public static final double RPMToVolts = 442.5;
         public static final double kP = 0.0001;
-        public static final double kI = 0.0003/FeederConstants.maxRPM;
+        public static final double kI = 0.0; // 0.0003/FeederConstants.maxRPM;
         public static final double kD = 0.0;
         public static final double minOutputPercent = -0.8;
         public static final double maxOutputPercent = 0.8;
-        public static final double kV = 1.0/maxRPM * 3000.0 / 2900.0; // Docs say 1.0 should be 12.0 but emperically 12.0 is not right.
+        public static final double kV = 12.0/maxRPM * 3000.0 / 2900.0; // Docs say 1.0 should be 12.0 but emperically 12.0 is not right.
     }
 
     public static final class IndexerConstants {
@@ -616,12 +616,12 @@ public final class Constants {
         public static final double RPMTolerance = 75;
         public static final double RPMToVolts = 442.5;
         public static final double kP = 0.0001;
-        public static final double kI = 0.0003/FeederConstants.maxRPM;
+        public static final double kI = 0.0; //0.0003/FeederConstants.maxRPM;
         public static final double kD = 0.0;
         public static final double minOutputPercent = -0.8;
         public static final double maxOutputPercent = 0.8;
         public static final double maxRPM = 6784.0; // Neo Vortex
-        public static final double kV = 1.0/maxRPM * 3000.0 / 2900.0; // Docs say 1.0 should be 12.0 but emperically 12.0 is not right.
+        public static final double kV = 12.0/maxRPM * 3000.0 / 2900.0; // Docs say 1.0 should be 12.0 but emperically 12.0 is not right.
         public static final double rotationTolerance = Units.degreesToRadians(2.0);
         public static final int currentLimit = 60;
     }
@@ -643,7 +643,7 @@ public final class Constants {
         public static final double minOutputPercent = -0.80;
         public static final double maxOutputPercent = 0.80;
         public static final double maxRPM = 6784.0; // Neo Vortex
-        public static final double kV = 1.0/maxRPM; // Docs say 1.0 should be 12.0 but emperically 12.0 is not right.
+        public static final double kV = 12.0/maxRPM; // Docs say 1.0 should be 12.0 but emperically 12.0 is not right.
         public static final int shakeCycles = 5; // number of periods to move in the same direction before reversing.
     }
 

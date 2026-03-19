@@ -18,16 +18,65 @@ import frc.robot.subsystems.FeederSubsystem;
 import frc.robot.subsystems.PoseEstimatorSubsystem;
 import frc.robot.subsystems.ShooterSubsystem;
 
-/* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
 public class PrepareToShootCommand extends Command {
   private final ShooterSubsystem shooter;
   private final FeederSubsystem feeder;
   private final PoseEstimatorSubsystem PoseEstimatorSubsystem;
+  private final double pwl[] = { // array or rpm vs feet from hub
+    2500.0, // 0
+    2500.0, // 1
+    2500.0, // 2
+    2500.0, // 3
+    2500.0, // 4
+    2500.0, // 5
+    2500.0, // 6
+    2550.0, // 7
+    2600.0, // 8
+    2695.0, // 9
+    2790.0, // 10
+    2875.0, // 11
+    2970.0, // 12
+    3090.0, // 13
+    3200.0, // 14
+    3300.0, // 15
+    3400.0, // 16
+    3500.0, // 17
+    3600.0, // 18
+    3700.0, // 19
+    3800.0, // 20
+  };
+  ExponentialSmoother exponentialSmoother = new ExponentialSmoother(1.0);
+
+  public class ExponentialSmoother {
+    private double alpha = 0.0; // weight of the new sample. (1-alpha is the weight for the old samples)
+    private boolean reset = true;
+    private double value = 0.0;
+    public ExponentialSmoother(double alpha) {
+      this.alpha = alpha;
+      this.reset = true;
+    }
+
+    public void reset() {
+      reset = true;
+    }
+
+    public double addSample(double x) {
+      if (reset) {
+        value = x;
+        reset = false;
+      } else {
+        value = x * alpha + value * (1.0 - alpha);
+      }
+      return value;
+    }
+  }
+
   /** Creates a new MotorTest. */
   public PrepareToShootCommand(ShooterSubsystem shooter, FeederSubsystem feeder, PoseEstimatorSubsystem poseEstimator) {
     this.shooter = shooter;
     this.feeder = feeder;
     PoseEstimatorSubsystem = poseEstimator;
+
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(shooter, feeder);
   }
@@ -35,7 +84,7 @@ public class PrepareToShootCommand extends Command {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-
+    exponentialSmoother.reset();
   }
 
   // Called every time the scheduler runs while the command is scheduled.
@@ -48,7 +97,8 @@ public class PrepareToShootCommand extends Command {
     double distance = robotPose.getTranslation().getDistance(hubPos) - shooterOffset;
     double correction = RobotContainer.getShooterCorrection();
     SmartDashboard.putString("Distance to Hub", String.format("%1dft %1din", (int)Units.metersToInches(distance)/12, (int)Units.metersToInches(distance)%12));
-    double RPM = distanceToRPM(MathUtil.clamp(distance+correction, 1.0, 6.0)); // The cubic is not fit beyond this range.
+    double adjustedDistance = exponentialSmoother.addSample(distance+correction);
+    double RPM = distanceToRPMPWL(MathUtil.clamp(adjustedDistance, 1.0, 6.0)); // The cubic is not fit beyond this range.
     shooter.setRPM(RPM);
     feeder.setRPM(RPM);
     SmartDashboard.putBoolean("Shooter Ready", readyToShoot(RPM));
@@ -75,6 +125,15 @@ public class PrepareToShootCommand extends Command {
   public double distanceToRPM(double x){
     //Change coefficents later
     return ShooterConstants.a*Math.pow(x, 3) + ShooterConstants.b*Math.pow(x,2) + ShooterConstants.c*x + ShooterConstants.d;
+  }
+
+  public double distanceToRPMPWL(double x) {
+    double feet = Units.metersToFeet(x);
+    int wholeFeet = (int)Math.floor(Units.metersToFeet(Math.abs(x)));
+    double remainder = feet - wholeFeet;
+    if (wholeFeet > pwl.length - 2)
+      wholeFeet = pwl.length - 2;
+    return pwl[wholeFeet] + (pwl[wholeFeet+1] - pwl[wholeFeet]) * remainder;
   }
 
   public boolean readyToShoot(double targetRPM){

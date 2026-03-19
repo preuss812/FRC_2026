@@ -41,6 +41,7 @@ import frc.robot.commands.DriveFacingHub;
 import frc.robot.commands.DriveRobotCommand;
 import frc.robot.commands.DriveWithoutVisionCommand;
 import frc.robot.commands.FireAtWillCommand;
+import frc.robot.commands.FireAtWillWithShakingCommand;
 import frc.robot.commands.GotoPoseCommand;
 import frc.robot.commands.LowerIntakeCommand;
 import frc.robot.commands.PointCameraTowardHubCommand;
@@ -49,6 +50,7 @@ import frc.robot.commands.RaiseIntakeCommand;
 import frc.robot.commands.RandomRobotPositionCommand;
 import frc.robot.commands.ResetDriveTrainCommand;
 import frc.robot.commands.ReverseShooterFeederCommand;
+import frc.robot.commands.ReverseTheShooterFeederIndexerCommand;
 import frc.robot.commands.RotateRobotCommand;
 import frc.robot.commands.RotateRobotG2PCommand;
 import frc.robot.commands.ShakeTheIntakeCommand;
@@ -291,6 +293,8 @@ public class RobotContainer {
       Utilities.toSmartDashboard("A19 Robot: ", DriveConstants.robotFrontAtPose(m_poseEstimatorSubsystem.getAprilTagPose(19), 0.0) );
     */
 
+    new JoystickButton(leftJoystick, 6).whileTrue(new FireAtWillWithShakingCommand(m_ShooterSubsystem, m_FeederSubsystem, m_IndexerSubsystem, null));
+
     // Left Joystick buttons 7,8,9,10 control the shooter and feeder speed for testing. 7 is stop, 8 is 3000 RPM, 9 is current target RPM - 25, 10 is current target RPM + 25.
     new JoystickButton(leftJoystick, 7).onTrue(
       new InstantCommand(() -> stopShooterFeeder(), m_ShooterSubsystem, m_FeederSubsystem)
@@ -343,6 +347,7 @@ public class RobotContainer {
     // reverse the shooter to clear stuck fuel.
     new JoystickButton(rightJoystick, 4).whileTrue(new ReverseShooterFeederCommand(m_ShooterSubsystem, m_FeederSubsystem));
     new JoystickButton(rightJoystick, 5).whileTrue(new ShakeTheIntakeCommand(m_IntakeDeploymentSubsystem));
+    new JoystickButton(rightJoystick, 6).whileTrue(new ReverseTheShooterFeederIndexerCommand(m_ShooterSubsystem, m_FeederSubsystem, m_IndexerSubsystem));
 
     // POV buttons to point robot to a given heading where 0 is
     // straight downfield from the driver's perspective.

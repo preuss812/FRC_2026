@@ -15,10 +15,9 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
-import com.revrobotics.spark.SparkMax;
+import com.revrobotics.PersistMode;
+import com.revrobotics.ResetMode;import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
-import com.revrobotics.spark.SparkBase.PersistMode;
-import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.config.SparkMaxConfig;
@@ -123,9 +122,12 @@ public class MAXSRXSwerveModule {
     // Set the PID related parameters for the driving motor.
     m_drivingConfig.closedLoop
         .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
-        .pidf(ModuleConstants.kDrivingP, ModuleConstants.kDrivingI, ModuleConstants.kDrivingD,
-            ModuleConstants.kDrivingFF)
-        .outputRange(ModuleConstants.kDrivingMinOutput, ModuleConstants.kDrivingMaxOutput);
+        .outputRange(ModuleConstants.kDrivingMinOutput, ModuleConstants.kDrivingMaxOutput)
+        .p(ModuleConstants.kDrivingP)
+        .i(ModuleConstants.kDrivingI)
+        .d(ModuleConstants.kDrivingD)
+        .feedForward.kV(ModuleConstants.kDrivingFF)
+      ;
 
     m_drivingSparkMax.configure(m_drivingConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
@@ -221,7 +223,7 @@ public class MAXSRXSwerveModule {
     // Rotation2d(m_turningEncoder.getPosition()));
 
     // Command driving and turning SPARKS MAX towards their respective setpoints.
-    m_drivingPIDController.setReference(correctedDesiredState.speedMetersPerSecond, ControlType.kVelocity);
+    m_drivingPIDController.setSetpoint(correctedDesiredState.speedMetersPerSecond, ControlType.kVelocity);
     m_turningPIDController.setSetpoint(correctedDesiredState.angle.getRadians());
 
     double pidOutput = m_turningPIDController.calculate(currentTurningAngleInRadians);
