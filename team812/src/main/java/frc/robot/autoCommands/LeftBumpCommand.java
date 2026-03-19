@@ -44,7 +44,21 @@ public class LeftBumpCommand extends SequentialCommandGroup {
             1.0),
         
             // Shoot the fuel cells we just picked up.
-            new FaceHubAndShootCommand()
+            new FaceHubAndShootCommand().withTimeout(6.0),
+
+            // Make a pass back to the center for more fuel.
+            new InstantCommand(()->RobotContainer.m_IntakeSubsystem.runMotor(IntakeConstants.pickupFuelSpeed),RobotContainer.m_IntakeSubsystem),
+            new DriveChoreoPathCommand(
+            RobotContainer.m_robotDrive,
+            RobotContainer.m_poseEstimatorSubsystem,
+            "LeftBumpGather2",
+            RobotContainer.m_robotDrive.defaultAutoConfig,
+            speedFactor,
+            1.0),
+
+            // Shoot the fuel cells we just picked up.
+            new InstantCommand(()->RobotContainer.m_IntakeSubsystem.stop(), RobotContainer.m_IntakeSubsystem),
+            new FaceHubAndShootCommand().withTimeout(6.0)
         );
     }
 }

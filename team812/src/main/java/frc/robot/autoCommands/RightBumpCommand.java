@@ -47,7 +47,21 @@ public class RightBumpCommand extends SequentialCommandGroup {
         
             // Shoot the fuel cells we just picked up.
             new InstantCommand(()->SmartDashboard.putString("AutoStep", "Shoot")),
-            new FaceHubAndShootCommand()
+            new FaceHubAndShootCommand().withTimeout(6.0),
+
+            // Make a second pass through the center for more fuel.
+            new InstantCommand(()->RobotContainer.m_IntakeSubsystem.runMotor(IntakeConstants.pickupFuelSpeed),RobotContainer.m_IntakeSubsystem),
+            new DriveChoreoPathCommand(
+            RobotContainer.m_robotDrive,
+            RobotContainer.m_poseEstimatorSubsystem,
+            "RightBumpGather2",
+            RobotContainer.m_robotDrive.defaultAutoConfig,
+            speedFactor,
+            1.0),
+
+            // Shoot the fuel we just gathered.
+            new InstantCommand(()->RobotContainer.m_IntakeSubsystem.stop(), RobotContainer.m_IntakeSubsystem),
+            new FaceHubAndShootCommand().withTimeout(6.0)
         );
     }
 }
