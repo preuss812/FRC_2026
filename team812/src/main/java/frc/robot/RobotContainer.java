@@ -21,6 +21,7 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.XboxController.Button;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.ParallelRaceGroup;
@@ -43,6 +44,7 @@ import frc.robot.commands.DriveWithoutVisionCommand;
 import frc.robot.commands.FireAtWillCommand;
 import frc.robot.commands.FireAtWillWithShakingCommand;
 import frc.robot.commands.GotoPoseCommand;
+import frc.robot.commands.IntakeFuelCommand;
 import frc.robot.commands.LowerIntakeCommand;
 import frc.robot.commands.PointCameraTowardHubCommand;
 import frc.robot.commands.PrepareToShootCommand;
@@ -58,6 +60,7 @@ import frc.robot.commands.ShakeThingsUpCommand;
 import frc.robot.commands.ShooterTest;
 import frc.robot.commands.SimSetRobotPoseCommand;
 import frc.robot.commands.SpinIndexerCommand;
+import frc.robot.commands.ToggleIntakeUpDownCommand;
 import frc.robot.subsystems.AllianceConfigurationSubsystem;
 import frc.robot.subsystems.DriveSubsystemSRX;
 import frc.robot.subsystems.DriveSubsystemSRX.DrivingMode;
@@ -103,7 +106,7 @@ public class RobotContainer {
   public static FeederSubsystem m_FeederSubsystem = new FeederSubsystem(CANConstants.kFeederMotor);
   public static IndexerSubsystem m_IndexerSubsystem = new IndexerSubsystem(CANConstants.kIndexerMotor);
   private static double shooterCorrection = 0.0;
-
+  private static boolean m_raisingIntake = true;
   /*
   public static PingResponseUltrasonicSubsystem m_pingResponseUltrasonicSubsystem =
     new PingResponseUltrasonicSubsystem(
@@ -212,6 +215,14 @@ public class RobotContainer {
    * it to a
    * {@link edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
+  public static void setRaisingIntake(boolean newValue) {
+     m_raisingIntake = newValue; 
+  }
+
+  public static boolean getRaisingIntake() {
+    return m_raisingIntake;
+  }
+
   private void configureButtonBindings() {
 
     /**
@@ -249,7 +260,7 @@ public class RobotContainer {
 
     // Right bumper puts the robot in a mode where the left stick controls translation but the robot automatically faces the hub.
     new JoystickButton(m_driverController, Button.kRightBumper.value)
-    .onTrue(
+    .toggleOnTrue(
       new ParallelRaceGroup(
         new PrepareToShootCommand(m_ShooterSubsystem, m_FeederSubsystem, m_poseEstimatorSubsystem),
         new DriveFacingHub(m_robotDrive, m_poseEstimatorSubsystem, m_driverController)
@@ -257,20 +268,32 @@ public class RobotContainer {
     );
 
     // A button starts the intake and leavs it running
-    new JoystickButton(m_driverController, Button.kA.value).onTrue(
-      new InstantCommand(()->m_IntakeSubsystem.runMotor(IntakeConstants.pickupFuelSpeed), m_IntakeSubsystem)
+    new JoystickButton(m_driverController, Button.kA.value).toggleOnTrue(
+      new IntakeFuelCommand(m_IntakeSubsystem)
     );
 
     // B button stops the intake.
+    
+   /* didnot work
     new JoystickButton(m_driverController, Button.kB.value).onTrue(
-      new InstantCommand(()->m_IntakeSubsystem.stop(), m_IntakeSubsystem)
+      new ConditionalCommand(
+        new LowerIntakeCommand(m_IntakeDeploymentSubsystem),
+        new RaiseIntakeCommand(m_IntakeDeploymentSubsystem),
+        ()-> getRaisingIntake()
+      )
     );
+    */
+    new JoystickButton(m_driverController, Button.kB.value).onTrue(
+      new ToggleIntakeUpDownCommand(m_IntakeDeploymentSubsystem)
+    );
+
 
     
     // Left bumper raises the intake.
     new JoystickButton(m_driverController, Button.kLeftBumper.value).onTrue(
       new RaiseIntakeCommand(m_IntakeDeploymentSubsystem)
     );
+
 
     // Left trigger lowers the intake.
     Trigger leftTriggerButton = new Trigger(() -> m_driverController.getLeftTriggerAxis() >= 0.5);
