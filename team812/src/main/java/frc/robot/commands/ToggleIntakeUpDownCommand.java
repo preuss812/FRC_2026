@@ -4,8 +4,8 @@
 
 package frc.robot.commands;
 
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.Constants;
 import frc.robot.Constants.IntakeDeploymentConstants;
 import frc.robot.subsystems.IntakeDeploymentSubsystem;
 
@@ -24,12 +24,13 @@ public class ToggleIntakeUpDownCommand extends Command {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
+    SmartDashboard.putBoolean("RaisingIntake", raisingIntake);
     if (raisingIntake) {
-        m_IntakeDeploymentSubsystem.setRPM(Constants.IntakeDeploymentConstants.kIntakeDeploymentDownRPM);
+        m_IntakeDeploymentSubsystem.setRPM(IntakeDeploymentConstants.kIntakeDeploymentDownRPM);
         raisingIntake = false;
     } else {
-      m_IntakeDeploymentSubsystem.setRPM(Constants.IntakeDeploymentConstants.kIntakeDeploymentUpRPM);
-      raisingIntake = false;
+      m_IntakeDeploymentSubsystem.setRPM(IntakeDeploymentConstants.kIntakeDeploymentUpRPM);
+      raisingIntake = true;
     }
 
   }
@@ -45,6 +46,6 @@ public class ToggleIntakeUpDownCommand extends Command {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return false;
+    return true;
   }
 }
