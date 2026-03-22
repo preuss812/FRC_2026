@@ -32,7 +32,7 @@ public class ReverseTheShooterFeederIndexerCommand extends Command {
   @Override
   public void initialize() {
     m_ShooterSubsystem.setRPM(-3000);
-    m_FeederSubsystem.setRPM(-3000);
+    m_FeederSubsystem.setRPM(-6000);
     m_IndexerSubsystem.runMotor(-Constants.IndexerConstants.indexerPercentOutput);
   }
 

@@ -94,7 +94,7 @@ public class RobotContainer {
   //public final SparkFlex m_test = new SparkFlex(50, MotorType.kBrushless);
   public static PoseEstimatorCamera m_atagCamera = new PoseEstimatorCamera("atag812", VisionConstants.ROBOT_TO_APRIL_CAMERA,200.0/219.0 );
   public static PoseEstimatorCamera m_rearAtagCamera = new PoseEstimatorCamera("rearAtag812", VisionConstants.ROBOT_TO_REAR_APRIL_CAMERA, 100.0/97.0 );
-  public static final PoseEstimatorCamera[] cameras = new PoseEstimatorCamera[]{m_atagCamera, m_rearAtagCamera};
+  public static final PoseEstimatorCamera[] cameras = new PoseEstimatorCamera[]{m_atagCamera}; //, m_rearAtagCamera};
   public static PoseEstimatorSubsystem m_poseEstimatorSubsystem = new PoseEstimatorSubsystem( cameras, m_robotDrive);
   public final static AllianceConfigurationSubsystem m_allianceConfigurationSubsystem = new AllianceConfigurationSubsystem(m_robotDrive, m_poseEstimatorSubsystem);
   private static  boolean isSimulation = !Robot.isReal();
@@ -261,14 +261,16 @@ public class RobotContainer {
     // Right bumper puts the robot in a mode where the left stick controls translation but the robot automatically faces the hub.
     new JoystickButton(m_driverController, Button.kRightBumper.value)
     .toggleOnTrue(
-      new ParallelRaceGroup(
-        new PrepareToShootCommand(m_ShooterSubsystem, m_FeederSubsystem, m_poseEstimatorSubsystem),
+        new PrepareToShootCommand(m_ShooterSubsystem, m_FeederSubsystem, m_poseEstimatorSubsystem)
+    );
+
+  new JoystickButton(m_driverController, Button.kLeftBumper.value)
+    .onTrue(
         new DriveFacingHub(m_robotDrive, m_poseEstimatorSubsystem, m_driverController)
-      )
     );
 
     // A button starts the intake and leavs it running
-    new JoystickButton(m_driverController, Button.kA.value).toggleOnTrue(
+    new JoystickButton(m_driverController, Button.kA.value).onTrue(
       new IntakeFuelCommand(m_IntakeSubsystem)
     );
 
@@ -284,21 +286,22 @@ public class RobotContainer {
     );
     */
     new JoystickButton(m_driverController, Button.kB.value).onTrue(
-      new ToggleIntakeUpDownCommand(m_IntakeDeploymentSubsystem)
+      //new ToggleIntakeUpDownCommand(m_IntakeDeploymentSubsystem)
+      new InstantCommand(() -> m_IntakeSubsystem.stop(), m_IntakeSubsystem)
     );
 
 
     
     // Left bumper raises the intake.
-    new JoystickButton(m_driverController, Button.kLeftBumper.value).onTrue(
-      new RaiseIntakeCommand(m_IntakeDeploymentSubsystem)
-    );
+    //new JoystickButton(m_driverController, Button.kLeftBumper.value).onTrue(
+     // new RaiseIntakeCommand(m_IntakeDeploymentSubsystem)
+    //);
 
 
     // Left trigger lowers the intake.
     Trigger leftTriggerButton = new Trigger(() -> m_driverController.getLeftTriggerAxis() >= 0.5);
     leftTriggerButton.whileTrue(
-      new LowerIntakeCommand(m_IntakeDeploymentSubsystem)
+      new IntakeFuelCommand(m_IntakeSubsystem)
     );
 
     // Right trigger shoots but running the indexer
@@ -323,14 +326,14 @@ public class RobotContainer {
       new InstantCommand(() -> stopShooterFeeder(), m_ShooterSubsystem, m_FeederSubsystem)
     );
     new JoystickButton(leftJoystick, 8).onTrue(
-      new InstantCommand(() -> setShooterFeederSpeed(3000), m_ShooterSubsystem, m_FeederSubsystem)
+      new InstantCommand(() -> setShooterFeederSpeed(2790), m_ShooterSubsystem, m_FeederSubsystem)
     );
     new JoystickButton(leftJoystick, 9).onTrue(
-      new InstantCommand(() -> setShooterFeederSpeed(m_ShooterSubsystem.getTargetRPM()-25), m_ShooterSubsystem, m_FeederSubsystem)
+      new InstantCommand(() -> setShooterFeederSpeed(m_ShooterSubsystem.getTargetRPM()-50), m_ShooterSubsystem, m_FeederSubsystem)
     );
     new JoystickButton(leftJoystick, 10).onTrue(
 
-      new InstantCommand(() -> setShooterFeederSpeed(m_ShooterSubsystem.getTargetRPM()+25), m_ShooterSubsystem, m_FeederSubsystem)
+      new InstantCommand(() -> setShooterFeederSpeed(m_ShooterSubsystem.getTargetRPM()+50), m_ShooterSubsystem, m_FeederSubsystem)
     );
 
     new JoystickButton(leftJoystick, 11).onTrue(

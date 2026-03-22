@@ -119,7 +119,7 @@ public class Autonomous extends SequentialCommandGroup {
         //new InstantCommand(() -> RobotContainer.m_ShooterSubsystem.setRPM(3000.0)) // Initial guess at required rpm.  Could do better - TODO
       )
     );
-    addCommands(new InstantCommand(()->SmartDashboard.putString("AutoStep", "modeAction")));
+    //addCommands(new InstantCommand(()->SmartDashboard.putString("AutoStep", "modeAction")));
     switch(m_autoMode) {
       
       case AllianceConfigurationSubsystem.AUTO_MODE_MOVE_OFF_LINE_AND_STOP:

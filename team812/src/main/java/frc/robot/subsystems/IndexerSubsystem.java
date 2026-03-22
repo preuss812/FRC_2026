@@ -15,6 +15,7 @@ import com.revrobotics.spark.config.SparkFlexConfig;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.RobotContainer;
 import frc.robot.Constants.IndexerConstants;
 
 public class IndexerSubsystem extends SubsystemBase {
@@ -51,10 +52,11 @@ public class IndexerSubsystem extends SubsystemBase {
     //pOut = 0.0;
     //runMotor(pOut);
     //SmartDashboard.putNumber("Indexer%Out", pOut);
+    
   }
 
   public void runMotor(double pOut){
-    pOut = MathUtil.clamp(pOut, IndexerConstants.minOutputPercent, IndexerConstants.maxOutputPercent);
+    pOut = MathUtil.clamp(pOut, IndexerConstants.minOutputPercent, IndexerConstants.maxOutputPercent); 
     closedLoopController.setSetpoint(pOut, ControlType.kDutyCycle);
     if (debug) 
         SmartDashboard.putNumber("Indexer%Out", pOut);

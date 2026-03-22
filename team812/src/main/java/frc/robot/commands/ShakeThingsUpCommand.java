@@ -31,7 +31,7 @@ public class ShakeThingsUpCommand extends Command {
     double x = Math.cos(m_heading);
     double y = Math.sin(m_heading);
     m_robotDrive.drive(x, y, 0.0, true, true);
-    m_heading = MathUtil.angleModulus(m_heading + Math.PI/2.0);
+    m_heading = MathUtil.angleModulus(m_heading + Math.PI/2);
   }
 
   // Called once the command ends or is interrupted.
