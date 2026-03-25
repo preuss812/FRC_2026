@@ -10,6 +10,7 @@ import java.util.function.BooleanSupplier;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFieldLayout.OriginPosition;
 import edu.wpi.first.apriltag.AprilTagFields;
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.Vector;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
@@ -22,6 +23,7 @@ import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.DriveConstants;
+import frc.robot.Constants.ShooterConstants;
 import frc.robot.Constants.VisionConstants;
 import frc.robot.Utilities;
 import frc.utils.PoseEstimatorCamera;
@@ -126,6 +128,11 @@ public class PoseEstimatorSubsystem extends SubsystemBase {
       SmartDashboard.putNumber("Pose R", getCurrentPose().getRotation().getDegrees());
 
     }
+    double currentRotation = getCurrentPose().getRotation().getRadians();
+    double desiredRotation = AllianceConfigurationSubsystem.robotFrontFacingHub().getRadians();
+    double rotationError = MathUtil.angleModulus(currentRotation - desiredRotation);
+    setRotationErrorToHub(rotationError);
+    SmartDashboard.putBoolean("Angle OK", facingHub(ShooterConstants.rotationTolerance));
   }
 
   public String getFomattedPose() {

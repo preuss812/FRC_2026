@@ -26,7 +26,6 @@ public class FeederSubsystem extends SubsystemBase {
 
     // Feeder settings
     private double targetRPM = 0.0;  // desired feeder wheel speed
-    private double savedTargetRPM = 0.0;
     private double currentRPM; // the current rpm of the feeder.
     // native units are rpm for the Spark MAX closed loop controller.
     // With external through bore encoder this calculation would be more typical:
@@ -42,12 +41,8 @@ public class FeederSubsystem extends SubsystemBase {
     //private final SparkFlexConfig motorFollowerConfig;
     private final SparkClosedLoopController closedLoopController;
     private final RelativeEncoder encoder;
-    private final int stuckMotorThreshold = 25; // 1/2 second
-    private int stuckMotorCount = 0;
-    private final int stuckMotorCoolDownDelay = 50*5; // 5 Seconds
-    private int stuckMotorCoolDownCount = 0;
-    private final double stuckMotorPercentOkay = 0.5; // Motor must spin at least 1/2 of what we asked for.
     
+    private boolean debug = false;
 
   public FeederSubsystem(int feederCANId) {
       /** Creates a new FeederSubsystem. */
@@ -124,7 +119,7 @@ public class FeederSubsystem extends SubsystemBase {
     // Initialize dashboard values
     //SmartDashboard.setDefaultNumber("Feeder RPM Target", 0);
     currentRPM = 0;
-    SmartDashboard.putBoolean("Feeder OK", true);
+    //SmartDashboard.putBoolean("Feeder OK", true);
 
   }
 
@@ -138,35 +133,11 @@ public class FeederSubsystem extends SubsystemBase {
     // telemetry
     SmartDashboard.putNumber("Feeder RPM", currentRPM);
     
-    double current = motor1.getOutputCurrent();
-    double appliedOutput = motor1.getAppliedOutput();
-    SmartDashboard.putNumber("feeder I", current);
-    SmartDashboard.putNumber("feeder V", appliedOutput);
-    
-    if (false) {
-      // Check for a jammed motor.
-      if (stuckMotorCoolDownCount > 0) {
-        stop(); // Keep reapplying stop to be sure we are stopped.
-        stuckMotorCoolDownCount--;
-        if (stuckMotorCoolDownCount <= 0) {
-          stuckMotorCoolDownCount = 0; // just to be sure.
-          setRPM(savedTargetRPM);
-          SmartDashboard.putBoolean("Feeder OK", true);
-          stuckMotorCount = 0;
-        }
-      } else {
-        if (Math.abs(currentRPM) < stuckMotorPercentOkay * Math.abs(targetRPM)) {
-          stuckMotorCount++;
-          if (stuckMotorCount >= stuckMotorThreshold) {
-            savedTargetRPM = targetRPM;
-            stop();
-            SmartDashboard.putBoolean("Feeder OK", false);
-            stuckMotorCoolDownCount = stuckMotorCoolDownDelay;
-          }
-        } else {
-          stuckMotorCount = 0; // reset the counter we are not stuck.
-        }
-      }
+    if (debug) {
+      double current = motor1.getOutputCurrent();
+      double appliedOutput = motor1.getAppliedOutput();
+      SmartDashboard.putNumber("feeder I", current);
+      SmartDashboard.putNumber("feeder V", appliedOutput);
     }
   }
 
@@ -185,10 +156,8 @@ public class FeederSubsystem extends SubsystemBase {
    */
   public void setRPM(double rpm) {
     targetRPM = rpm;
-    if (stuckMotorCoolDownCount == 0) {
-      double targetVelocity = rpmToNativeUnits(rpm);
-      closedLoopController.setSetpoint(targetVelocity, ControlType.kVelocity);
-    }
+    double targetVelocity = rpmToNativeUnits(rpm);
+    closedLoopController.setSetpoint(targetVelocity, ControlType.kVelocity);
     SmartDashboard.putNumber("Feeder Target RPM", targetRPM);
   }
 

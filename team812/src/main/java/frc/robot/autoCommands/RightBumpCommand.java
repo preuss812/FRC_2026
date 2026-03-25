@@ -20,7 +20,7 @@ import frc.robot.commands.SetShooterSpeedCommand;
 import frc.robot.commands.ShakeTheIntakeCommand;
 
 public class RightBumpCommand extends SequentialCommandGroup {
-    private final double speedFactor = 0.5; // 1.0 would be full speed.
+    private final double speedFactor = 0.8; // 1.0 would be full speed.
     /** Creates a new RightBumpCommand. */
     public RightBumpCommand(
         Optional<Trajectory<SwerveSample>> rightBumpGather,
@@ -54,7 +54,7 @@ public class RightBumpCommand extends SequentialCommandGroup {
             new ParallelCommandGroup(
                 new FaceHubAndShootCommand(),
                 new ShakeTheIntakeCommand(RobotContainer.m_IntakeDeploymentSubsystem)
-            ).withTimeout(10.0),
+            ).withTimeout(6.0),
 
             // Make a second pass through the center for more fuel.
             new InstantCommand(()->RobotContainer.m_IntakeSubsystem.runMotor(IntakeConstants.pickupFuelSpeed),RobotContainer.m_IntakeSubsystem),

@@ -41,7 +41,7 @@ public class FireAtWillCommand extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    SmartDashboard.putBoolean("Angle OK", poseEstimatorSubsystem.facingHub(ShooterConstants.rotationTolerance));
+    //SmartDashboard.putBoolean("Angle OK", poseEstimatorSubsystem.facingHub(ShooterConstants.rotationTolerance));
     if (poseEstimatorSubsystem.facingHub(ShooterConstants.rotationTolerance)
       && shooterSubsystem.readyToShoot(ShooterConstants.RPMTolerance)
       && feederSubsystem.readyToShoot(FeederConstants.RPMTolerance)) {

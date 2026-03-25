@@ -9,6 +9,7 @@ import java.util.Optional;
 import choreo.trajectory.SwerveSample;
 import choreo.trajectory.Trajectory;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.Constants.IntakeConstants;
 import frc.robot.RobotContainer;
@@ -16,6 +17,7 @@ import frc.robot.commands.DriveChoreoPathCommand;
 import frc.robot.commands.FaceHubAndShootCommand;
 import frc.robot.commands.LowerIntakeCommand;
 import frc.robot.commands.SetShooterSpeedCommand;
+import frc.robot.subsystems.DriveSubsystemSRX.DrivingMode;
 
 public class RightTrenchCommand extends SequentialCommandGroup {
     private final double speedFactor = 0.5; // 1.0 would be full speed.
@@ -25,10 +27,15 @@ public class RightTrenchCommand extends SequentialCommandGroup {
         Optional<Trajectory<SwerveSample>> rightTrenchReturn
     ) {
         addCommands(
-            new LowerIntakeCommand(RobotContainer.m_IntakeDeploymentSubsystem).withTimeout(1.0), // The timeout is just for simulation.
-            
+            // Lower the intake and make sure we are in fast driving mode.
+            new ParallelCommandGroup(
+                new LowerIntakeCommand(RobotContainer.m_IntakeDeploymentSubsystem).withTimeout(1.0), // The timeout is just for simulation.
+                new InstantCommand(()->RobotContainer.m_IntakeSubsystem.runMotor(IntakeConstants.pickupFuelSpeed),RobotContainer.m_IntakeSubsystem),
+                new InstantCommand(() -> RobotContainer.m_robotDrive.setDrivingMode(DrivingMode.SPEED))
+            ),
+
             // Simultaneously drive out on the field and start the intake.
-            new SequentialCommandGroup( 
+            new ParallelCommandGroup( 
                 new InstantCommand(()->RobotContainer.m_IntakeSubsystem.runMotor(IntakeConstants.pickupFuelSpeed),RobotContainer.m_IntakeSubsystem),
                 new DriveChoreoPathCommand(
                     RobotContainer.m_robotDrive,
@@ -39,9 +46,9 @@ public class RightTrenchCommand extends SequentialCommandGroup {
                     1.0
                 )
             ),
-            // Stop the intake.
-            //new InstantCommand(()->RobotContainer.m_IntakeSubsystem.stop(), RobotContainer.m_IntakeSubsystem),
-            new SequentialCommandGroup(
+            // Decided not to stop the intake.
+            // new InstantCommand(()->RobotContainer.m_IntakeSubsystem.stop(), RobotContainer.m_IntakeSubsystem),
+            new ParallelCommandGroup(
                 
                 new SetShooterSpeedCommand(RobotContainer.m_ShooterSubsystem, RobotContainer.m_FeederSubsystem, 3000), 
                 // Return to out alliance zone 

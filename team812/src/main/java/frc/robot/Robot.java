@@ -10,6 +10,7 @@ package frc.robot;
 import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -32,7 +33,7 @@ public class Robot extends TimedRobot {
   private static boolean debug = true;
   private static boolean usingCameraServer = false; // Set to true to enable the usb camera plugged into the roboRIO.
   public static SendableChooser<Integer> autoChooser = new SendableChooser<>();
-  private Timer m_timer = new Timer();
+  public static Timer m_timer = new Timer();
 
   /**
    * This function is run when the robot is first started up and should be used for any
@@ -105,7 +106,7 @@ public class Robot extends TimedRobot {
   @Override
   public void autonomousPeriodic() {
     // Display countdown to the end of autonomous for testing purposes.
-    SmartDashboard.putNumber("Match Time", 20 - m_timer.get());
+    SmartDashboard.putNumber("Match Time", DriverStation.getMatchTime());
   }
 
   @Override
@@ -130,8 +131,7 @@ public class Robot extends TimedRobot {
   @Override
   public void teleopPeriodic() {
     // Display a countdown to the end of the match for testing purposes. 160 seconds is the typical length of a match, but this can be adjusted as needed.
-    SmartDashboard.putNumber("Match Time", 160 - m_timer.get());
-
+    SmartDashboard.putNumber("Match Time", DriverStation.getMatchTime());
   }
 
   @Override

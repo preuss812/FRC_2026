@@ -4,9 +4,21 @@
 
 package frc.robot.subsystems;
 
-import java.lang.Math;
-import edu.wpi.first.math.controller.PIDController;
+import com.ctre.phoenix6.StatusSignal;
+import com.ctre.phoenix6.hardware.CANcoder;
+import com.revrobotics.PersistMode;
+import com.revrobotics.RelativeEncoder;
+import com.revrobotics.ResetMode;
+import com.revrobotics.sim.SparkMaxSim;
+import com.revrobotics.spark.FeedbackSensor;
+import com.revrobotics.spark.SparkBase.ControlType;
+import com.revrobotics.spark.SparkClosedLoopController;
+import com.revrobotics.spark.SparkLowLevel.MotorType;
+import com.revrobotics.spark.SparkMax;
+import com.revrobotics.spark.config.SparkMaxConfig;
+
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
@@ -14,23 +26,8 @@ import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-
-import com.revrobotics.PersistMode;
-import com.revrobotics.ResetMode;import com.revrobotics.spark.SparkMax;
-import com.revrobotics.spark.SparkLowLevel.MotorType;
-import com.revrobotics.spark.SparkBase.ControlType;
-import com.revrobotics.spark.SparkClosedLoopController;
-import com.revrobotics.spark.config.SparkMaxConfig;
-//import com.revrobotics.spark.config.ClosedLoopConfig.FeedbackSensor;
-//import com.revrobotics.spark.config.ClosedLoopConfig;
-import com.revrobotics.spark.FeedbackSensor;
-import com.revrobotics.RelativeEncoder;
-import com.revrobotics.sim.SparkMaxSim;
-import com.ctre.phoenix6.StatusSignal;
-
-import com.ctre.phoenix6.hardware.CANcoder;
-import frc.robot.Constants.ModuleConstants;
 import frc.robot.Constants.CANConstants;
+import frc.robot.Constants.ModuleConstants;
 
 public class MAXSRXSwerveModule {
   private final SparkMax m_drivingSparkMax;

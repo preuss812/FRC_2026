@@ -66,7 +66,7 @@ public class FireAtWillWithShakingCommand extends Command {
         RobotContainer.m_IntakeSubsystem.stop();
     }
 
-    SmartDashboard.putBoolean("Angle OK", poseEstimatorSubsystem.facingHub(ShooterConstants.rotationTolerance));
+    //SmartDashboard.putBoolean("Angle OK", poseEstimatorSubsystem.facingHub(ShooterConstants.rotationTolerance));
     if (poseEstimatorSubsystem.facingHub(ShooterConstants.rotationTolerance)
       && shooterSubsystem.readyToShoot(ShooterConstants.RPMTolerance)
       && feederSubsystem.readyToShoot(FeederConstants.RPMTolerance)) {

@@ -4,6 +4,8 @@
 
 package frc.robot.subsystems;
 
+import java.util.Optional;
+
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -33,36 +35,33 @@ public class AllianceConfigurationSubsystem extends SubsystemBase {
   private static PoseEstimatorSubsystem m_poseEstimatorSubsystem;
   private static boolean initialized = false;
   private static Alliance currentAlliance = Alliance.Blue;
-  private static Translation2d hubCenter;
+  private static Translation2d hubCenter = new Translation2d(0,0);
   private static boolean m_isAutonomous = true;
   private static double m_startLine;
-private static AprilTag towerAprilTag;
-private static AprilTag outpostAprilTag;
+  private static AprilTag towerAprilTag;
+  private static AprilTag outpostAprilTag;
   public static final int AUTO_MODE_DO_NOTHING = 0;
   public static final int AUTO_MODE_MOVE_OFF_LINE_AND_STOP = 1;
-  public static final int AUTO_MODE_CENTER_SHOOT = 2;
-  public static final int AUTO_MODE_FAR_RIGHT_SHOOT_OUTPOST_SHOOT = 3;
-  public static final int AUTO_MODE_RIGHT_SHOOT_TWICE = 4;
-  public static final int AUTO_MODE_RIGHT_TRENCH = 5;
-  public static final int AUTO_MODE_RIGHT_BUMP = 6;
-  public static final int AUTO_MODE_LEFT_BUMP = 7;
-  public static final int AUTO_MODE_LEFT_TRENCH = 8;
+  public static final int AUTO_MODE_RIGHT_TRENCH = 2;
+  public static final int AUTO_MODE_RIGHT_BUMP = 3;
+  public static final int AUTO_MODE_LEFT_BUMP = 4;
+  public static final int AUTO_MODE_LEFT_TRENCH = 5;
+  private static boolean m_hubActive = true; // Match starts with active hubs.
+  private static boolean m_hubActiveSoon = true; // Match starts with active hubs.
   
   /** Creates a new AllianceConfigurationSubsystem. */
   public AllianceConfigurationSubsystem(DriveSubsystemSRX robotDrive, PoseEstimatorSubsystem poseEstimatorSubsystem) {
     m_robotDrive = robotDrive;
     m_poseEstimatorSubsystem = poseEstimatorSubsystem;
     // Set up the list of possible autonomous modes.  This is used by the autonomous command to determine which plan to run.
-    Robot.autoChooser.addOption("Do Nothing", AUTO_MODE_DO_NOTHING);
-    Robot.autoChooser.addOption("Move Off Line and Stop", AUTO_MODE_MOVE_OFF_LINE_AND_STOP);
-    Robot.autoChooser.addOption("Center Shoot", AUTO_MODE_CENTER_SHOOT);
-    Robot.autoChooser.addOption("Far Right", AUTO_MODE_FAR_RIGHT_SHOOT_OUTPOST_SHOOT);
-    Robot.autoChooser.addOption("Right Shoot Twice", AUTO_MODE_RIGHT_SHOOT_TWICE);
-    Robot.autoChooser.addOption("Right Trench", AUTO_MODE_RIGHT_TRENCH);
-    Robot.autoChooser.addOption("Right Bump", AUTO_MODE_RIGHT_BUMP);
+    
     Robot.autoChooser.addOption("Left Bump", AUTO_MODE_LEFT_BUMP);
     Robot.autoChooser.addOption("Left Trench", AUTO_MODE_LEFT_TRENCH);
-  
+    Robot.autoChooser.addOption("Right Bump", AUTO_MODE_RIGHT_BUMP);
+    Robot.autoChooser.addOption("Right Trench", AUTO_MODE_RIGHT_TRENCH);
+    Robot.autoChooser.addOption("Do Nothing", AUTO_MODE_DO_NOTHING);
+    Robot.autoChooser.addOption("Move Off Line and Stop", AUTO_MODE_MOVE_OFF_LINE_AND_STOP);
+
     // Add more commands here and define the plan number above.  Put the commands needed for each auto mode in AutonomousPlans.java.
     SmartDashboard.putData("AutoSelector", Robot.autoChooser);
 
@@ -86,6 +85,10 @@ private static AprilTag outpostAprilTag;
         AllianceConfigurationSubsystem.refreshAllianceConfiguration(currentAlliance);
       }
     }
+    m_hubActive = isHubActive(0.0); // right now.
+    m_hubActiveSoon = isHubActive(3.0); // looking ahead 3 seconds.
+    SmartDashboard.putBoolean("HubActive", m_hubActive);
+    SmartDashboard.putBoolean("HubActiveSoon", m_hubActiveSoon);
   }
 
   public static void setAutonomous() {
@@ -286,13 +289,94 @@ private static AprilTag outpostAprilTag;
   }
 
   /**
-     * robotFrontFacingHub 
-     * @return - the rotation in radians for the robot's front to face the hub in field coordinates.
-     */
-    public static Rotation2d robotFrontFacingHub() {
-        Rotation2d rotation = new Rotation2d(
-            AllianceConfigurationSubsystem.robotHeadingToHub()
-        );
-        return rotation;
-    } 
+   * robotFrontFacingHub 
+   * @return - the rotation in radians for the robot's front to face the hub in field coordinates.
+   */
+  public static Rotation2d robotFrontFacingHub() {
+      if (!initialized) return new Rotation2d(0.0);
+      Rotation2d rotation = new Rotation2d(
+        AllianceConfigurationSubsystem.robotHeadingToHub()
+    );
+    return rotation;
+  }
+
+  /**
+   * isHubActive - determine if the hub will be active for scoring fuel in "lookAhead" seconds from now.
+   * @paraam lookAhead (double) the number of seconds to look ahead.
+   * @return (boolean) true if the the hub is active for scoring.
+   */
+  public boolean isHubActive(double lookAhead) {
+    Optional<Alliance> alliance = DriverStation.getAlliance();
+    // If we have no alliance, we cannot be enabled, therefore no hub.
+    if (alliance.isEmpty()) {
+      return false;
+    }
+    // Hub is always enabled in autonomous.
+    if (DriverStation.isAutonomousEnabled()) {
+      return true;
+    }
+    // At this point, if we're not teleop enabled, there is no hub.
+    if (!DriverStation.isTeleopEnabled()) {
+      return false;
+    }
+
+    // We're teleop enabled, compute.
+    double matchTime = DriverStation.getMatchTime() - lookAhead; // minus because it's a count down timer.
+    String gameData = DriverStation.getGameSpecificMessage();
+    // If we have no game data, we cannot compute, assume hub is active, as its likely early in teleop.
+    if (gameData.isEmpty()) {
+      return true;
+    }
+    boolean redInactiveFirst = false;
+    switch (gameData.charAt(0)) {
+      case 'R' -> redInactiveFirst = true;
+      case 'B' -> redInactiveFirst = false;
+      default -> {
+        // If we have invalid game data, assume hub is active.
+        return true;
+      }
+    }
+
+    // Shift was is active for blue if red won auto, or red if blue won auto.
+    boolean shift1Active = switch (alliance.get()) {
+      case Red -> !redInactiveFirst;
+      case Blue -> redInactiveFirst;
+    };
+
+    if (matchTime > 130) {
+      // Transition shift, hub is active.
+      return true;
+    } else if (matchTime > 105) {
+      // Shift 1
+      return shift1Active;
+    } else if (matchTime > 80) {
+      // Shift 2
+      return !shift1Active;
+    } else if (matchTime > 55) {
+      // Shift 3
+      return shift1Active;
+    } else if (matchTime > 30) {
+      // Shift 4
+      return !shift1Active;
+    } else {
+      // End game, hub always active.
+      return true;
+    }
+  }
+
+  /**
+   * hubActive - return hub status for the current alliance.
+   * @return (boolean) true if the hub will is active.
+   */
+  public static boolean hubActive() {
+    return m_hubActive;
+  }
+
+  /**
+   * hubActive - return hub status for the current alliance.
+   * @return (boolean) true if the hub will be active in 3 seconds.
+   */
+  public static boolean hubActiveSoon() {
+    return m_hubActiveSoon;
+  }
 }

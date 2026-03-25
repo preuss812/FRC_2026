@@ -7,10 +7,6 @@
 
 package frc.robot;
 
-import com.ctre.phoenix6.signals.ReverseLimitValue;
-import com.revrobotics.spark.SparkFlex;
-import com.revrobotics.spark.SparkLowLevel.MotorType;
-
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -23,8 +19,6 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
-import edu.wpi.first.wpilibj2.command.ParallelRaceGroup;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
@@ -34,13 +28,15 @@ import frc.robot.Constants.CANConstants;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.Constants.IntakeConstants;
 import frc.robot.Constants.OIConstants;
+import frc.robot.Constants.RotationConstants;
+import frc.robot.Constants.ShooterConstants;
 import frc.robot.Constants.VisionConstants;
-import frc.robot.commands.DriveChoreoPathCommand;
 import frc.robot.commands.DriveCircle;
 import frc.robot.commands.DriveCircleThrottle;
 import frc.robot.commands.DriveFacingHub;
 import frc.robot.commands.DriveRobotCommand;
 import frc.robot.commands.DriveWithoutVisionCommand;
+import frc.robot.commands.FaceHubCommand;
 import frc.robot.commands.FireAtWillCommand;
 import frc.robot.commands.FireAtWillWithShakingCommand;
 import frc.robot.commands.GotoPoseCommand;
@@ -60,7 +56,7 @@ import frc.robot.commands.ShakeThingsUpCommand;
 import frc.robot.commands.ShooterTest;
 import frc.robot.commands.SimSetRobotPoseCommand;
 import frc.robot.commands.SpinIndexerCommand;
-import frc.robot.commands.ToggleIntakeUpDownCommand;
+import frc.robot.commands.UnloadFuelCommand;
 import frc.robot.subsystems.AllianceConfigurationSubsystem;
 import frc.robot.subsystems.DriveSubsystemSRX;
 import frc.robot.subsystems.DriveSubsystemSRX.DrivingMode;
@@ -118,7 +114,7 @@ public class RobotContainer {
 
   // Controller definitions
   public static final Joystick leftJoystick = new Joystick(OIConstants.kLeftJoystick);
-  private final Joystick rightJoystick = new Joystick(OIConstants.kRightJoystick);
+  public static final Joystick rightJoystick = new Joystick(OIConstants.kRightJoystick);
   public static XboxController m_driverController = new XboxController(OIConstants.kDriverControllerPort);
   public static double startingHeading;
 
@@ -184,6 +180,15 @@ public class RobotContainer {
         m_robotDrive)
     );
 
+    // The feeder is just following the shooter motor.
+    m_FeederSubsystem.setDefaultCommand(
+      new ConditionalCommand(
+        new RunCommand(() -> m_FeederSubsystem.setRPM(m_ShooterSubsystem.getTargetRPM()), m_FeederSubsystem),
+        new RunCommand(() -> m_FeederSubsystem.stop(), m_FeederSubsystem),
+        () -> (m_ShooterSubsystem.getShooterMode() != ShooterConstants.ShooterMode.IDLE)
+      )
+    );
+
     /*
     // The XBox right trigger will control the indexer motor turning it on when the trigger is > 50%.
     m_IndexerSubsystem.setDefaultCommand(
@@ -200,12 +205,12 @@ public class RobotContainer {
 
   public void setShooterFeederSpeed(double rpm) {
     m_ShooterSubsystem.setRPM(rpm);
-    m_FeederSubsystem.setRPM(rpm);
+    //m_FeederSubsystem.setRPM(rpm);
   }
 
   public void stopShooterFeeder() {
     m_ShooterSubsystem.stop();
-    m_FeederSubsystem.stop();
+    //m_FeederSubsystem.stop();
   }
   /**
    * Use this method to define your button->command mappings. Buttons can be
@@ -319,6 +324,7 @@ public class RobotContainer {
       Utilities.toSmartDashboard("A19 Robot: ", DriveConstants.robotFrontAtPose(m_poseEstimatorSubsystem.getAprilTagPose(19), 0.0) );
     */
 
+    new JoystickButton(leftJoystick, 1).whileTrue(new UnloadFuelCommand(m_IntakeSubsystem));
     new JoystickButton(leftJoystick, 6).whileTrue(new FireAtWillWithShakingCommand(m_ShooterSubsystem, m_FeederSubsystem, m_IndexerSubsystem, null));
 
     // Left Joystick buttons 7,8,9,10 control the shooter and feeder speed for testing. 7 is stop, 8 is 3000 RPM, 9 is current target RPM - 25, 10 is current target RPM + 25.
@@ -368,6 +374,10 @@ public class RobotContainer {
       new SpinIndexerCommand(m_IndexerSubsystem)
     );
 
+    new JoystickButton(rightJoystick, 2).whileTrue(
+      new RunCommand(() -> m_robotDrive.setX(), m_robotDrive)
+    );
+
     // Shake the robot to facilitate ball movement.
     new JoystickButton(rightJoystick, 3).whileTrue(new ShakeThingsUpCommand(m_robotDrive));
     // reverse the shooter to clear stuck fuel.
@@ -386,12 +396,16 @@ public class RobotContainer {
     POVButton dPad225 = dPadButton(225);
     POVButton dPad270 = dPadButton(270);
     POVButton dPad315 = dPadButton(315);
+    Pose2d AT31 = m_poseEstimatorSubsystem.getAprilTagPose(31);
+    Pose2d nearAT31 = new Pose2d(AT31.getX() + Units.inchesToMeters(36), AT31.getY(), new Rotation2d(0.0));
+  
+    SmartDashboard.putData("G31", new GotoPoseCommand(m_robotDrive, m_poseEstimatorSubsystem, nearAT31, null));
 
     /* Debugging below */
     if (debug && isSimulation()) {
       SmartDashboard.putData("Circle", new DriveCircleThrottle(m_robotDrive, m_poseEstimatorSubsystem, m_robotDrive.circleAutoConfig, 1.0));
       SmartDashboard.putData("DCG2P", new DriveCircle(m_robotDrive, m_poseEstimatorSubsystem, m_robotDrive.circleAutoConfig, 1.145916));
-      SmartDashboard.putData("Choreo1", new DriveChoreoPathCommand(m_robotDrive, m_poseEstimatorSubsystem, "CenterShoot", m_robotDrive.circleAutoConfig, 0.1, 0.0));
+      //SmartDashboard.putData("Choreo1", new DriveChoreoPathCommand(m_robotDrive, m_poseEstimatorSubsystem, "CenterShoot", m_robotDrive.circleAutoConfig, 0.1, 0.0));
       SmartDashboard.putData("Y", new ResetDriveTrainCommand(this));
       SmartDashboard.putData("Z", new SimSetRobotPoseCommand(m_robotDrive, m_poseEstimatorSubsystem, new Pose2d(5.5 + 0.145916,4, Rotation2d.kZero)));
       SmartDashboard.putData("R", new RandomRobotPositionCommand(m_robotDrive, m_poseEstimatorSubsystem));
@@ -422,11 +436,13 @@ public class RobotContainer {
         SmartDashboard.putData("RTest", new ShooterTest(m_ShooterSubsystem, m_poseEstimatorSubsystem));     
         SmartDashboard.putData("RI", new RaiseIntakeCommand(m_IntakeDeploymentSubsystem));
         SmartDashboard.putData("LI", new LowerIntakeCommand(m_IntakeDeploymentSubsystem));
-        SmartDashboard.putData("PS", new ParallelCommandGroup(
-        new PrepareToShootCommand(m_ShooterSubsystem, m_FeederSubsystem, m_poseEstimatorSubsystem),
-        new DriveFacingHub(m_robotDrive, m_poseEstimatorSubsystem, m_driverController)
-      ));
+        SmartDashboard.putData("PS", new PrepareToShootCommand(m_ShooterSubsystem, m_FeederSubsystem, m_poseEstimatorSubsystem));
+        SmartDashboard.putData("FH", new FaceHubCommand(m_robotDrive, m_poseEstimatorSubsystem));
      } // (isSimulation()
+    SmartDashboard.putData("AR", new InstantCommand(() -> alignGyroRotationToFieldRotation(RotationConstants.rotate180), m_robotDrive));
+    //Pose2d OneMeter = new Pose2d(1.0, 0.0, new Rotation2d(0.0));
+    //SmartDashboard.putData("DB", new DriveWithoutVisionCommand(m_robotDrive, m_poseEstimatorSubsystem, OneMeter, null));
+
 } // (configureButtonBindings)
 
   /**
@@ -459,6 +475,16 @@ public class RobotContainer {
       new Pose2d(
           m_poseEstimatorSubsystem.getCurrentPose().getTranslation()
         , AllianceConfigurationSubsystem.robotToFieldRotation()
+      )
+    );
+  }
+
+  public void alignGyroRotationToFieldRotation(Rotation2d allianceRotation) {
+    m_robotDrive.setAngleDegrees(AllianceConfigurationSubsystem.robotToFieldRotation().getDegrees() + allianceRotation.getDegrees());
+    m_robotDrive.resetOdometry(
+      new Pose2d(
+          m_poseEstimatorSubsystem.getCurrentPose().getTranslation()
+        , AllianceConfigurationSubsystem.robotToFieldRotation().plus(allianceRotation)
       )
     );
   }

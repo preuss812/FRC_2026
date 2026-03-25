@@ -47,6 +47,7 @@ public class IntakeDeploymentSubsystem extends SubsystemBase {
     private final SparkLimitSwitch m_revLimitSwitch;
     private boolean m_atFwdLimit = true; // dont allow motion until after periodic sets this.
     private boolean m_atRevLimit = true; // dont allow motion until after periodic sets this.
+    private double m_position = 0.0; // 0.0 is the fully raised position.
     private final boolean debug = true;
 
   public IntakeDeploymentSubsystem(int intakedeploymentCANId) {
@@ -143,10 +144,8 @@ public class IntakeDeploymentSubsystem extends SubsystemBase {
     currentRPM = encoder.getVelocity();
     // telemetry
     SmartDashboard.putNumber("IntakeDeployment RPM", currentRPM);
-    if (debug) {
-      double position = encoder.getPosition();
-      SmartDashboard.putNumber("Intake Position", position);
-    }
+    m_position = encoder.getPosition();
+    SmartDashboard.putNumber("Intake Position", m_position);
     
     // = SmartDashboard.getNumber("Target Velocity", 0);
     closedLoopController.setSetpoint(targetRPM, ControlType.kVelocity);

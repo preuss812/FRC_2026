@@ -54,7 +54,7 @@ public class LeftBumpCommand extends SequentialCommandGroup {
             new ParallelCommandGroup(
                 new FaceHubAndShootCommand(),
                 new ShakeTheIntakeCommand(RobotContainer.m_IntakeDeploymentSubsystem)
-            ).withTimeout(10.0),
+            ).withTimeout(6.0),
 
             // Make a pass back to the center for more fuel.
             new InstantCommand(()->RobotContainer.m_IntakeSubsystem.runMotor(IntakeConstants.pickupFuelSpeed),RobotContainer.m_IntakeSubsystem),

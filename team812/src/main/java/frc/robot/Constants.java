@@ -624,10 +624,13 @@ public final class Constants {
         public static final double kV = 12.0/maxRPM * 3000.0 / 2900.0; // Docs say 1.0 should be 12.0 but emperically 12.0 is not right.
         public static final double rotationTolerance = Units.degreesToRadians(2.0);
         public static final int currentLimit = 60;
+        public enum ShooterMode {IDLE, AUTO_RANGING, UNJAMMING, FIXED_SPEED };
+
     }
 
     public static final class IntakeConstants {
         public static final double pickupFuelSpeed = 0.35;
+        public static final double ejectFuelSpeed = -0.35;
         public static final int currentLimit = 60;
     }
 

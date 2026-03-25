@@ -47,7 +47,6 @@ public class Autonomous extends SequentialCommandGroup {
   private final DriveSubsystemSRX m_robotDrive;
   private final PoseEstimatorSubsystem m_PoseEstimatorSubsystem;
   public static int m_autoMode = 1; // Default to move 1 meter and stop;
-  private final double m_startingHeadingBlue = 0.0; // The starting heading for the blue alliance.  The red alliance will be adjusted from this.
   private Optional<Trajectory<SwerveSample>> m_leftTrenchGather = Choreo.loadTrajectory("LeftTrenchGather");
   private Optional<Trajectory<SwerveSample>> m_leftTrenchReturn = Choreo.loadTrajectory("LeftTrenchReturn2");
   private Optional<Trajectory<SwerveSample>> m_rightTrenchGather = Choreo.loadTrajectory("RightTrenchGather");
@@ -117,22 +116,26 @@ public class Autonomous extends SequentialCommandGroup {
     switch(m_autoMode) {
       
       case AllianceConfigurationSubsystem.AUTO_MODE_MOVE_OFF_LINE_AND_STOP:
-         // Drive off the line assuming the robot position as center field on the starting line facing downfield.
+        // Tell the robot it is on the start line in the center of the field facing toward field center.
+        // The robot could be placed anywhere on the start line.  Seeing an apriltag will 'cure' the unknown location.
         addCommands(
-          new InstantCommand(
-          () -> AllianceConfigurationSubsystem.setStartingPose(
-            new Pose2d(
-              AllianceConfigurationSubsystem.getStartLine(), 
-              FieldConstants.yCenter, 
-              new Rotation2d(AllianceConfigurationSubsystem.allianceAdjustedHeading(m_startingHeadingBlue))
-            )
+          new SequentialCommandGroup(
+            new InstantCommand(
+              () -> AllianceConfigurationSubsystem.setStartingPose(
+                new Pose2d(
+                  AllianceConfigurationSubsystem.getStartLine(), 
+                  FieldConstants.yCenter, 
+                  new Rotation2d(AllianceConfigurationSubsystem.allianceAdjustedHeading(0.0)) // facing toward field center.
+                )
+              )
+            ),
+            new InstantCommand(() -> RobotContainer.m_robotDrive.setDrivingMode(DrivingMode.SPEED))
           )
-        ),
-        new InstantCommand(() -> RobotContainer.m_robotDrive.setDrivingMode(DrivingMode.SPEED))
         );
+        // Drive one meter backwards.  That should get us off the start line.
         addCommands(new DriveWithoutVisionCommand(m_robotDrive, m_PoseEstimatorSubsystem,  new Pose2d(-1.0, 0, new Rotation2d(0.0)), null));
         break;
-
+      
       case AllianceConfigurationSubsystem.AUTO_MODE_RIGHT_TRENCH:
         addCommands(new RightTrenchCommand(m_rightTrenchGather, m_rightTrenchReturn));
         break;
@@ -151,20 +154,21 @@ public class Autonomous extends SequentialCommandGroup {
 
       case AllianceConfigurationSubsystem.AUTO_MODE_DO_NOTHING:
       default:
-       // Do nothing. Set the robot position as center field on the starting line facing downfield.
         addCommands(
+          new SequentialCommandGroup(
           new InstantCommand(
-          () -> AllianceConfigurationSubsystem.setStartingPose(
-            new Pose2d(
-              AllianceConfigurationSubsystem.getStartLine(), 
-              FieldConstants.yCenter, 
-              new Rotation2d(AllianceConfigurationSubsystem.allianceAdjustedHeading(m_startingHeadingBlue))
+            () -> AllianceConfigurationSubsystem.setStartingPose(
+              new Pose2d(
+                AllianceConfigurationSubsystem.getStartLine(), 
+                FieldConstants.yCenter, 
+                new Rotation2d(AllianceConfigurationSubsystem.allianceAdjustedHeading(0.0)) // facing toward field center.
+              )
             )
-          )
-        ),
-        new InstantCommand(() -> RobotContainer.m_robotDrive.setDrivingMode(DrivingMode.SPEED))
-        );
-      }
-    
+          ),
+          new InstantCommand(() -> RobotContainer.m_robotDrive.setDrivingMode(DrivingMode.SPEED))
+          //new InstantCommand(() -> RobotContainer.m_ShooterSubsystem.setRPM(3000.0)) // Initial guess at required rpm.  Could do better - TODO
+        )
+      );
+    }
   }
 }
