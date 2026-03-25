@@ -4,7 +4,10 @@
 
 package frc.robot.autoCommands;
 
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import java.util.Optional;
+
+import choreo.trajectory.SwerveSample;
+import choreo.trajectory.Trajectory;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
@@ -19,36 +22,35 @@ import frc.robot.commands.ShakeTheIntakeCommand;
 public class RightBumpCommand extends SequentialCommandGroup {
     private final double speedFactor = 0.5; // 1.0 would be full speed.
     /** Creates a new RightBumpCommand. */
-    public RightBumpCommand() {
+    public RightBumpCommand(
+        Optional<Trajectory<SwerveSample>> rightBumpGather,
+        Optional<Trajectory<SwerveSample>> rightBumpReturn,
+        Optional<Trajectory<SwerveSample>> rightBumpGather2
+    ) {
         addCommands(
-            new InstantCommand(()->SmartDashboard.putString("AutoStep", "LoweringIntake")),
-            new LowerIntakeCommand(RobotContainer.m_IntakeDeploymentSubsystem).withTimeout(2.0), // The timeout is just for simulation.
+            new LowerIntakeCommand(RobotContainer.m_IntakeDeploymentSubsystem).withTimeout(1.0), // The timeout is just for simulation.
             new InstantCommand(()->RobotContainer.m_IntakeSubsystem.runMotor(IntakeConstants.pickupFuelSpeed),RobotContainer.m_IntakeSubsystem),
-            new InstantCommand(()->SmartDashboard.putString("AutoStep", "Gather")),
 
             new DriveChoreoPathCommand(
                 RobotContainer.m_robotDrive,
                 RobotContainer.m_poseEstimatorSubsystem,
-                "RightHumpGather",
+                rightBumpGather,
                 RobotContainer.m_robotDrive.defaultAutoConfig,
                 speedFactor,
                 1.0
             ),
             // Stop the intake.
-            //new InstantCommand(()->RobotContainer.m_IntakeSubsystem.stop(), RobotContainer.m_IntakeSubsystem),
-            new InstantCommand(()->SmartDashboard.putString("AutoStep", "Return")),
             new SetShooterSpeedCommand(RobotContainer.m_ShooterSubsystem, RobotContainer.m_FeederSubsystem, 3000), 
             // Return to out alliance zone 
             new DriveChoreoPathCommand(
             RobotContainer.m_robotDrive,
             RobotContainer.m_poseEstimatorSubsystem,
-            "RightHumpReturn",
+            rightBumpReturn,
             RobotContainer.m_robotDrive.defaultAutoConfig,
             speedFactor,
             1.0),
         
             // Shoot the fuel cells we just picked up.
-            new InstantCommand(()->SmartDashboard.putString("AutoStep", "Shoot")),
             new ParallelCommandGroup(
                 new FaceHubAndShootCommand(),
                 new ShakeTheIntakeCommand(RobotContainer.m_IntakeDeploymentSubsystem)
@@ -59,7 +61,7 @@ public class RightBumpCommand extends SequentialCommandGroup {
             new DriveChoreoPathCommand(
             RobotContainer.m_robotDrive,
             RobotContainer.m_poseEstimatorSubsystem,
-            "RightBumpGather2",
+            rightBumpGather2,
             RobotContainer.m_robotDrive.defaultAutoConfig,
             speedFactor,
             1.0),

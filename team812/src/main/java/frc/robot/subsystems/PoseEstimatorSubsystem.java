@@ -110,6 +110,7 @@ public class PoseEstimatorSubsystem extends SubsystemBase {
       }
     }
     m_lastAprilTagSeen = fiducialId;
+    SmartDashboard.putNumber("AprilTag", fiducialId);
 
     // Update pose estimator with drivetrain sensors
     poseEstimator.update(

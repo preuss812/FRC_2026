@@ -7,6 +7,11 @@
 
 package frc.robot;
 
+import java.util.Optional;
+
+import choreo.Choreo;
+import choreo.trajectory.SwerveSample;
+import choreo.trajectory.Trajectory;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -47,6 +52,17 @@ public class Autonomous extends SequentialCommandGroup {
   private final PoseEstimatorSubsystem m_PoseEstimatorSubsystem;
   public static int m_autoMode = 1; // Default to move 1 meter and stop;
   private final double m_startingHeadingBlue = 0.0; // The starting heading for the blue alliance.  The red alliance will be adjusted from this.
+  private Optional<Trajectory<SwerveSample>> m_leftTrenchGather = Choreo.loadTrajectory("LeftTrenchGather");
+  private Optional<Trajectory<SwerveSample>> m_leftTrenchReturn = Choreo.loadTrajectory("LeftTrenchReturn2");
+  private Optional<Trajectory<SwerveSample>> m_rightTrenchGather = Choreo.loadTrajectory("RightTrenchGather");
+  private Optional<Trajectory<SwerveSample>> m_rightTrenchReturn = Choreo.loadTrajectory("RightTrenchReturn2");
+  private Optional<Trajectory<SwerveSample>> m_rightBumpGather = Choreo.loadTrajectory("RightBumpGather");
+  private Optional<Trajectory<SwerveSample>> m_rightBumpReturn = Choreo.loadTrajectory("RightBumpReturn");
+  private Optional<Trajectory<SwerveSample>> m_rightBumpGather2 = Choreo.loadTrajectory("RightBumpGather2");
+  private Optional<Trajectory<SwerveSample>> m_leftBumpGather = Choreo.loadTrajectory("LeftBumpGather");
+  private Optional<Trajectory<SwerveSample>> m_leftBumpReturn = Choreo.loadTrajectory("LeftBumpReturn");
+  private Optional<Trajectory<SwerveSample>> m_leftBumpGather2 = Choreo.loadTrajectory("LeftBumpGather2");
+;
 
   /**
    * robotHeadingForCameraToHubCenter - helper function for controlling rotation during autonomous driving.
@@ -102,11 +118,12 @@ public class Autonomous extends SequentialCommandGroup {
     // Set up the alliance first.  Other commands need to know which alliance to operate correctly.
     setAutoMode();
 
-    // Initialize the robot before moving.  This will happen for all autonomous modes.
-    addCommands(
-        new InstantCommand(()->SmartDashboard.putString("AutoStep", "Start")),
-        new SequentialCommandGroup(
-        new InstantCommand(
+    switch(m_autoMode) {
+      
+      case AllianceConfigurationSubsystem.AUTO_MODE_MOVE_OFF_LINE_AND_STOP:
+         // Drive off the line assuming the robot position as center field on the starting line facing downfield.
+        addCommands(
+          new InstantCommand(
           () -> AllianceConfigurationSubsystem.setStartingPose(
             new Pose2d(
               AllianceConfigurationSubsystem.getStartLine(), 
@@ -116,40 +133,41 @@ public class Autonomous extends SequentialCommandGroup {
           )
         ),
         new InstantCommand(() -> RobotContainer.m_robotDrive.setDrivingMode(DrivingMode.SPEED))
-        //new InstantCommand(() -> RobotContainer.m_ShooterSubsystem.setRPM(3000.0)) // Initial guess at required rpm.  Could do better - TODO
-      )
-    );
-    //addCommands(new InstantCommand(()->SmartDashboard.putString("AutoStep", "modeAction")));
-    switch(m_autoMode) {
-      
-      case AllianceConfigurationSubsystem.AUTO_MODE_MOVE_OFF_LINE_AND_STOP:
+        );
         addCommands(new DriveWithoutVisionCommand(m_robotDrive, m_PoseEstimatorSubsystem,  new Pose2d(-1.0, 0, new Rotation2d(0.0)), null));
         break;
-      case AllianceConfigurationSubsystem.AUTO_MODE_DO_NOTHING:
-        // Do nothing.
-        break;
-      case AllianceConfigurationSubsystem.AUTO_MODE_CENTER_SHOOT:
-        addCommands(new CenterShootCommand());
-        break;
-      case AllianceConfigurationSubsystem.AUTO_MODE_FAR_RIGHT_SHOOT_OUTPOST_SHOOT:
-        addCommands(new FarRightShootOutpostShootCommand());
-        break;
-      case AllianceConfigurationSubsystem.AUTO_MODE_RIGHT_SHOOT_TWICE:
-        addCommands(new RightShootTwoCyclesCommand());
-        break;
+
       case AllianceConfigurationSubsystem.AUTO_MODE_RIGHT_TRENCH:
-        addCommands(new RightTrenchCommand());
+        addCommands(new RightTrenchCommand(m_rightTrenchGather, m_rightTrenchReturn));
         break;
+
       case AllianceConfigurationSubsystem.AUTO_MODE_RIGHT_BUMP:
-        addCommands(new RightBumpCommand());
+        addCommands(new RightBumpCommand(m_rightBumpGather, m_rightBumpReturn, m_rightBumpGather2));
         break;
+
       case AllianceConfigurationSubsystem.AUTO_MODE_LEFT_BUMP:
-        addCommands(new LeftBumpCommand());
+        addCommands(new LeftBumpCommand(m_leftBumpGather, m_leftBumpReturn, m_leftBumpGather2));
         break;
+
       case AllianceConfigurationSubsystem.AUTO_MODE_LEFT_TRENCH:
-        addCommands(new LeftTrenchCommand());
+        addCommands(new LeftTrenchCommand(m_leftTrenchGather, m_leftTrenchReturn));
         break;
+
+      case AllianceConfigurationSubsystem.AUTO_MODE_DO_NOTHING:
       default:
+       // Do nothing. Set the robot position as center field on the starting line facing downfield.
+        addCommands(
+          new InstantCommand(
+          () -> AllianceConfigurationSubsystem.setStartingPose(
+            new Pose2d(
+              AllianceConfigurationSubsystem.getStartLine(), 
+              FieldConstants.yCenter, 
+              new Rotation2d(AllianceConfigurationSubsystem.allianceAdjustedHeading(m_startingHeadingBlue))
+            )
+          )
+        ),
+        new InstantCommand(() -> RobotContainer.m_robotDrive.setDrivingMode(DrivingMode.SPEED))
+        );
       }
     
   }

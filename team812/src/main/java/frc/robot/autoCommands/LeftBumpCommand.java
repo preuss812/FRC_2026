@@ -4,7 +4,10 @@
 
 package frc.robot.autoCommands;
 
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import java.util.Optional;
+
+import choreo.trajectory.SwerveSample;
+import choreo.trajectory.Trajectory;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
@@ -19,16 +22,18 @@ import frc.robot.commands.ShakeTheIntakeCommand;
 public class LeftBumpCommand extends SequentialCommandGroup {
     private final double speedFactor = 0.5; // 1.0 would be full speed.
     /** Creates a new LeftTrenchCommand. */
-    public LeftBumpCommand() {
+    public LeftBumpCommand(
+        Optional<Trajectory<SwerveSample>> leftBumpGather,
+        Optional<Trajectory<SwerveSample>> leftBumpReturn,
+        Optional<Trajectory<SwerveSample>> leftBumpGather2
+    ) {
         addCommands(
-            new InstantCommand(() -> SmartDashboard.putString("AutoStep", "LowerIntake")),
             new LowerIntakeCommand(RobotContainer.m_IntakeDeploymentSubsystem).withTimeout(2.0), // The timeout is just for simulation.
-            new InstantCommand(() -> SmartDashboard.putString("AutoStep", "IntakeOn")),
             new InstantCommand(()->RobotContainer.m_IntakeSubsystem.runMotor(IntakeConstants.pickupFuelSpeed),RobotContainer.m_IntakeSubsystem),
             new DriveChoreoPathCommand(
                 RobotContainer.m_robotDrive,
                 RobotContainer.m_poseEstimatorSubsystem,
-                "LeftHumpGather",
+                leftBumpGather,
                 RobotContainer.m_robotDrive.defaultAutoConfig,
                 speedFactor,
                 1.0
@@ -40,7 +45,7 @@ public class LeftBumpCommand extends SequentialCommandGroup {
             new DriveChoreoPathCommand(
             RobotContainer.m_robotDrive,
             RobotContainer.m_poseEstimatorSubsystem,
-            "LeftHumpReturn",
+            leftBumpReturn,
             RobotContainer.m_robotDrive.defaultAutoConfig,
             speedFactor,
             1.0),
@@ -56,7 +61,7 @@ public class LeftBumpCommand extends SequentialCommandGroup {
             new DriveChoreoPathCommand(
             RobotContainer.m_robotDrive,
             RobotContainer.m_poseEstimatorSubsystem,
-            "LeftBumpGather2",
+            leftBumpGather2,
             RobotContainer.m_robotDrive.defaultAutoConfig,
             speedFactor,
             1.0),

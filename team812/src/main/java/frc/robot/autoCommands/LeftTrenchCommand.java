@@ -4,10 +4,12 @@
 
 package frc.robot.autoCommands;
 
+import java.util.Optional;
+
+import choreo.trajectory.SwerveSample;
+import choreo.trajectory.Trajectory;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
-import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.Constants.IntakeConstants;
 import frc.robot.RobotContainer;
 import frc.robot.commands.DriveChoreoPathCommand;
@@ -18,17 +20,18 @@ import frc.robot.commands.SetShooterSpeedCommand;
 public class LeftTrenchCommand extends SequentialCommandGroup {
     private final double speedFactor = 0.5; // 1.0 would be full speed.
     /** Creates a new LeftTrenchCommand. */
-    public LeftTrenchCommand() {
+    public LeftTrenchCommand(
+         Optional<Trajectory<SwerveSample>> leftTrenchGather,
+          Optional<Trajectory<SwerveSample>> leftTrenchReturn 
+    ) {
         addCommands(
             new LowerIntakeCommand(RobotContainer.m_IntakeDeploymentSubsystem).withTimeout(1.0), // The timeout is just for simulation.
-            new WaitCommand(0.25),
             new InstantCommand(()->RobotContainer.m_IntakeSubsystem.runMotor(IntakeConstants.pickupFuelSpeed),RobotContainer.m_IntakeSubsystem),
-            new SetShooterSpeedCommand(RobotContainer.m_ShooterSubsystem, RobotContainer.m_FeederSubsystem, 3000), 
 
             new DriveChoreoPathCommand(
                 RobotContainer.m_robotDrive,
                 RobotContainer.m_poseEstimatorSubsystem,
-                "LeftTrenchGather",
+                leftTrenchGather,
                 RobotContainer.m_robotDrive.defaultAutoConfig,
                 speedFactor,
                 1.0
@@ -40,7 +43,7 @@ public class LeftTrenchCommand extends SequentialCommandGroup {
             new DriveChoreoPathCommand(
             RobotContainer.m_robotDrive,
             RobotContainer.m_poseEstimatorSubsystem,
-            "LeftTrenchReturn2",
+            leftTrenchReturn,
             RobotContainer.m_robotDrive.defaultAutoConfig,
             speedFactor,
             1.0),

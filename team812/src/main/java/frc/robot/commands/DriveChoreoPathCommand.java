@@ -29,7 +29,6 @@ import frc.utils.DrivingConfig;
 
 public class DriveChoreoPathCommand extends Command {
 
-  private final String m_trajectoryName;
   private final DriveSubsystemSRX m_robotDrive;
   private final PoseEstimatorSubsystem m_poseEstimatorSubsystem;
   private Optional<Trajectory<SwerveSample>> m_trajectory;
@@ -50,7 +49,6 @@ public class DriveChoreoPathCommand extends Command {
   , double pidCorrectionFactor) {
     this.m_robotDrive = robotDrive;
     this.m_poseEstimatorSubsystem = poseEstimatorSubsystem;
-    this.m_trajectoryName = trajectoryName;
     this.m_speedFactor = speedFactor;
     m_trajectory  = Choreo.loadTrajectory(trajectoryName);
     pidControllers[0] = new PIDController(10.0 * pidCorrectionFactor, 0.0, 0.0);
@@ -63,6 +61,26 @@ public class DriveChoreoPathCommand extends Command {
     addRequirements(robotDrive, poseEstimatorSubsystem);
   }
 
+  public DriveChoreoPathCommand(
+    DriveSubsystemSRX robotDrive
+  , PoseEstimatorSubsystem poseEstimatorSubsystem
+  ,  Optional<Trajectory<SwerveSample>> trajectory
+  , DrivingConfig config
+  , double speedFactor
+  , double pidCorrectionFactor) {
+    this.m_robotDrive = robotDrive;
+    this.m_poseEstimatorSubsystem = poseEstimatorSubsystem;
+    this.m_trajectory = trajectory;
+    this.m_speedFactor = speedFactor;
+    pidControllers[0] = new PIDController(10.0 * pidCorrectionFactor, 0.0, 0.0);
+    pidControllers[1] = new PIDController(10.0 * pidCorrectionFactor, 0.0, 0.0);
+    pidControllers[2] = new PIDController(7.5  * pidCorrectionFactor, 0.0, 0.0);
+    pidControllers[2].enableContinuousInput(-Math.PI, Math.PI); // For wrapping rotation.
+    m_initialPose = m_trajectory.get().getInitialPose(isRedAlliance());
+
+    // Use addRequirements() here to declare subsystem dependencies.
+    addRequirements(robotDrive, poseEstimatorSubsystem);
+  }
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
@@ -76,19 +94,10 @@ public class DriveChoreoPathCommand extends Command {
                 //robotDrive.resetOdometry(initialPose.get());
 
                 RobotContainer.setRobotPose(m_initialPose.get());
-
-                if (m_trajectoryName == "PID test")
-                {
-                  // Set up at the wrong start location to see if the robot can correct itself
-                  Pose2d  offsetPose = m_initialPose.get();
-                  //poseEstimatorSubsystem.setCurrentPose(initialPose.get());
-                  m_poseEstimatorSubsystem.setCurrentPose(new Pose2d(offsetPose.getX(), offsetPose.getY() + 2.0, new Rotation2d(Math.PI/2.0))); //offsetPose.getRotation()));
-                }
-                else              
-                {  // Set the pose estimator to the start of the traject
-                  m_poseEstimatorSubsystem.setCurrentPose(m_initialPose.get());
+       
+               // Set the pose estimator to the start of the traject
+              m_poseEstimatorSubsystem.setCurrentPose(m_initialPose.get());
                 
-                }
             }
             RobotContainer.m_poseEstimatorSubsystem.field2d.getObject("trajectory").setTrajectory(choreoToWPITrajectory(m_trajectory));
           }
