@@ -4,14 +4,13 @@
 
 package frc.robot.commands;
 
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.RobotContainer;
 import frc.robot.Constants.FeederConstants;
 import frc.robot.Constants.IndexerConstants;
 import frc.robot.Constants.IntakeConstants;
 import frc.robot.Constants.IntakeDeploymentConstants;
 import frc.robot.Constants.ShooterConstants;
+import frc.robot.RobotContainer;
 import frc.robot.subsystems.FeederSubsystem;
 import frc.robot.subsystems.IndexerSubsystem;
 import frc.robot.subsystems.PoseEstimatorSubsystem;
@@ -66,7 +65,6 @@ public class FireAtWillWithShakingCommand extends Command {
         RobotContainer.m_IntakeSubsystem.stop();
     }
 
-    //SmartDashboard.putBoolean("Angle OK", poseEstimatorSubsystem.facingHub(ShooterConstants.rotationTolerance));
     if (poseEstimatorSubsystem.facingHub(ShooterConstants.rotationTolerance)
       && shooterSubsystem.readyToShoot(ShooterConstants.RPMTolerance)
       && feederSubsystem.readyToShoot(FeederConstants.RPMTolerance)) {

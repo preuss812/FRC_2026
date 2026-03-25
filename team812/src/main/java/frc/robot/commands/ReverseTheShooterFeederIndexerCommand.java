@@ -6,6 +6,7 @@ package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants;
+import frc.robot.Constants.ShooterConstants;
 import frc.robot.subsystems.FeederSubsystem;
 import frc.robot.subsystems.IndexerSubsystem;
 import frc.robot.subsystems.ShooterSubsystem;
@@ -25,14 +26,15 @@ public class ReverseTheShooterFeederIndexerCommand extends Command {
     this.m_FeederSubsystem = feederSubsystem;
     this.m_IndexerSubsystem = indexerSubsystem;
     // Use addRequirements() here to declare subsystem dependencies.
-    addRequirements(shooterSubsystem, feederSubsystem, indexerSubsystem);
+    addRequirements(shooterSubsystem, /*feederSubsystem, */indexerSubsystem);
   }
 
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    m_ShooterSubsystem.setRPM(-3000);
-    m_FeederSubsystem.setRPM(-6000);
+    //m_ShooterSubsystem.setRPM(-3000);
+    //m_FeederSubsystem.setRPM(-6000);
+    m_ShooterSubsystem.setShooterMode(ShooterConstants.ShooterMode.UNJAMMING);
     m_IndexerSubsystem.runMotor(-Constants.IndexerConstants.indexerPercentOutput);
   }
 
@@ -43,8 +45,9 @@ public class ReverseTheShooterFeederIndexerCommand extends Command {
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    m_ShooterSubsystem.stop();
-    m_FeederSubsystem.stop();
+    //m_ShooterSubsystem.stop();
+    //m_FeederSubsystem.stop();
+    m_ShooterSubsystem.setShooterMode(ShooterConstants.ShooterMode.AUTO_RANGING);
     m_IndexerSubsystem.stop();
   }
 

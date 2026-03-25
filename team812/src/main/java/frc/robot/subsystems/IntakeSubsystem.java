@@ -6,12 +6,11 @@ package frc.robot.subsystems;
 
 import com.revrobotics.PersistMode;
 import com.revrobotics.ResetMode;
-import com.revrobotics.spark.SparkClosedLoopController;
-import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.SparkBase.ControlType;
-import com.revrobotics.spark.config.SparkMaxConfig;
+import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
-
+import com.revrobotics.spark.SparkMax;
+import com.revrobotics.spark.config.SparkMaxConfig;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -46,6 +45,7 @@ public class IntakeSubsystem extends SubsystemBase {
     motorConfig = new SparkMaxConfig();
     motorConfig.smartCurrentLimit(IntakeConstants.currentLimit);
     motor.configure(motorConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
+    SmartDashboard.putBoolean("Intake", false);
   }
 
     /*
@@ -118,6 +118,7 @@ public class IntakeSubsystem extends SubsystemBase {
   }
 
   public void runMotor(double pOut){
+    SmartDashboard.putBoolean("Intake", true);
     targetOutput = MathUtil.clamp(pOut, -1, 1);
     /*
     if( targetOutput <= 0.01 ) {
@@ -133,6 +134,7 @@ public class IntakeSubsystem extends SubsystemBase {
     targetOutput = 0.0;
     // resetOscillation(false);
     closedLoopController.setSetpoint(targetOutput, ControlType.kDutyCycle);
+    SmartDashboard.putBoolean("Intake", false);
   }
 
 }

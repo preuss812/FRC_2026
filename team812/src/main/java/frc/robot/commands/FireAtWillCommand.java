@@ -4,7 +4,6 @@
 
 package frc.robot.commands;
 
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants.FeederConstants;
 import frc.robot.Constants.IndexerConstants;
@@ -41,7 +40,6 @@ public class FireAtWillCommand extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    //SmartDashboard.putBoolean("Angle OK", poseEstimatorSubsystem.facingHub(ShooterConstants.rotationTolerance));
     if (poseEstimatorSubsystem.facingHub(ShooterConstants.rotationTolerance)
       && shooterSubsystem.readyToShoot(ShooterConstants.RPMTolerance)
       && feederSubsystem.readyToShoot(FeederConstants.RPMTolerance)) {

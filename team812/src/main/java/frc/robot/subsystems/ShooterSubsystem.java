@@ -167,16 +167,18 @@ public class ShooterSubsystem extends SubsystemBase {
     currentRPM = encoder.getVelocity();
     // telemetry
     SmartDashboard.putNumber("Shooter RPM", currentRPM);
-    /* if the joystick is being used, save the current mode and switch to unjamming mode */
-    double joystickInput = RobotContainer.rightJoystick.getY();
-    if (Math.abs(joystickInput) > 0.3) {
-      if (m_shooterMode != ShooterConstants.ShooterMode.UNJAMMING) {
-        m_savedShooterMode = m_shooterMode;
+    /*
+      // if the joystick is being used, save the current mode and switch to unjamming mode
+      double joystickInput = RobotContainer.rightJoystick.getY();
+      if (Math.abs(joystickInput) > 0.3) {
+        if (m_shooterMode != ShooterConstants.ShooterMode.UNJAMMING) {
+          m_savedShooterMode = m_shooterMode;
+        }
+        // If we are in unjamming mode and the joystick is not used, switch back to the saved mode.
+      } else if (m_shooterMode == ShooterConstants.ShooterMode.UNJAMMING) {
+        m_shooterMode = m_savedShooterMode;
       }
-      // If we are in unjamming mode and the joystick is not used, switch back to the saved mode.
-    } else if (m_shooterMode == ShooterConstants.ShooterMode.UNJAMMING) {
-      m_shooterMode = m_savedShooterMode;
-    }
+    */
     //Distance from the center of the robot (Adjust later)
     Pose2d robotPose = RobotContainer.m_poseEstimatorSubsystem.getCurrentPose();
     Translation2d hubPos = AllianceConfigurationSubsystem.getHubCenter();
@@ -212,8 +214,11 @@ public class ShooterSubsystem extends SubsystemBase {
         setRPM(targetRPM);
       }
       case UNJAMMING -> {
+        /*
         runMotor(joystickInput);
         RobotContainer.m_FeederSubsystem.runMotor(joystickInput);
+        */
+        setRPM(-6000);
         smoothedRange.reset(); // Forget the past smoothing.
       }
     }

@@ -25,10 +25,8 @@ import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.POVButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.CANConstants;
-import frc.robot.Constants.DriveConstants;
 import frc.robot.Constants.IntakeConstants;
 import frc.robot.Constants.OIConstants;
-import frc.robot.Constants.RotationConstants;
 import frc.robot.Constants.ShooterConstants;
 import frc.robot.Constants.VisionConstants;
 import frc.robot.commands.DriveCircle;
@@ -36,7 +34,6 @@ import frc.robot.commands.DriveCircleThrottle;
 import frc.robot.commands.DriveFacingHub;
 import frc.robot.commands.DriveRobotCommand;
 import frc.robot.commands.DriveWithoutVisionCommand;
-import frc.robot.commands.FaceHubCommand;
 import frc.robot.commands.FireAtWillCommand;
 import frc.robot.commands.FireAtWillWithShakingCommand;
 import frc.robot.commands.GotoPoseCommand;
@@ -53,7 +50,6 @@ import frc.robot.commands.RotateRobotCommand;
 import frc.robot.commands.RotateRobotG2PCommand;
 import frc.robot.commands.ShakeTheIntakeCommand;
 import frc.robot.commands.ShakeThingsUpCommand;
-import frc.robot.commands.ShooterTest;
 import frc.robot.commands.SimSetRobotPoseCommand;
 import frc.robot.commands.SpinIndexerCommand;
 import frc.robot.commands.UnloadFuelCommand;
@@ -67,7 +63,6 @@ import frc.robot.subsystems.IntakeSubsystem;
 import frc.robot.subsystems.PoseEstimatorSubsystem;
 import frc.robot.subsystems.ShooterSubsystem;
 import frc.utils.PoseEstimatorCamera;
-import frc.utils.PreussDriveSimulation;
 
 /**
  * This class is where the bulk of the robot should be declared. Since
@@ -87,15 +82,14 @@ public class RobotContainer {
   //private final DriveTrain m_DriveTrain = new DriveTrain();
   // The robot's subsystems
   public final static DriveSubsystemSRX m_robotDrive = new DriveSubsystemSRX();
-  //public final SparkFlex m_test = new SparkFlex(50, MotorType.kBrushless);
-  public static PoseEstimatorCamera m_atagCamera = new PoseEstimatorCamera("atag812", VisionConstants.ROBOT_TO_APRIL_CAMERA,200.0/219.0 );
-  public static PoseEstimatorCamera m_rearAtagCamera = new PoseEstimatorCamera("rearAtag812", VisionConstants.ROBOT_TO_REAR_APRIL_CAMERA, 100.0/97.0 );
+  public static final PoseEstimatorCamera m_atagCamera = new PoseEstimatorCamera("atag812", VisionConstants.ROBOT_TO_APRIL_CAMERA,200.0/219.0 );
+  public static final PoseEstimatorCamera m_rearAtagCamera = new PoseEstimatorCamera("rearAtag812", VisionConstants.ROBOT_TO_REAR_APRIL_CAMERA, 100.0/97.0 );
   public static final PoseEstimatorCamera[] cameras = new PoseEstimatorCamera[]{m_atagCamera}; //, m_rearAtagCamera};
-  public static PoseEstimatorSubsystem m_poseEstimatorSubsystem = new PoseEstimatorSubsystem( cameras, m_robotDrive);
+  public static final PoseEstimatorSubsystem m_poseEstimatorSubsystem = new PoseEstimatorSubsystem( cameras, m_robotDrive);
   public final static AllianceConfigurationSubsystem m_allianceConfigurationSubsystem = new AllianceConfigurationSubsystem(m_robotDrive, m_poseEstimatorSubsystem);
   private static  boolean isSimulation = !Robot.isReal();
-  public static PreussDriveSimulation m_preussDriveSimulation = new PreussDriveSimulation(m_poseEstimatorSubsystem);
-  private static boolean debug = false; // To enable debugging in this module, change false to true.
+  //public static PreussDriveSimulation m_preussDriveSimulation = new PreussDriveSimulation(m_poseEstimatorSubsystem);
+  private static final boolean debug = false; // To enable debugging in this module, change false to true.
   public static ShooterSubsystem m_ShooterSubsystem = new ShooterSubsystem(CANConstants.kShooterMotor1);
   public static IntakeSubsystem m_IntakeSubsystem = new IntakeSubsystem(CANConstants.kIntakeMotor);
   public static IntakeDeploymentSubsystem m_IntakeDeploymentSubsystem = new IntakeDeploymentSubsystem(CANConstants.kIntakeDeploymentMotor);
@@ -116,8 +110,9 @@ public class RobotContainer {
   public static final Joystick leftJoystick = new Joystick(OIConstants.kLeftJoystick);
   public static final Joystick rightJoystick = new Joystick(OIConstants.kRightJoystick);
   public static XboxController m_driverController = new XboxController(OIConstants.kDriverControllerPort);
-  public static double startingHeading;
+  //public static double startingHeading;
 
+  /*
   double POV_to_double(int pov) {
     double result;
     if (pov == -1) {
@@ -135,7 +130,8 @@ public class RobotContainer {
     }
     return result;
   }
-  
+  */
+
   /**
    * Convenience function to create xbox-direction pad rotate buttons.
    * Comprehends alliance to turn to driver's field perspective.
@@ -396,13 +392,13 @@ public class RobotContainer {
     POVButton dPad225 = dPadButton(225);
     POVButton dPad270 = dPadButton(270);
     POVButton dPad315 = dPadButton(315);
-    Pose2d AT31 = m_poseEstimatorSubsystem.getAprilTagPose(31);
-    Pose2d nearAT31 = new Pose2d(AT31.getX() + Units.inchesToMeters(36), AT31.getY(), new Rotation2d(0.0));
+    //Pose2d AT31 = m_poseEstimatorSubsystem.getAprilTagPose(31);
+    //Pose2d nearAT31 = new Pose2d(AT31.getX() + Units.inchesToMeters(36), AT31.getY(), new Rotation2d(0.0));
   
-    SmartDashboard.putData("G31", new GotoPoseCommand(m_robotDrive, m_poseEstimatorSubsystem, nearAT31, null));
+    //SmartDashboard.putData("G31", new GotoPoseCommand(m_robotDrive, m_poseEstimatorSubsystem, nearAT31, null));
 
     /* Debugging below */
-    if (debug && isSimulation()) {
+    if (isSimulation()) {
       SmartDashboard.putData("Circle", new DriveCircleThrottle(m_robotDrive, m_poseEstimatorSubsystem, m_robotDrive.circleAutoConfig, 1.0));
       SmartDashboard.putData("DCG2P", new DriveCircle(m_robotDrive, m_poseEstimatorSubsystem, m_robotDrive.circleAutoConfig, 1.145916));
       //SmartDashboard.putData("Choreo1", new DriveChoreoPathCommand(m_robotDrive, m_poseEstimatorSubsystem, "CenterShoot", m_robotDrive.circleAutoConfig, 0.1, 0.0));
@@ -429,19 +425,22 @@ public class RobotContainer {
         ));
         //Utilities.toSmartDashboard("April17", m_poseEstimatorSubsystem.getAprilTagPose((17)));
         //Utilities.toSmartDashboard("April31", m_poseEstimatorSubsystem.getAprilTagPose((31)));
-        SmartDashboard.putData("OP", new GotoPoseCommand(m_robotDrive, m_poseEstimatorSubsystem, DriveConstants.robotFrontAtPose(m_poseEstimatorSubsystem.getAprilTagPose(19), 0.0) , m_robotDrive.defaultAutoConfig));
-        SmartDashboard.putData("A29", new GotoPoseCommand(m_robotDrive, m_poseEstimatorSubsystem, DriveConstants.robotRearAtPose(m_poseEstimatorSubsystem.getAprilTagPose(29), 0.0) , m_robotDrive.defaultAutoConfig));
-        SmartDashboard.putData("A29L", new GotoPoseCommand(m_robotDrive, m_poseEstimatorSubsystem, DriveConstants.robotLeftAtPose(m_poseEstimatorSubsystem.getAprilTagPose(29), 0.0) , m_robotDrive.defaultAutoConfig));
-        SmartDashboard.putData("A29R", new GotoPoseCommand(m_robotDrive, m_poseEstimatorSubsystem, DriveConstants.robotRightAtPose(m_poseEstimatorSubsystem.getAprilTagPose(29), 0.0) , m_robotDrive.defaultAutoConfig));
-        SmartDashboard.putData("RTest", new ShooterTest(m_ShooterSubsystem, m_poseEstimatorSubsystem));     
-        SmartDashboard.putData("RI", new RaiseIntakeCommand(m_IntakeDeploymentSubsystem));
-        SmartDashboard.putData("LI", new LowerIntakeCommand(m_IntakeDeploymentSubsystem));
-        SmartDashboard.putData("PS", new PrepareToShootCommand(m_ShooterSubsystem, m_FeederSubsystem, m_poseEstimatorSubsystem));
-        SmartDashboard.putData("FH", new FaceHubCommand(m_robotDrive, m_poseEstimatorSubsystem));
-     } // (isSimulation()
-    SmartDashboard.putData("AR", new InstantCommand(() -> alignGyroRotationToFieldRotation(RotationConstants.rotate180), m_robotDrive));
-    //Pose2d OneMeter = new Pose2d(1.0, 0.0, new Rotation2d(0.0));
-    //SmartDashboard.putData("DB", new DriveWithoutVisionCommand(m_robotDrive, m_poseEstimatorSubsystem, OneMeter, null));
+        //SmartDashboard.putData("OP", new GotoPoseCommand(m_robotDrive, m_poseEstimatorSubsystem, DriveConstants.robotFrontAtPose(m_poseEstimatorSubsystem.getAprilTagPose(19), 0.0) , m_robotDrive.defaultAutoConfig));
+        //SmartDashboard.putData("A29", new GotoPoseCommand(m_robotDrive, m_poseEstimatorSubsystem, DriveConstants.robotRearAtPose(m_poseEstimatorSubsystem.getAprilTagPose(29), 0.0) , m_robotDrive.defaultAutoConfig));
+        //SmartDashboard.putData("A29L", new GotoPoseCommand(m_robotDrive, m_poseEstimatorSubsystem, DriveConstants.robotLeftAtPose(m_poseEstimatorSubsystem.getAprilTagPose(29), 0.0) , m_robotDrive.defaultAutoConfig));
+        //SmartDashboard.putData("A29R", new GotoPoseCommand(m_robotDrive, m_poseEstimatorSubsystem, DriveConstants.robotRightAtPose(m_poseEstimatorSubsystem.getAprilTagPose(29), 0.0) , m_robotDrive.defaultAutoConfig));
+        //SmartDashboard.putData("RTest", new ShooterTest(m_ShooterSubsystem, m_poseEstimatorSubsystem));     
+        //SmartDashboard.putData("RI", new RaiseIntakeCommand(m_IntakeDeploymentSubsystem));
+        //SmartDashboard.putData("LI", new LowerIntakeCommand(m_IntakeDeploymentSubsystem));
+        //SmartDashboard.putData("PS", new PrepareToShootCommand(m_ShooterSubsystem, m_FeederSubsystem, m_poseEstimatorSubsystem));
+        //SmartDashboard.putData("FH", new FaceHubCommand(m_robotDrive, m_poseEstimatorSubsystem));
+        //SmartDashboard.putData("AR", new InstantCommand(() -> alignGyroRotationToFieldRotation(RotationConstants.rotate180), m_robotDrive));
+        //SmartDashboard.putData("RS", new ReverseTheShooterFeederIndexerCommand(m_ShooterSubsystem, m_FeederSubsystem, m_IndexerSubsystem));
+        //SmartDashboard.putData("PS", new PrepareToShootCommand(m_ShooterSubsystem, m_FeederSubsystem, m_poseEstimatorSubsystem));
+        //Pose2d OneMeter = new Pose2d(1.0, 0.0, new Rotation2d(0.0));
+        //SmartDashboard.putData("DB", new DriveWithoutVisionCommand(m_robotDrive, m_poseEstimatorSubsystem, OneMeter, null));
+    } // (isSimulation()
+    
 
 } // (configureButtonBindings)
 
@@ -497,9 +496,11 @@ public class RobotContainer {
     return isSimulation;
   }
 
+  /*
   public static double startingHeading() {
     return startingHeading;
   }
+  */
 
 /**
  * setRobotPose - update the gyro, drivetrain and pose estimated to the supplied pose.
