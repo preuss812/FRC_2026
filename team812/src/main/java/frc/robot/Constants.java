@@ -53,6 +53,7 @@ public final class Constants {
         public static final int kIndexerMotor = 47;
         //public static final int kShooterElevationMotor = 41;
         public static final int kIntakeDeploymentMotor = 48;
+        public static final int kBellyMotor = 49;
 
         public static final int kPDP = 0; // was 50 until 3/12/2024
         //public static final int kPCM = 51;
@@ -261,12 +262,12 @@ public final class Constants {
         public static final double maximumAmbiguity = 0.2;
         
 
-        public static double rearCameraXOffsetToRobot = Units.inchesToMeters(-13.5);
-        public static double rearCameraYOffsetToRobot = Units.inchesToMeters(6.5);
-        public static double rearCameraHeightToGround = Units.inchesToMeters(20.0);
+        public static double rearCameraXOffsetToRobot = Units.inchesToMeters(-12.0);
+        public static double rearCameraYOffsetToRobot = Units.inchesToMeters(8.75);
+        public static double rearCameraHeightToGround = Units.inchesToMeters(13.5);
         public static double rearCameraRoll  = Units.degreesToRadians(0.0);
         public static double rearCameraPitch = Units.degreesToRadians(0.0); 
-        public static double rearCameraYaw   = Units.degreesToRadians(0.0); // Rear facing camera.
+        public static double rearCameraYaw   = Units.degreesToRadians(180.0); // Rear facing camera.
         public static final double rearCameraHeading = Units.degreesToRadians(180.0); // Rear facing camera
         public static final Transform3d REAR_APRIL_CAMERA_TO_ROBOT = new Transform3d(
             new Translation3d(rearCameraXOffsetToRobot,rearCameraYOffsetToRobot,rearCameraHeightToGround),
@@ -650,7 +651,15 @@ public final class Constants {
         public static final int shakeCycles = 5; // number of periods to move in the same direction before reversing.
     }
 
-    
+    public static final class BellyConstants {
+        public static final double kP = 0.0001;
+        public static final double kI = 0.0; // 0.0003/FeederConstants.maxRPM;
+        public static final double kD = 0.0;
+        public static final double minOutputPercent = -0.8;
+        public static final double maxOutputPercent = 0.8;
+        public static final double maxRPM = 6784.0; // Neo Vortex
+        public static final double kV = 12.0/maxRPM; // Docs say 1.0 should 
+    }
    
     
 }

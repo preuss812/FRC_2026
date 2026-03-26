@@ -54,6 +54,7 @@ import frc.robot.commands.SimSetRobotPoseCommand;
 import frc.robot.commands.SpinIndexerCommand;
 import frc.robot.commands.UnloadFuelCommand;
 import frc.robot.subsystems.AllianceConfigurationSubsystem;
+import frc.robot.subsystems.BellySubsystem;
 import frc.robot.subsystems.DriveSubsystemSRX;
 import frc.robot.subsystems.DriveSubsystemSRX.DrivingMode;
 import frc.robot.subsystems.FeederSubsystem;
@@ -83,8 +84,8 @@ public class RobotContainer {
   // The robot's subsystems
   public final static DriveSubsystemSRX m_robotDrive = new DriveSubsystemSRX();
   public static final PoseEstimatorCamera m_atagCamera = new PoseEstimatorCamera("atag812", VisionConstants.ROBOT_TO_APRIL_CAMERA,200.0/219.0 );
-  public static final PoseEstimatorCamera m_rearAtagCamera = new PoseEstimatorCamera("rearAtag812", VisionConstants.ROBOT_TO_REAR_APRIL_CAMERA, 100.0/97.0 );
-  public static final PoseEstimatorCamera[] cameras = new PoseEstimatorCamera[]{m_atagCamera}; //, m_rearAtagCamera};
+  public static final PoseEstimatorCamera m_rearAtagCamera = new PoseEstimatorCamera("rearAtag812", VisionConstants.ROBOT_TO_REAR_APRIL_CAMERA, 200.0/197.0 );
+  public static final PoseEstimatorCamera[] cameras = new PoseEstimatorCamera[]{m_atagCamera, m_rearAtagCamera};
   public static final PoseEstimatorSubsystem m_poseEstimatorSubsystem = new PoseEstimatorSubsystem( cameras, m_robotDrive);
   public final static AllianceConfigurationSubsystem m_allianceConfigurationSubsystem = new AllianceConfigurationSubsystem(m_robotDrive, m_poseEstimatorSubsystem);
   private static  boolean isSimulation = !Robot.isReal();
@@ -95,9 +96,13 @@ public class RobotContainer {
   public static IntakeDeploymentSubsystem m_IntakeDeploymentSubsystem = new IntakeDeploymentSubsystem(CANConstants.kIntakeDeploymentMotor);
   public static FeederSubsystem m_FeederSubsystem = new FeederSubsystem(CANConstants.kFeederMotor);
   public static IndexerSubsystem m_IndexerSubsystem = new IndexerSubsystem(CANConstants.kIndexerMotor);
+  public static BellySubsystem m_BellySubsystem = new BellySubsystem(CANConstants.kBellyMotor);
+
   private static double shooterCorrection = 0.0;
   private static boolean m_raisingIntake = true;
   /*
+
+  
   public static PingResponseUltrasonicSubsystem m_pingResponseUltrasonicSubsystem =
     new PingResponseUltrasonicSubsystem(
       UltrasonicConstants.kPingChannel,
