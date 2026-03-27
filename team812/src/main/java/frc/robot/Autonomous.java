@@ -49,8 +49,10 @@ public class Autonomous extends SequentialCommandGroup {
   public static int m_autoMode = 1; // Default to move 1 meter and stop;
   private Optional<Trajectory<SwerveSample>> m_leftTrenchGather = Choreo.loadTrajectory("LeftTrenchGather");
   private Optional<Trajectory<SwerveSample>> m_leftTrenchReturn = Choreo.loadTrajectory("LeftTrenchReturn2");
+  private Optional<Trajectory<SwerveSample>> m_leftTrenchGather2 = Choreo.loadTrajectory("LeftTrenchGather2");
   private Optional<Trajectory<SwerveSample>> m_rightTrenchGather = Choreo.loadTrajectory("RightTrenchGather");
   private Optional<Trajectory<SwerveSample>> m_rightTrenchReturn = Choreo.loadTrajectory("RightTrenchReturn2");
+  private Optional<Trajectory<SwerveSample>> m_rightTrenchGather2 = Choreo.loadTrajectory("RightTrenchGather2");
   private Optional<Trajectory<SwerveSample>> m_rightBumpGather = Choreo.loadTrajectory("RightBumpGather");
   private Optional<Trajectory<SwerveSample>> m_rightBumpReturn = Choreo.loadTrajectory("RightBumpReturn");
   private Optional<Trajectory<SwerveSample>> m_rightBumpGather2 = Choreo.loadTrajectory("RightBumpGather2");
@@ -137,7 +139,7 @@ public class Autonomous extends SequentialCommandGroup {
         break;
       
       case AllianceConfigurationSubsystem.AUTO_MODE_RIGHT_TRENCH:
-        addCommands(new RightTrenchCommand(m_rightTrenchGather, m_rightTrenchReturn));
+        addCommands(new RightTrenchCommand(m_rightTrenchGather, m_rightTrenchReturn, m_rightTrenchGather2));
         break;
 
       case AllianceConfigurationSubsystem.AUTO_MODE_RIGHT_BUMP:
@@ -149,7 +151,7 @@ public class Autonomous extends SequentialCommandGroup {
         break;
 
       case AllianceConfigurationSubsystem.AUTO_MODE_LEFT_TRENCH:
-        addCommands(new LeftTrenchCommand(m_leftTrenchGather, m_leftTrenchReturn));
+        addCommands(new LeftTrenchCommand(m_leftTrenchGather, m_leftTrenchReturn, m_leftTrenchGather2));
         break;
 
       case AllianceConfigurationSubsystem.AUTO_MODE_DO_NOTHING:

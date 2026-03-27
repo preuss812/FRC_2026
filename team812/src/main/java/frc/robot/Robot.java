@@ -11,6 +11,7 @@ import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -70,6 +71,7 @@ public class Robot extends TimedRobot {
     // and running subsystem periodic() methods.  This must be called from the robot's periodic
     // block in order for anything in the Command-based framework to work.
     CommandScheduler.getInstance().run();
+    SmartDashboard.putNumber("Battery Voltage", RobotController.getBatteryVoltage());
     // In a periodic method (e.g., robotPeriodic() or teleopPeriodic())
   }
 
@@ -106,7 +108,7 @@ public class Robot extends TimedRobot {
   @Override
   public void autonomousPeriodic() {
     // Display countdown to the end of autonomous for testing purposes.
-    SmartDashboard.putNumber("Match Time", DriverStation.getMatchTime());
+    SmartDashboard.putNumber("Autonomous Time Left", 20 - DriverStation.getMatchTime());
   }
 
   @Override

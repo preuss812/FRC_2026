@@ -24,7 +24,8 @@ public class LeftTrenchCommand extends SequentialCommandGroup {
     /** Creates a new LeftTrenchCommand. */
     public LeftTrenchCommand(
          Optional<Trajectory<SwerveSample>> leftTrenchGather,
-          Optional<Trajectory<SwerveSample>> leftTrenchReturn 
+          Optional<Trajectory<SwerveSample>> leftTrenchReturn,
+          Optional<Trajectory<SwerveSample>> leftTrenchGather2
     ) {
         addCommands(
             new ParallelCommandGroup(
@@ -57,7 +58,17 @@ public class LeftTrenchCommand extends SequentialCommandGroup {
             ),
         
             // Shoot the fuel cells we just picked 
-            new FaceHubAndShootCommand()
+            new FaceHubAndShootCommand(),
+            
+            //Gather balls a second time
+            new DriveChoreoPathCommand(
+                    RobotContainer.m_robotDrive,
+                    RobotContainer.m_poseEstimatorSubsystem,
+                    leftTrenchGather2,
+                    RobotContainer.m_robotDrive.defaultAutoConfig,
+                    speedFactor,
+                    1.0
+                )
         );
     }
 }

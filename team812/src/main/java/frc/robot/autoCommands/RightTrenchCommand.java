@@ -24,7 +24,8 @@ public class RightTrenchCommand extends SequentialCommandGroup {
     /** Creates a new RightTrenchCommand. */
     public RightTrenchCommand(
         Optional<Trajectory<SwerveSample>> rightTrenchGather,
-        Optional<Trajectory<SwerveSample>> rightTrenchReturn
+        Optional<Trajectory<SwerveSample>> rightTrenchReturn,
+        Optional<Trajectory<SwerveSample>> rightTrenchGather2
     ) {
         addCommands(
             // Lower the intake and make sure we are in fast driving mode.
@@ -63,8 +64,19 @@ public class RightTrenchCommand extends SequentialCommandGroup {
             ),
         
             // Shoot the fuel cells we just picked up.
-            new FaceHubAndShootCommand()
+            new FaceHubAndShootCommand(),
             
+            //Drive out to intake a second time
+                
+                // Return to out alliance zone 
+                new DriveChoreoPathCommand(
+                RobotContainer.m_robotDrive,
+                    RobotContainer.m_poseEstimatorSubsystem,
+                    rightTrenchGather2,
+                    RobotContainer.m_robotDrive.defaultAutoConfig,
+                    speedFactor,
+                    1.0
+                )
         );
     }
 }
