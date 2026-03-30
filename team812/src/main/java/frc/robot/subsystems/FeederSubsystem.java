@@ -142,6 +142,8 @@ public class FeederSubsystem extends SubsystemBase {
   }
 
   public void runMotor(double pOut){
+        SmartDashboard.putString("FeederMode", "PERCENT");
+
     pOut = MathUtil.clamp(pOut, FeederConstants.minOutputPercent, FeederConstants.maxOutputPercent);
     closedLoopController.setSetpoint(pOut, ControlType.kDutyCycle);
   }
@@ -155,6 +157,7 @@ public class FeederSubsystem extends SubsystemBase {
    * @param rpm (double) The rpm target for the feeder
    */
   public void setRPM(double rpm) {
+    SmartDashboard.putString("FeederMode", "RPM");
     targetRPM = rpm;
     double targetVelocity = rpmToNativeUnits(rpm);
     closedLoopController.setSetpoint(targetVelocity, ControlType.kVelocity);
@@ -166,6 +169,8 @@ public class FeederSubsystem extends SubsystemBase {
   }
 
   public void stop() {
+    SmartDashboard.putString("FeederMode", "STOP");
+
     closedLoopController.setSetpoint(0, ControlType.kDutyCycle);
     targetRPM = 0.0;
   }

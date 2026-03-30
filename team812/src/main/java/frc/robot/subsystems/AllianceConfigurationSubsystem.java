@@ -42,10 +42,12 @@ public class AllianceConfigurationSubsystem extends SubsystemBase {
   private static AprilTag outpostAprilTag;
   public static final int AUTO_MODE_DO_NOTHING = 0;
   public static final int AUTO_MODE_MOVE_OFF_LINE_AND_STOP = 1;
-  public static final int AUTO_MODE_RIGHT_TRENCH = 2;
+  public static final int AUTO_MODE_RIGHT_TRENCH_RETURN_TRENCH = 2;
   public static final int AUTO_MODE_RIGHT_BUMP = 3;
   public static final int AUTO_MODE_LEFT_BUMP = 4;
-  public static final int AUTO_MODE_LEFT_TRENCH = 5;
+  public static final int AUTO_MODE_LEFT_TRENCH_RETURN_TRENCH = 5;
+  public static final int AUTO_MODE_LEFT_TRENCH_RETURN_BUMP = 6;
+  public static final int AUTO_MODE_RIGHT_TRENCH_RETURN_BUMP = 7;
   private static boolean m_hubActive = true; // Match starts with active hubs.
   private static boolean m_hubActiveSoon = true; // Match starts with active hubs.
   
@@ -56,9 +58,11 @@ public class AllianceConfigurationSubsystem extends SubsystemBase {
     // Set up the list of possible autonomous modes.  This is used by the autonomous command to determine which plan to run.
     
     Robot.autoChooser.addOption("Left Bump", AUTO_MODE_LEFT_BUMP);
-    Robot.autoChooser.addOption("Left Trench", AUTO_MODE_LEFT_TRENCH);
+    Robot.autoChooser.addOption("Left Trench Return Trench", AUTO_MODE_LEFT_TRENCH_RETURN_TRENCH);
+    Robot.autoChooser.addOption("Left Trench Return Bump", AUTO_MODE_LEFT_TRENCH_RETURN_BUMP);
     Robot.autoChooser.addOption("Right Bump", AUTO_MODE_RIGHT_BUMP);
-    Robot.autoChooser.addOption("Right Trench", AUTO_MODE_RIGHT_TRENCH);
+    Robot.autoChooser.addOption("Right Trench Return Trench", AUTO_MODE_RIGHT_TRENCH_RETURN_TRENCH);
+    Robot.autoChooser.addOption("Right Trench Return Bump", AUTO_MODE_RIGHT_TRENCH_RETURN_BUMP);
     Robot.autoChooser.addOption("Do Nothing", AUTO_MODE_DO_NOTHING);
     Robot.autoChooser.addOption("Move Off Line and Stop", AUTO_MODE_MOVE_OFF_LINE_AND_STOP);
 

@@ -115,7 +115,7 @@ public class IntakeSubsystem extends SubsystemBase {
 	      closedLoopController.setSetpoint(targetOutput, ControlType.kDutyCycle);
       }
       */
-  }
+  } 
 
   public void runMotor(double pOut){
     SmartDashboard.putBoolean("Intake", true);

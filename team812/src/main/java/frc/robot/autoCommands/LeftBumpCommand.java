@@ -28,7 +28,7 @@ public class LeftBumpCommand extends SequentialCommandGroup {
         Optional<Trajectory<SwerveSample>> leftBumpGather2
     ) {
         addCommands(
-            new LowerIntakeCommand(RobotContainer.m_IntakeDeploymentSubsystem).withTimeout(2.0), // The timeout is just for simulation.
+            new LowerIntakeCommand(RobotContainer.m_IntakeDeploymentSubsystem).withTimeout(1.0), // The timeout is just for simulation.
             new InstantCommand(()->RobotContainer.m_IntakeSubsystem.runMotor(IntakeConstants.pickupFuelSpeed),RobotContainer.m_IntakeSubsystem),
             new DriveChoreoPathCommand(
                 RobotContainer.m_robotDrive,
@@ -67,7 +67,6 @@ public class LeftBumpCommand extends SequentialCommandGroup {
             1.0),
 
             // Shoot the fuel cells we just picked up.
-            new InstantCommand(()->RobotContainer.m_IntakeSubsystem.stop(), RobotContainer.m_IntakeSubsystem),
             new ParallelCommandGroup(
                 new FaceHubAndShootCommand(),
                 new ShakeTheIntakeCommand(RobotContainer.m_IntakeDeploymentSubsystem)

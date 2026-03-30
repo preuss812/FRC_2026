@@ -11,16 +11,18 @@ import choreo.trajectory.Trajectory;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.Constants.IntakeConstants;
 import frc.robot.RobotContainer;
 import frc.robot.commands.DriveChoreoPathCommand;
 import frc.robot.commands.FaceHubAndShootCommand;
 import frc.robot.commands.LowerIntakeCommand;
 import frc.robot.commands.SetShooterSpeedCommand;
+import frc.robot.commands.ShakeTheIntakeCommand;
 import frc.robot.subsystems.DriveSubsystemSRX.DrivingMode;
 
 public class RightTrenchCommand extends SequentialCommandGroup {
-    private final double speedFactor = 0.5; // 1.0 would be full speed.
+    private final double speedFactor = 0.8; // 1.0 would be full speed.
     /** Creates a new RightTrenchCommand. */
     public RightTrenchCommand(
         Optional<Trajectory<SwerveSample>> rightTrenchGather,
@@ -34,6 +36,8 @@ public class RightTrenchCommand extends SequentialCommandGroup {
                 new InstantCommand(()->RobotContainer.m_IntakeSubsystem.runMotor(IntakeConstants.pickupFuelSpeed),RobotContainer.m_IntakeSubsystem),
                 new InstantCommand(() -> RobotContainer.m_robotDrive.setDrivingMode(DrivingMode.SPEED))
             ),
+
+            //new WaitCommand(5.0),
 
             // Simultaneously drive out on the field and start the intake.
             new ParallelCommandGroup( 
@@ -64,7 +68,11 @@ public class RightTrenchCommand extends SequentialCommandGroup {
             ),
         
             // Shoot the fuel cells we just picked up.
-            new FaceHubAndShootCommand(),
+            new ParallelCommandGroup(
+                new FaceHubAndShootCommand(),
+                new ShakeTheIntakeCommand(RobotContainer.m_IntakeDeploymentSubsystem))
+                .withTimeout(8)
+            ,
             
             //Drive out to intake a second time
                 

@@ -17,10 +17,12 @@ import frc.robot.commands.DriveChoreoPathCommand;
 import frc.robot.commands.FaceHubAndShootCommand;
 import frc.robot.commands.LowerIntakeCommand;
 import frc.robot.commands.SetShooterSpeedCommand;
+import frc.robot.commands.ShakeTheIntakeCommand;
+import frc.robot.subsystems.IntakeDeploymentSubsystem;
 import frc.robot.subsystems.DriveSubsystemSRX.DrivingMode;
 
 public class LeftTrenchCommand extends SequentialCommandGroup {
-    private final double speedFactor = 0.5; // 1.0 would be full speed.
+    private final double speedFactor = 0.8; // 1.0 would be full speed.
     /** Creates a new LeftTrenchCommand. */
     public LeftTrenchCommand(
          Optional<Trajectory<SwerveSample>> leftTrenchGather,
@@ -58,7 +60,11 @@ public class LeftTrenchCommand extends SequentialCommandGroup {
             ),
         
             // Shoot the fuel cells we just picked 
-            new FaceHubAndShootCommand(),
+            new ParallelCommandGroup(
+                new FaceHubAndShootCommand(),
+                new ShakeTheIntakeCommand(RobotContainer.m_IntakeDeploymentSubsystem))
+                .withTimeout(8)
+            ,
             
             //Gather balls a second time
             new DriveChoreoPathCommand(

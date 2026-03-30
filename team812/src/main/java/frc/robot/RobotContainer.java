@@ -96,7 +96,7 @@ public class RobotContainer {
   public static IntakeDeploymentSubsystem m_IntakeDeploymentSubsystem = new IntakeDeploymentSubsystem(CANConstants.kIntakeDeploymentMotor);
   public static FeederSubsystem m_FeederSubsystem = new FeederSubsystem(CANConstants.kFeederMotor);
   public static IndexerSubsystem m_IndexerSubsystem = new IndexerSubsystem(CANConstants.kIndexerMotor);
-  public static BellySubsystem m_BellySubsystem = new BellySubsystem(CANConstants.kBellyMotor);
+  //public static BellySubsystem m_BellySubsystem = new BellySubsystem(CANConstants.kBellyMotor);
 
   private static double shooterCorrection = 0.0;
   private static boolean m_raisingIntake = true;
@@ -206,12 +206,12 @@ public class RobotContainer {
 
   public void setShooterFeederSpeed(double rpm) {
     m_ShooterSubsystem.setRPM(rpm);
-    //m_FeederSubsystem.setRPM(rpm);
+    m_FeederSubsystem.setRPM(rpm);
   }
 
   public void stopShooterFeeder() {
     m_ShooterSubsystem.stop();
-    //m_FeederSubsystem.stop();
+    m_FeederSubsystem.stop();
   }
   /**
    * Use this method to define your button->command mappings. Buttons can be
@@ -266,7 +266,7 @@ public class RobotContainer {
 
     // Right bumper puts the robot in a mode where the left stick controls translation but the robot automatically faces the hub.
     new JoystickButton(m_driverController, Button.kRightBumper.value)
-    .toggleOnTrue(
+    .onTrue(
         new PrepareToShootCommand(m_ShooterSubsystem, m_FeederSubsystem, m_poseEstimatorSubsystem)
     );
 
@@ -335,7 +335,7 @@ public class RobotContainer {
     new JoystickButton(leftJoystick, 8).onTrue(
       new InstantCommand(() -> setShooterFeederSpeed(2790), m_ShooterSubsystem, m_FeederSubsystem)
     );
-    new JoystickButton(leftJoystick, 9).onTrue(
+    new JoystickButton(leftJoystick, 9).onTrue(   
       new InstantCommand(() -> setShooterFeederSpeed(m_ShooterSubsystem.getTargetRPM()-50), m_ShooterSubsystem, m_FeederSubsystem)
     );
     new JoystickButton(leftJoystick, 10).onTrue(

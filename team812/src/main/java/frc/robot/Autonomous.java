@@ -17,6 +17,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.Constants.FieldConstants;
@@ -47,19 +48,8 @@ public class Autonomous extends SequentialCommandGroup {
   private final DriveSubsystemSRX m_robotDrive;
   private final PoseEstimatorSubsystem m_PoseEstimatorSubsystem;
   public static int m_autoMode = 1; // Default to move 1 meter and stop;
-  private Optional<Trajectory<SwerveSample>> m_leftTrenchGather = Choreo.loadTrajectory("LeftTrenchGather");
-  private Optional<Trajectory<SwerveSample>> m_leftTrenchReturn = Choreo.loadTrajectory("LeftTrenchReturn2");
-  private Optional<Trajectory<SwerveSample>> m_leftTrenchGather2 = Choreo.loadTrajectory("LeftTrenchGather2");
-  private Optional<Trajectory<SwerveSample>> m_rightTrenchGather = Choreo.loadTrajectory("RightTrenchGather");
-  private Optional<Trajectory<SwerveSample>> m_rightTrenchReturn = Choreo.loadTrajectory("RightTrenchReturn2");
-  private Optional<Trajectory<SwerveSample>> m_rightTrenchGather2 = Choreo.loadTrajectory("RightTrenchGather2");
-  private Optional<Trajectory<SwerveSample>> m_rightBumpGather = Choreo.loadTrajectory("RightBumpGather");
-  private Optional<Trajectory<SwerveSample>> m_rightBumpReturn = Choreo.loadTrajectory("RightBumpReturn");
-  private Optional<Trajectory<SwerveSample>> m_rightBumpGather2 = Choreo.loadTrajectory("RightBumpGather2");
-  private Optional<Trajectory<SwerveSample>> m_leftBumpGather = Choreo.loadTrajectory("LeftBumpGather");
-  private Optional<Trajectory<SwerveSample>> m_leftBumpReturn = Choreo.loadTrajectory("LeftBumpReturn");
-  private Optional<Trajectory<SwerveSample>> m_leftBumpGather2 = Choreo.loadTrajectory("LeftBumpGather2");
-;
+  
+ // SmartDashboard.putNumber("Auto Delay", 0.0);
 
   /**
    * robotHeadingForCameraToHubCenter - helper function for controlling rotation during autonomous driving.
@@ -138,21 +128,30 @@ public class Autonomous extends SequentialCommandGroup {
         addCommands(new DriveWithoutVisionCommand(m_robotDrive, m_PoseEstimatorSubsystem,  new Pose2d(-1.0, 0, new Rotation2d(0.0)), null));
         break;
       
-      case AllianceConfigurationSubsystem.AUTO_MODE_RIGHT_TRENCH:
-        addCommands(new RightTrenchCommand(m_rightTrenchGather, m_rightTrenchReturn, m_rightTrenchGather2));
+      case AllianceConfigurationSubsystem.AUTO_MODE_RIGHT_TRENCH_RETURN_TRENCH:
+        addCommands(new RightTrenchCommand(Robot.m_rightTrenchGather, Robot.m_rightTrenchReturn, Robot.m_rightTrenchGather2));
+        break;
+      case AllianceConfigurationSubsystem.AUTO_MODE_RIGHT_TRENCH_RETURN_BUMP:
+        addCommands(new RightTrenchCommand(Robot.m_rightTrenchGather, Robot.m_rightTrenchReturnBump, Robot.m_rightTrenchBumpGather));
         break;
 
       case AllianceConfigurationSubsystem.AUTO_MODE_RIGHT_BUMP:
-        addCommands(new RightBumpCommand(m_rightBumpGather, m_rightBumpReturn, m_rightBumpGather2));
+        addCommands(new RightBumpCommand(Robot.m_rightBumpGather, Robot.m_rightBumpReturn, Robot.m_rightBumpGather2));
         break;
 
       case AllianceConfigurationSubsystem.AUTO_MODE_LEFT_BUMP:
-        addCommands(new LeftBumpCommand(m_leftBumpGather, m_leftBumpReturn, m_leftBumpGather2));
+        addCommands(new LeftBumpCommand(Robot.m_leftBumpGather, Robot.m_leftBumpReturn, Robot.m_leftBumpGather2
+        ));
         break;
 
-      case AllianceConfigurationSubsystem.AUTO_MODE_LEFT_TRENCH:
-        addCommands(new LeftTrenchCommand(m_leftTrenchGather, m_leftTrenchReturn, m_leftTrenchGather2));
+      case AllianceConfigurationSubsystem.AUTO_MODE_LEFT_TRENCH_RETURN_TRENCH:
+        addCommands(new LeftTrenchCommand(Robot.m_leftTrenchGather, Robot.m_leftTrenchReturn, Robot.m_leftTrenchGather2));
         break;
+      case AllianceConfigurationSubsystem.AUTO_MODE_LEFT_TRENCH_RETURN_BUMP:
+        addCommands(new LeftTrenchCommand(Robot.m_leftTrenchGather, Robot.m_leftTrenchReturnBump, Robot.m_leftTrenchBumpGather));
+        break;
+      
+        
 
       case AllianceConfigurationSubsystem.AUTO_MODE_DO_NOTHING:
       default:

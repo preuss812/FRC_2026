@@ -112,8 +112,8 @@ public class DriveSubsystemSRX extends SubsystemBase {
 
     // set up some known-good PID configurations for automatic and semi-automatic driving.
     defaultAutoConfig = new DrivingConfig()
-    .setMaxThrottle(0.8)
-    .setMaxRotation(0.8)
+    .setMaxThrottle(1)
+    .setMaxRotation(1)
     .setLinearP(0.25)
     .setLinearIZone(Units.inchesToMeters(4.0))
     .setLinearTolerance(Units.inchesToMeters(2.0))

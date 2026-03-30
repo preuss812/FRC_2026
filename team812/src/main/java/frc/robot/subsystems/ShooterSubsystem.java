@@ -188,6 +188,7 @@ public class ShooterSubsystem extends SubsystemBase {
     
     // Manage shooter mode based on the clock.  Active when we can score, otherwise inactive.
     // If we are unjamming or fixed speed mode, leave it as it is.
+    /*
     if (AllianceConfigurationSubsystem.hubActiveSoon()) {
       if (m_shooterMode == ShooterConstants.ShooterMode.IDLE) 
         m_shooterMode = ShooterConstants.ShooterMode.AUTO_RANGING;
@@ -195,8 +196,8 @@ public class ShooterSubsystem extends SubsystemBase {
       if (m_shooterMode == ShooterConstants.ShooterMode.AUTO_RANGING) {
         m_shooterMode = ShooterConstants.ShooterMode.IDLE;
       }
-    }
-
+    }*/
+    SmartDashboard.putString("ShooterMode", m_shooterMode.name());
     switch(m_shooterMode) {
       case IDLE -> {
         stop();  // De-energize the motor.
@@ -212,6 +213,8 @@ public class ShooterSubsystem extends SubsystemBase {
       }
       case FIXED_SPEED -> {
         setRPM(targetRPM);
+        RobotContainer.m_FeederSubsystem.setRPM(targetRPM);
+
       }
       case UNJAMMING -> {
         /*

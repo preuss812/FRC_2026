@@ -7,6 +7,11 @@
 
 package frc.robot;
 
+import java.util.Optional;
+
+import choreo.Choreo;
+import choreo.trajectory.SwerveSample;
+import choreo.trajectory.Trajectory;
 import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
@@ -35,6 +40,22 @@ public class Robot extends TimedRobot {
   private static boolean usingCameraServer = false; // Set to true to enable the usb camera plugged into the roboRIO.
   public static SendableChooser<Integer> autoChooser = new SendableChooser<>();
   public static Timer m_timer = new Timer();
+  public static final Optional<Trajectory<SwerveSample>> m_leftTrenchGather = Choreo.loadTrajectory("LeftTrenchGather");
+  public static final Optional<Trajectory<SwerveSample>> m_leftTrenchReturn = Choreo.loadTrajectory("LeftTrenchReturn2");
+  public static final Optional<Trajectory<SwerveSample>> m_leftTrenchReturnBump = Choreo.loadTrajectory("LeftTrenchReturnBump");
+  public static final Optional<Trajectory<SwerveSample>> m_leftTrenchGather2 = Choreo.loadTrajectory("LeftTrenchGather2");
+  public static final Optional<Trajectory<SwerveSample>> m_rightTrenchGather = Choreo.loadTrajectory("RightTrenchGather");
+  public static final Optional<Trajectory<SwerveSample>> m_rightTrenchReturn = Choreo.loadTrajectory("RightTrenchReturn2");
+  public static final Optional<Trajectory<SwerveSample>> m_rightTrenchReturnBump = Choreo.loadTrajectory("RightTrenchReturnBump");
+  public static final Optional<Trajectory<SwerveSample>> m_rightTrenchGather2 = Choreo.loadTrajectory("RightTrenchGather2");
+  public static final Optional<Trajectory<SwerveSample>> m_rightTrenchBumpGather = Choreo.loadTrajectory("RightTrenchBumpGather");
+  public static final Optional<Trajectory<SwerveSample>> m_rightBumpGather = Choreo.loadTrajectory("RightBumpGather");
+  public static final Optional<Trajectory<SwerveSample>> m_rightBumpReturn = Choreo.loadTrajectory("RightBumpReturn");
+  public static final Optional<Trajectory<SwerveSample>> m_rightBumpGather2 = Choreo.loadTrajectory("RightBumpGather2");
+  public static final Optional<Trajectory<SwerveSample>> m_leftBumpGather = Choreo.loadTrajectory("LeftBumpGather");
+  public static final Optional<Trajectory<SwerveSample>> m_leftBumpReturn = Choreo.loadTrajectory("LeftBumpReturn");
+  public static final Optional<Trajectory<SwerveSample>> m_leftBumpGather2 = Choreo.loadTrajectory("LeftBumpGather2");
+  public static final Optional<Trajectory<SwerveSample>> m_leftTrenchBumpGather = Choreo.loadTrajectory("LeftTrenchBumpGather");
 
   /**
    * This function is run when the robot is first started up and should be used for any
