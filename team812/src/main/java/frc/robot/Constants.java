@@ -641,6 +641,7 @@ public final class Constants {
         public static final double kIntakeDeploymentDownRPM = -800;
         public static final double kIntakeDeploymentShakeUpRPM = -800;
         public static final double kIntakeDeploymentShakeDownRPM = 400;
+        public static final double kIntakeDeploymentLoweredPosition = -8.0;
         public static final double kP = 0.0002;
         public static final double kI = 0.0;
         public static final double kD = 0.0;

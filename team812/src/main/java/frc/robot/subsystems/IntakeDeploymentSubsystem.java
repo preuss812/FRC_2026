@@ -108,6 +108,7 @@ public class IntakeDeploymentSubsystem extends SubsystemBase {
         .feedForward
           // kV is now in Volts, so we multiply by the nominal voltage (12V)
           .kV(IntakeDeploymentConstants.kV);
+      motorConfig.smartCurrentLimit(60);
 
     /*
      * Apply the configuration to the SPARK MAX.
@@ -138,6 +139,8 @@ public class IntakeDeploymentSubsystem extends SubsystemBase {
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
+
+    SmartDashboard.putNumber("Intake Deployment Motor Current", motor1.getOutputCurrent());
     //double rpm = SmartDashboard.getNumber("IntakeDeployment RPM Target", 0.0);
     //setRPM(rpm);
     // closed-loop velocity control
@@ -155,6 +158,11 @@ public class IntakeDeploymentSubsystem extends SubsystemBase {
     SmartDashboard.putBoolean("IntakeRevLimit", m_atRevLimit); 
     SmartDashboard.putBoolean("IntakeUp", m_atFwdLimit);
     SmartDashboard.putBoolean("IntakeDown", m_atRevLimit);
+
+    if (m_atFwdLimit) encoder.setPosition(0.0);
+  }
+  public double getPosition() {
+    return m_position;
   }
 
   public void runMotor(double pOut){

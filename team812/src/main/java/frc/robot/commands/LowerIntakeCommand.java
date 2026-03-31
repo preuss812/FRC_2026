@@ -23,13 +23,17 @@ public class LowerIntakeCommand extends Command {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    m_intakeDeploymentSubsystem.setRPM(Constants.IntakeDeploymentConstants.kIntakeDeploymentDownRPM/2.0);
+    m_intakeDeploymentSubsystem.setRPM(Constants.IntakeDeploymentConstants.kIntakeDeploymentDownRPM);
     RobotContainer.setRaisingIntake(false);
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
-  public void execute() {}
+  public void execute() {
+  //  if (m_intakeDeploymentSubsystem.getPosition() <= Constants.IntakeDeploymentConstants.kIntakeDeploymentLoweredPosition) {
+  //    m_intakeDeploymentSubsystem.setRPM(-10);
+  //  }
+  }
 
   // Called once the command ends or is interrupted.
   @Override
