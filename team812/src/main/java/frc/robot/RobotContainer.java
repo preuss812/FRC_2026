@@ -182,13 +182,13 @@ public class RobotContainer {
     );
 
     // The feeder is just following the shooter motor.
-    m_FeederSubsystem.setDefaultCommand(
+    /*m_FeederSubsystem.setDefaultCommand(
       new ConditionalCommand(
         new RunCommand(() -> m_FeederSubsystem.setRPM(m_ShooterSubsystem.getTargetRPM()), m_FeederSubsystem),
         new RunCommand(() -> m_FeederSubsystem.stop(), m_FeederSubsystem),
         () -> (m_ShooterSubsystem.getShooterMode() != ShooterConstants.ShooterMode.IDLE)
       )
-    );
+    );*/
 
     /*
     // The XBox right trigger will control the indexer motor turning it on when the trigger is > 50%.
@@ -205,8 +205,9 @@ public class RobotContainer {
   }
 
   public void setShooterFeederSpeed(double rpm) {
+    m_ShooterSubsystem.setShooterMode(ShooterConstants.ShooterMode.FIXED_SPEED);
     m_ShooterSubsystem.setRPM(rpm);
-    m_FeederSubsystem.setRPM(rpm);
+    //m_FeederSubsystem.setRPM(rpm);
   }
 
   public void stopShooterFeeder() {
@@ -333,7 +334,7 @@ public class RobotContainer {
       new InstantCommand(() -> stopShooterFeeder(), m_ShooterSubsystem, m_FeederSubsystem)
     );
     new JoystickButton(leftJoystick, 8).onTrue(
-      new InstantCommand(() -> setShooterFeederSpeed(2790), m_ShooterSubsystem, m_FeederSubsystem)
+      new InstantCommand(() -> setShooterFeederSpeed(2600), m_ShooterSubsystem, m_FeederSubsystem)
     );
     new JoystickButton(leftJoystick, 9).onTrue(   
       new InstantCommand(() -> setShooterFeederSpeed(m_ShooterSubsystem.getTargetRPM()-50), m_ShooterSubsystem, m_FeederSubsystem)

@@ -159,7 +159,7 @@ public class FeederSubsystem extends SubsystemBase {
   public void setRPM(double rpm) {
     SmartDashboard.putString("FeederMode", "RPM");
     targetRPM = rpm;
-    double targetVelocity = rpmToNativeUnits(rpm);
+    double targetVelocity = rpmToNativeUnits(rpm * 0.7);
     closedLoopController.setSetpoint(targetVelocity, ControlType.kVelocity);
     SmartDashboard.putNumber("Feeder Target RPM", targetRPM);
   }

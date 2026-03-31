@@ -23,7 +23,7 @@ public class LowerIntakeCommand extends Command {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    m_intakeDeploymentSubsystem.setRPM(Constants.IntakeDeploymentConstants.kIntakeDeploymentDownRPM);
+    m_intakeDeploymentSubsystem.setRPM(Constants.IntakeDeploymentConstants.kIntakeDeploymentDownRPM/2.0);
     RobotContainer.setRaisingIntake(false);
   }
 

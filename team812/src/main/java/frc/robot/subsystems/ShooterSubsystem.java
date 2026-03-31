@@ -123,7 +123,7 @@ public class ShooterSubsystem extends SubsystemBase {
     motorConfig.closedLoop
         .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
         // Set PID values for velocity control in slot 1
-        .p(ShooterConstants.kP)
+        .p(ShooterConstants.kP*8.0)
         .i(ShooterConstants.kI)
         .d(ShooterConstants.kD)
         //.iMaxAccum(50.0)
