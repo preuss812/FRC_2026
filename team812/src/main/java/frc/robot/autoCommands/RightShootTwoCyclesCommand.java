@@ -32,7 +32,6 @@ public class RightShootTwoCyclesCommand extends SequentialCommandGroup {
       ),
       new ParallelCommandGroup(
         new InstantCommand(() -> RobotContainer.m_ShooterSubsystem.setRPM(3000.0), RobotContainer.m_ShooterSubsystem), // Start the flywheel spinning at an initial guess at the required rpm.  Could do better - TODO
-        new InstantCommand(() -> RobotContainer.m_FeederSubsystem.setRPM(3000.0), RobotContainer.m_FeederSubsystem), // Start the flywheel spinning at an initial guess at the required rpm.  Could do better - TODO
         new InstantCommand(() -> RobotContainer.m_IntakeSubsystem.stop(), RobotContainer.m_IntakeSubsystem),
         new DriveChoreoPathCommand(
           RobotContainer.m_robotDrive,
@@ -45,7 +44,6 @@ public class RightShootTwoCyclesCommand extends SequentialCommandGroup {
       new FaceHubAndShootCommand().withTimeout(6.0), // TODO: tune the timeout to shoot 8 fuel cells.
     new ParallelCommandGroup(
         new InstantCommand(() -> RobotContainer.m_ShooterSubsystem.stop(), RobotContainer.m_ShooterSubsystem),
-        new InstantCommand(() -> RobotContainer.m_FeederSubsystem.stop(), RobotContainer.m_FeederSubsystem),
         new InstantCommand(()->RobotContainer.m_IntakeSubsystem.runMotor(IntakeConstants.pickupFuelSpeed), RobotContainer.m_IntakeSubsystem),
         new DriveChoreoPathCommand(
           RobotContainer.m_robotDrive,
@@ -58,7 +56,6 @@ public class RightShootTwoCyclesCommand extends SequentialCommandGroup {
       new ParallelCommandGroup(
         new InstantCommand(() -> RobotContainer.m_IntakeSubsystem.stop(), RobotContainer.m_IntakeSubsystem),
         new InstantCommand(() -> RobotContainer.m_ShooterSubsystem.setRPM(3000.0), RobotContainer.m_ShooterSubsystem), // Start the flywheel spinning at an initial guess at the required rpm.  Could do better - TODO
-        new InstantCommand(() -> RobotContainer.m_FeederSubsystem.setRPM(3000.0), RobotContainer.m_FeederSubsystem), // Start the flywheel spinning at an initial guess at the required rpm.  Could do better - TODO
         new DriveChoreoPathCommand(
           RobotContainer.m_robotDrive,
           RobotContainer.m_poseEstimatorSubsystem,

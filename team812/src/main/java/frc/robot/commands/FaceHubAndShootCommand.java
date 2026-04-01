@@ -20,10 +20,9 @@ public class FaceHubAndShootCommand extends ParallelCommandGroup {
       new FaceHubCommand(
         RobotContainer.m_robotDrive,
         RobotContainer.m_poseEstimatorSubsystem),
-      new PrepareToShootCommand(RobotContainer.m_ShooterSubsystem, RobotContainer.m_FeederSubsystem, RobotContainer.m_poseEstimatorSubsystem),
+      new PrepareToShootCommand(RobotContainer.m_ShooterSubsystem,  RobotContainer.m_poseEstimatorSubsystem),
       new FireAtWillCommand(
         RobotContainer.m_ShooterSubsystem,
-        RobotContainer.m_FeederSubsystem,
         RobotContainer.m_IndexerSubsystem,
         RobotContainer.m_poseEstimatorSubsystem 
       )

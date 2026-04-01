@@ -48,7 +48,8 @@ public final class Constants {
 
         //public static final int kElbowMotor2 = 44;
         public static final int kIntakeMotor = 43;
-        public static final int kShooterMotor1 = 45;
+        public static final int kFollowerMotor = -1; // -1 => there is no follower motor. 44 is the assigned value for the follower motor if we had one.
+        public static final int kShooterMotor = 45;
         public static final int kFeederMotor = 46;
         public static final int kIndexerMotor = 47;
         //public static final int kShooterElevationMotor = 41;
@@ -592,7 +593,9 @@ public final class Constants {
         public static final double minOutputPercent = -0.8;
         public static final double maxOutputPercent = 0.8;
         public static final double kV = 12.0/maxRPM * 3000.0 / 2900.0; // Docs say 1.0 should be 12.0 but emperically 12.0 is not right.
-    }
+                public static final boolean inverted = false;
+        public static final double shooterFactor = 0.70; // The feeder needs to run slower than the shooter to prevent jamming.  This factor is multiplied by the shooter output to determine the feeder output.
+        }
 
     public static final class IndexerConstants {
         public static final double minOutputPercent = -0.8;
@@ -616,7 +619,7 @@ public final class Constants {
         public static final double d = 3063.16870;
         public static final double RPMTolerance = 75;
         public static final double RPMToVolts = 442.5;
-        public static final double kP = 0.0001;
+        public static final double kP = 0.0008;
         public static final double kI = 0.0; //0.0003/FeederConstants.maxRPM;
         public static final double kD = 0.0;
         public static final double minOutputPercent = -0.8;
@@ -626,6 +629,8 @@ public final class Constants {
         public static final double rotationTolerance = Units.degreesToRadians(2.0);
         public static final int currentLimit = 60;
         public enum ShooterMode {IDLE, AUTO_RANGING, UNJAMMING, FIXED_SPEED };
+        public static final boolean inverted = true;
+        public static final boolean followerInverted = true;
 
     }
 

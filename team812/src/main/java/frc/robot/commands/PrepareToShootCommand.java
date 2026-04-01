@@ -6,23 +6,19 @@ package frc.robot.commands;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.Constants.FeederConstants;
 import frc.robot.Constants.ShooterConstants;
-import frc.robot.subsystems.FeederSubsystem;
 import frc.robot.subsystems.PoseEstimatorSubsystem;
 import frc.robot.subsystems.ShooterSubsystem;
 
 public class PrepareToShootCommand extends Command {
   private final ShooterSubsystem shooter;
-  private final FeederSubsystem feeder;
 
   /** Creates a new MotorTest. */
-  public PrepareToShootCommand(ShooterSubsystem shooter, FeederSubsystem feeder, PoseEstimatorSubsystem poseEstimator) {
+  public PrepareToShootCommand(ShooterSubsystem shooter, PoseEstimatorSubsystem poseEstimator) {
     this.shooter = shooter;
-    this.feeder = feeder;
 
     // Use addRequirements() here to declare subsystem dependencies.
-    addRequirements(shooter, feeder);
+    addRequirements(shooter);
     SmartDashboard.putBoolean("Shooter OK", false);
     SmartDashboard.putBoolean("Feeder OK", false);
   }
@@ -36,7 +32,7 @@ public class PrepareToShootCommand extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    boolean ignore = readyToShoot(shooter.getTargetRPM());
+    boolean ignore = readyToShoot();
   }
 
   // Called once the command ends or is interrupted.
@@ -53,13 +49,11 @@ public class PrepareToShootCommand extends Command {
     return false;
   }
 
-  public boolean readyToShoot(double targetRPM){
-    double shooterRPM = shooter.getRPM();
-    double feederRPM = feeder.getRPM();
-    boolean shooterRPMOkay = Math.abs(shooterRPM-targetRPM) < ShooterConstants.RPMTolerance;
-    boolean feederRPMOkay = Math.abs(feederRPM-targetRPM) < FeederConstants.RPMTolerance;
-    SmartDashboard.putNumber("Shooter RPM Error", shooterRPM - targetRPM);
-    SmartDashboard.putNumber("Feeder RPM Error", feederRPM - targetRPM);
+  public boolean readyToShoot(){
+    boolean shooterRPMOkay = shooter.shooterReadyToShoot();
+    boolean feederRPMOkay = shooter.feederReadyToShoot();
+    SmartDashboard.putNumber("Shooter RPM Error", shooter.shooterError());
+    SmartDashboard.putNumber("Feeder RPM Error", shooter.feederError());
     SmartDashboard.putBoolean("Shooter OK", shooterRPMOkay);
     SmartDashboard.putBoolean("Feeder OK", feederRPMOkay);
     return feederRPMOkay && shooterRPMOkay;

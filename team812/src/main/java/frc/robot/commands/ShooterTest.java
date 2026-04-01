@@ -73,7 +73,7 @@ public class ShooterTest extends Command {
   }
 
   public boolean canShoot(double targetRPM){
-    double actualRPM = shooter.getRPM();
+    double actualRPM = shooter.getShooterRPM();
     return Math.abs(actualRPM-targetRPM) < ShooterConstants.RPMTolerance;
   }
 

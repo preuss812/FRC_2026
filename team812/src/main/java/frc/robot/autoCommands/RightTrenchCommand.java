@@ -11,7 +11,6 @@ import choreo.trajectory.Trajectory;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
-import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.Constants.IntakeConstants;
 import frc.robot.RobotContainer;
 import frc.robot.commands.DriveChoreoPathCommand;
@@ -55,7 +54,7 @@ public class RightTrenchCommand extends SequentialCommandGroup {
             // new InstantCommand(()->RobotContainer.m_IntakeSubsystem.stop(), RobotContainer.m_IntakeSubsystem),
             new ParallelCommandGroup(
                 
-                new SetShooterSpeedCommand(RobotContainer.m_ShooterSubsystem, RobotContainer.m_FeederSubsystem, 3000), 
+                new SetShooterSpeedCommand(RobotContainer.m_ShooterSubsystem, 3000), 
                 // Return to out alliance zone 
                 new DriveChoreoPathCommand(
                 RobotContainer.m_robotDrive,

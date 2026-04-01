@@ -22,7 +22,7 @@ import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Constants.CANConstants;
+import frc.robot.Constants.FeederConstants;
 import frc.robot.Constants.ShooterConstants;
 import frc.robot.RobotContainer;
 import frc.utils.ExponentialSmoother;
@@ -32,18 +32,37 @@ public class ShooterSubsystem extends SubsystemBase {
 
   // Shooter settings
   //private final double maxRPM = 5320; // For a CIM motor. 
-  private double targetRPM = 0.0;  // desired shooter wheel speed
-  private double currentRPM; // the current rpm of the shooter.
+  private double shooterTargetRPM = 0.0;  // desired shooter wheel speed
+  private double shooterRPM = 0.0; // the current rpm of the shooter.
+  private double feederTargetRPM = 0.0; // the current rpm of the feeder.
+  private double feederRPM = 0.0; // the current rpm of the feeder.
+
+  private double shooterCorrection = 0.0; // A correction factor in RPM to adjust the distance used for the RPM calculation.
   // native units are ticks per 100ms.
   // With external through bore encoder this calculation would be more typical:
   //  RPMToNativeUnits = 1 rpm * (4096 ticks/rpm) * (1 minute/60 seconds) * (0.1 second/100ms)
   private final double RPMToNativeUnits = 1.0;
   private final double nativeUnitsToRPM = 1.0/RPMToNativeUnits; // Typical CTRE Mag Encoder CPR
-  private final SparkFlex motor1;
-  private final SparkFlexSim motor1Sim;
-  private final DCMotor m_dcMotor = DCMotor.getNEO(1);
+  
+  
+  private final SparkFlex feederMotor;
+  private final SparkFlexSim feederMotorSim;
+  private final DCMotor m_feederDCMotorForSim = DCMotor.getNeoVortex(1);
+  
+  private final SparkFlex followerMotor;
+  private final SparkFlexSim followerSim;
+  private final DCMotor m_followerDCMotorForSim = DCMotor.getNeoVortex(1);
+  
+  private final SparkFlex shooterMotor;
+  private final SparkFlexSim shooterMotorSim;
+  private final DCMotor m_shooterDCMotorForSim = DCMotor.getNeoVortex(1);
+  private final SparkFlexConfig shooterMotorConfig;
+
+    // Only used if there are dual motors on the shooter.
+  
+
   private ShooterConstants.ShooterMode m_shooterMode = ShooterConstants.ShooterMode.IDLE;
-  private ShooterConstants.ShooterMode m_savedShooterMode = ShooterConstants.ShooterMode.IDLE;
+  //private ShooterConstants.ShooterMode m_savedShooterMode = ShooterConstants.ShooterMode.IDLE;
   private final ExponentialSmoother smoothedRange = new ExponentialSmoother(1.0); // Not smoothing for now.
   private final double pwl[] = { // array or rpm vs feet from hub
     2500.0, // 0
@@ -69,93 +88,106 @@ public class ShooterSubsystem extends SubsystemBase {
     3800.0, // 20
   };
   //private final SparkFlex motor2;
-  private final SparkFlexConfig motorConfig;
-  //private final SparkFlexConfig motorFollowerConfig;
-  private final SparkClosedLoopController closedLoopController;
-  private final RelativeEncoder encoder;
+  private final SparkFlexConfig followerMotorConfig;
+  private final SparkFlexConfig feederMotorConfig;
+
+  private final SparkClosedLoopController shooterClosedLoopController;
+  private final SparkClosedLoopController followerClosedLoopController;
+  private final SparkClosedLoopController feederClosedLoopController;
+
+  private final RelativeEncoder shooterEncoder;
+  private final RelativeEncoder feederEncoder;
   
   /** Creates a new ShooterSubsystem. */
-  public ShooterSubsystem(int shooterCANId) {
+  public ShooterSubsystem(int shooterCANId, int followerCANId,int feederCANId) {
 
   /*
-     * Initialize the SPARK MAX and get its encoder and closed loop controller
+     * Initialize the SPARK MAXes and get encoders and closed loop controllers
      * objects for later use.
      */
-    motor1 = new SparkFlex(CANConstants.kShooterMotor1, MotorType.kBrushless);
-    motor1Sim = new SparkFlexSim(motor1, m_dcMotor);
-
-    //motor2 = new SparkFlex(CANConstants.kShooterMotor2, MotorType.kBrushless);
-    closedLoopController = motor1.getClosedLoopController();
-    encoder = motor1.getEncoder();
-
-    /*
-     * Create a new SPARK MAX configuration object. This will store the
-     * configuration parameters for the SPARK MAX that we will set below.
-     */
-    motorConfig = new SparkFlexConfig();
-    motorConfig.closedLoopRampRate(1.0);
-    //motorFollowerConfig = new SparkFlexConfig();
-    motorConfig.inverted(true);
-    //motorConfig.smartCurrentLimit(ShooterConstants.currentLimit);
-    /*
-     * Configure the encoder. For this specific example, we are using the
-     * integrated encoder of the NEO, and we don't need to configure it. If
-     * needed, we can adjust values like the position or velocity conversion
-     * factors.
-     */
-    /*
-    motorConfig.encoder
-        .positionConversionFactor(1)
-        .velocityConversionFactor(1);
-    */
-   /*
-     * Configure the 2nd motor on the Shooter to follow, inverted, the primary motor
-     */
-    //motorFollowerConfig
-    //  .apply(motorConfig)
-    //  .follow(motor1)
-    //  .inverted(true);
-
+    shooterMotor = new SparkFlex(shooterCANId, MotorType.kBrushless);
+    shooterMotorSim = new SparkFlexSim(shooterMotor, m_shooterDCMotorForSim);
+    shooterClosedLoopController = shooterMotor.getClosedLoopController();
+    shooterEncoder = shooterMotor.getEncoder();
+    shooterMotorConfig = new SparkFlexConfig();
+    shooterMotorConfig.closedLoopRampRate(1.0);
+    shooterMotorConfig.inverted(ShooterConstants.inverted);
     /*
      * Configure the closed loop controller. We want to make sure we set the
      * feedback sensor as the primary encoder.
      */
-    motorConfig.closedLoop
+    shooterMotorConfig.closedLoop
         .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
         // Set PID values for velocity control in slot 1
-        .p(ShooterConstants.kP*8.0)
+        .p(ShooterConstants.kP)
         .i(ShooterConstants.kI)
         .d(ShooterConstants.kD)
-        //.iMaxAccum(50.0)
-        //.iZone(50)
         .outputRange(ShooterConstants.minOutputPercent, ShooterConstants.maxOutputPercent)
         .feedForward
           // kV is now in Volts, so we multiply by the nominal voltage (12V)
           .kV(ShooterConstants.kV);
+    shooterMotor.configure(shooterMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
 
+
+    if (followerCANId != -1) {
+      followerMotor = new SparkFlex(followerCANId, MotorType.kBrushless);
+      followerSim = new SparkFlexSim(followerMotor, m_followerDCMotorForSim);
+      followerClosedLoopController = followerMotor.getClosedLoopController();
+      followerMotorConfig = new SparkFlexConfig();
+      followerMotorConfig.closedLoopRampRate(1.0);
+      followerMotorConfig.inverted(ShooterConstants.followerInverted);
+      /*
+      * Configure the closed loop controller. We want to make sure we set the
+      * feedback sensor as the primary encoder.
+      */
+      followerMotorConfig.closedLoop
+          .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
+          // Set PID values for velocity control in slot 1
+          .p(ShooterConstants.kP)
+          .i(ShooterConstants.kI)
+          .d(ShooterConstants.kD)
+          .outputRange(ShooterConstants.minOutputPercent, ShooterConstants.maxOutputPercent)
+          .feedForward
+            // kV is now in Volts, so we multiply by the nominal voltage (12V)
+            .kV(ShooterConstants.kV);
+      followerMotorConfig.follow(shooterMotor);
+      followerMotor.configure(followerMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
+
+    } else {
+      // No follower motor, so set all the follower variables to null.
+      followerMotor = null;
+      followerSim = null;
+      followerClosedLoopController = null;
+      followerMotorConfig = null;
+    }
+
+    feederMotor = new SparkFlex(feederCANId, MotorType.kBrushless);
+    feederMotorSim = new SparkFlexSim(feederMotor, m_feederDCMotorForSim);
+    feederClosedLoopController = feederMotor.getClosedLoopController();
+    feederEncoder = feederMotor.getEncoder();
+    feederMotorConfig = new SparkFlexConfig();
+    feederMotorConfig.closedLoopRampRate(1.0);
+    feederMotorConfig.inverted(FeederConstants.inverted);
     /*
-     * Apply the configuration to the SPARK MAX.
-     *
-     * kResetSafeParameters is used to get the SPARK MAX to a known state. This
-     * is useful in case the SPARK MAX is replaced.
-     *
-     * kPersistParameters is used to ensure the configuration is not lost when
-     * the SPARK MAX loses power. This is useful for power cycles that may occur
-     * mid-operation.
+     * Configure the closed loop controller. We want to make sure we set the
+     * feedback sensor as the primary encoder.
      */
-    motor1.configure(motorConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
-    /*
-    motorFollowerConfig
-      .apply(motorConfig)
-      .follow(motor1)
-      .inverted(true);
-    motor2.configure(motorFollowerConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
-    */
+    feederMotorConfig.closedLoop
+        .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
+        // Set PID values for velocity control in slot 1
+        .p(FeederConstants.kP)
+        .i(FeederConstants.kI)
+        .d(FeederConstants.kD)
+        .outputRange(FeederConstants.minOutputPercent, FeederConstants.maxOutputPercent)
+        .feedForward
+          // kV is now in Volts, so we multiply by the nominal voltage (12V)
+          .kV(FeederConstants.kV);
+    feederMotor.configure(feederMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
 
-    // Initialize dashboard values
-    SmartDashboard.setDefaultNumber("Shooter RPM Target", 0);
-    currentRPM = 0;
-    //SmartDashboard.putBoolean("Shooter OK", true);
+    shooterRPM = 0.0;
+    feederRPM = 0.0;
+    SmartDashboard.putNumber("Shooter Correction", shooterCorrection);
+
   }
 
   @Override
@@ -164,21 +196,12 @@ public class ShooterSubsystem extends SubsystemBase {
     //double rpm = SmartDashboard.getNumber("Shooter RPM Target", 0.0);
    //setRPM(rpm);
     // closed-loop velocity control
-    currentRPM = encoder.getVelocity();
     // telemetry
-    SmartDashboard.putNumber("Shooter RPM", currentRPM);
-    /*
-      // if the joystick is being used, save the current mode and switch to unjamming mode
-      double joystickInput = RobotContainer.rightJoystick.getY();
-      if (Math.abs(joystickInput) > 0.3) {
-        if (m_shooterMode != ShooterConstants.ShooterMode.UNJAMMING) {
-          m_savedShooterMode = m_shooterMode;
-        }
-        // If we are in unjamming mode and the joystick is not used, switch back to the saved mode.
-      } else if (m_shooterMode == ShooterConstants.ShooterMode.UNJAMMING) {
-        m_shooterMode = m_savedShooterMode;
-      }
-    */
+    shooterRPM = shooterEncoder.getVelocity();
+    SmartDashboard.putNumber("Shooter RPM", shooterRPM);
+    feederRPM = feederEncoder.getVelocity();
+    SmartDashboard.putNumber("Feeder RPM", feederRPM);
+    
     //Distance from the center of the robot (Adjust later)
     Pose2d robotPose = RobotContainer.m_poseEstimatorSubsystem.getCurrentPose();
     Translation2d hubPos = AllianceConfigurationSubsystem.getHubCenter();
@@ -186,6 +209,7 @@ public class ShooterSubsystem extends SubsystemBase {
     double distance = robotPose.getTranslation().getDistance(hubPos) - shooterOffset;
     SmartDashboard.putString("Distance to Hub", String.format("%1dft %1din", (int)Units.metersToInches(distance)/12, (int)Units.metersToInches(distance)%12));
     
+    // This next section seemed like a good idea but there are unresolved bugs: 
     // Manage shooter mode based on the clock.  Active when we can score, otherwise inactive.
     // If we are unjamming or fixed speed mode, leave it as it is.
     /*
@@ -198,22 +222,20 @@ public class ShooterSubsystem extends SubsystemBase {
       }
     }*/
     SmartDashboard.putString("ShooterMode", m_shooterMode.name());
+
     switch(m_shooterMode) {
       case IDLE -> {
         stop();  // De-energize the motor.
-        RobotContainer.m_FeederSubsystem.stop();
         smoothedRange.reset(); // Forget the past smoothing.
       }
       case AUTO_RANGING -> {
-        double correction = RobotContainer.getShooterCorrection();
-        double adjustedDistance = smoothedRange.addSample(distance+correction);
-        double RPM = distanceToRPMPWL(MathUtil.clamp(adjustedDistance, 1.0, 6.0)); // The RPM is not fit beyond this range.
+        double correction = getShooterCorrection();
+        double adjustedDistance = smoothedRange.addSample(distance);
+        double RPM = distanceToRPMPWL(MathUtil.clamp(adjustedDistance, 1.0, 6.0)) + correction; // The RPM is not fit beyond this range.
         setRPM(RPM);
-        RobotContainer.m_FeederSubsystem.setRPM(RPM);
       }
       case FIXED_SPEED -> {
-        setRPM(targetRPM);
-        RobotContainer.m_FeederSubsystem.setRPM(targetRPM);
+        setRPM(shooterTargetRPM);
 
       }
       case UNJAMMING -> {
@@ -229,7 +251,7 @@ public class ShooterSubsystem extends SubsystemBase {
 
   public void runMotor(double pOut){
     pOut = MathUtil.clamp(pOut, ShooterConstants.minOutputPercent, ShooterConstants.maxOutputPercent);
-    closedLoopController.setSetpoint(pOut, ControlType.kDutyCycle);
+    shooterClosedLoopController.setSetpoint(pOut, ControlType.kDutyCycle);
   }
 
   public double rpmToNativeUnits(double rpm) {
@@ -241,38 +263,84 @@ public class ShooterSubsystem extends SubsystemBase {
    * @param rpm (double) The rpm target for the shooter
    */
   public void setRPM(double rpm) {
-    targetRPM = rpm;
-    double targetVelocity = rpmToNativeUnits(rpm);
-    closedLoopController.setSetpoint(targetVelocity, ControlType.kVelocity);
-    SmartDashboard.putNumber("Shooter RPM Target", targetRPM);
-    
+    shooterTargetRPM = rpm;
+    feederTargetRPM = (rpm < 0) ? shooterTargetRPM : shooterTargetRPM*FeederConstants.shooterFactor;
+    double targetVelocity = rpmToNativeUnits(shooterTargetRPM);
+    // If rpm is negative, we are unjamming so run the feeder at the same speed as the shooter. Otherwise, run the feeder at a fraction of the shooter speed.
+    double feederTargetVelocity = rpmToNativeUnits(feederTargetRPM);
+    shooterClosedLoopController.setSetpoint(targetVelocity, ControlType.kVelocity);
+    SmartDashboard.putNumber("Shooter RPM Target", shooterTargetRPM);
+    feederClosedLoopController.setSetpoint(feederTargetVelocity, ControlType.kVelocity);
+    SmartDashboard.putNumber("Feeder RPM Target", feederTargetRPM);
   }
 
-  public double getRPM() {
-    return currentRPM * nativeUnitsToRPM;
+  public double getShooterRPM() {
+    return shooterRPM * nativeUnitsToRPM;
+  }
+
+  public double getFeederRPM() {
+    return feederRPM * nativeUnitsToRPM;
   }
 
   public void stop() {
-    closedLoopController.setSetpoint(0, ControlType.kDutyCycle);
-    targetRPM = 0.0;
+    shooterClosedLoopController.setSetpoint(0, ControlType.kDutyCycle);
+    if (followerMotor != null) 
+      followerClosedLoopController.setSetpoint(0, ControlType.kDutyCycle);
+    feederClosedLoopController.setSetpoint(0, ControlType.kDutyCycle);
+    m_shooterMode = ShooterConstants.ShooterMode.IDLE;
+    shooterTargetRPM = 0.0;
+    feederTargetRPM = 0.0;
+    SmartDashboard.putNumber("Shooter RPM Target", shooterTargetRPM);
+    SmartDashboard.putNumber("Feeder RPM Target", feederTargetRPM);
   }
 
   @Override
   public void simulationPeriodic() {
-    motor1Sim.setAppliedOutput(closedLoopController.getSetpoint());
-    motor1Sim.iterate(closedLoopController.getSetpoint(), 12, 0.02);
+    shooterMotorSim.setAppliedOutput(shooterClosedLoopController.getSetpoint());
+    shooterMotorSim.iterate(shooterClosedLoopController.getSetpoint(), 12, 0.02);
+    feederMotorSim.setAppliedOutput(feederClosedLoopController.getSetpoint());
+    feederMotorSim.iterate(feederClosedLoopController.getSetpoint(), 12, 0.02);
+    if (followerMotor != null) {
+      followerSim.setAppliedOutput(followerClosedLoopController.getSetpoint());
+      followerSim.iterate(followerClosedLoopController.getSetpoint(), 12, 0.02);
+    }
+  }
+  
+  public boolean shooterReadyToShoot() {
+    return Math.abs(shooterRPM - shooterTargetRPM) < ShooterConstants.RPMTolerance;
+  }
+  
+  public boolean feederReadyToShoot() {
+    return Math.abs(feederRPM - feederTargetRPM) < FeederConstants.RPMTolerance;
   }
 
+  public double shooterTargetRPM() {
+    return shooterTargetRPM;
+  }
+
+  public double feederTargetRPM() {
+    return feederTargetRPM;
+  }
+
+  public double shooterError() {
+    return shooterRPM - shooterTargetRPM;
+  } 
+
+  public double feederError() {
+    return feederRPM - feederTargetRPM;
+  } 
+  
   /* readyToShoot - helper function to determine if the shooter is up to speed and ready to shoot.
    * @param rpmTolerance (double) the tolerance in rpm for determining if the shooter is up to speed.
    * @return (boolean) true if the shooter is up to speed, false otherwise.
    */
-  public boolean readyToShoot(double rpmTolerance) {
-    return Math.abs(currentRPM - targetRPM) < rpmTolerance;
+  public boolean readyToShoot() {
+    return (Math.abs(shooterRPM - shooterTargetRPM) < ShooterConstants.RPMTolerance)
+        && (Math.abs(feederRPM - shooterTargetRPM*FeederConstants.shooterFactor) < FeederConstants.RPMTolerance);
   }
 
-  public double getTargetRPM() {
-    return targetRPM;
+  public double getShooterTargetRPM() {
+    return shooterTargetRPM;
   }
 
   /**
@@ -296,4 +364,14 @@ public class ShooterSubsystem extends SubsystemBase {
   public ShooterConstants.ShooterMode getShooterMode() {
     return m_shooterMode;
   }
+
+  public double getShooterCorrection() {
+    return shooterCorrection;
+  }
+
+  public void incrementShooterCorrection(double increment) {
+    shooterCorrection += increment;
+    SmartDashboard.putNumber("Shooter Correction", shooterCorrection);
+  }
+
 }

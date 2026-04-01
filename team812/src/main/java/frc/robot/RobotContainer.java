@@ -17,7 +17,6 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.XboxController.Button;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
@@ -27,13 +26,13 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.CANConstants;
 import frc.robot.Constants.IntakeConstants;
 import frc.robot.Constants.OIConstants;
-import frc.robot.Constants.ShooterConstants;
 import frc.robot.Constants.VisionConstants;
 import frc.robot.commands.DriveCircle;
 import frc.robot.commands.DriveCircleThrottle;
 import frc.robot.commands.DriveFacingHub;
 import frc.robot.commands.DriveRobotCommand;
 import frc.robot.commands.DriveWithoutVisionCommand;
+import frc.robot.commands.FaceHubCommand;
 import frc.robot.commands.FireAtWillCommand;
 import frc.robot.commands.FireAtWillWithShakingCommand;
 import frc.robot.commands.GotoPoseCommand;
@@ -54,10 +53,8 @@ import frc.robot.commands.SimSetRobotPoseCommand;
 import frc.robot.commands.SpinIndexerCommand;
 import frc.robot.commands.UnloadFuelCommand;
 import frc.robot.subsystems.AllianceConfigurationSubsystem;
-import frc.robot.subsystems.BellySubsystem;
 import frc.robot.subsystems.DriveSubsystemSRX;
 import frc.robot.subsystems.DriveSubsystemSRX.DrivingMode;
-import frc.robot.subsystems.FeederSubsystem;
 import frc.robot.subsystems.IndexerSubsystem;
 import frc.robot.subsystems.IntakeDeploymentSubsystem;
 import frc.robot.subsystems.IntakeSubsystem;
@@ -90,15 +87,12 @@ public class RobotContainer {
   public final static AllianceConfigurationSubsystem m_allianceConfigurationSubsystem = new AllianceConfigurationSubsystem(m_robotDrive, m_poseEstimatorSubsystem);
   private static  boolean isSimulation = !Robot.isReal();
   //public static PreussDriveSimulation m_preussDriveSimulation = new PreussDriveSimulation(m_poseEstimatorSubsystem);
-  private static final boolean debug = false; // To enable debugging in this module, change false to true.
-  public static ShooterSubsystem m_ShooterSubsystem = new ShooterSubsystem(CANConstants.kShooterMotor1);
+  private static final boolean debug = true; // To enable debugging in this module, change false to true.
+  public static ShooterSubsystem m_ShooterSubsystem = new ShooterSubsystem(CANConstants.kShooterMotor, CANConstants.kFollowerMotor, CANConstants.kFeederMotor);
   public static IntakeSubsystem m_IntakeSubsystem = new IntakeSubsystem(CANConstants.kIntakeMotor);
   public static IntakeDeploymentSubsystem m_IntakeDeploymentSubsystem = new IntakeDeploymentSubsystem(CANConstants.kIntakeDeploymentMotor);
-  public static FeederSubsystem m_FeederSubsystem = new FeederSubsystem(CANConstants.kFeederMotor);
   public static IndexerSubsystem m_IndexerSubsystem = new IndexerSubsystem(CANConstants.kIndexerMotor);
-  //public static BellySubsystem m_BellySubsystem = new BellySubsystem(CANConstants.kBellyMotor);
 
-  private static double shooterCorrection = 0.0;
   private static boolean m_raisingIntake = true;
   /*
 
@@ -181,14 +175,7 @@ public class RobotContainer {
         m_robotDrive)
     );
 
-    // The feeder is just following the shooter motor.
-    /*m_FeederSubsystem.setDefaultCommand(
-      new ConditionalCommand(
-        new RunCommand(() -> m_FeederSubsystem.setRPM(m_ShooterSubsystem.getTargetRPM()), m_FeederSubsystem),
-        new RunCommand(() -> m_FeederSubsystem.stop(), m_FeederSubsystem),
-        () -> (m_ShooterSubsystem.getShooterMode() != ShooterConstants.ShooterMode.IDLE)
-      )
-    );*/
+    
 
     /*
     // The XBox right trigger will control the indexer motor turning it on when the trigger is > 50%.
@@ -200,20 +187,9 @@ public class RobotContainer {
       )
     );
     */
-    SmartDashboard.putNumber("Shooter Correction", Units.metersToFeet(shooterCorrection));
 
   }
 
-  public void setShooterFeederSpeed(double rpm) {
-    m_ShooterSubsystem.setShooterMode(ShooterConstants.ShooterMode.FIXED_SPEED);
-    m_ShooterSubsystem.setRPM(rpm);
-    //m_FeederSubsystem.setRPM(rpm);
-  }
-
-  public void stopShooterFeeder() {
-    m_ShooterSubsystem.stop();
-    m_FeederSubsystem.stop();
-  }
   /**
    * Use this method to define your button->command mappings. Buttons can be
    * created by
@@ -268,7 +244,7 @@ public class RobotContainer {
     // Right bumper puts the robot in a mode where the left stick controls translation but the robot automatically faces the hub.
     new JoystickButton(m_driverController, Button.kRightBumper.value)
     .onTrue(
-        new PrepareToShootCommand(m_ShooterSubsystem, m_FeederSubsystem, m_poseEstimatorSubsystem)
+        new PrepareToShootCommand(m_ShooterSubsystem, m_poseEstimatorSubsystem)
     );
 
   new JoystickButton(m_driverController, Button.kLeftBumper.value)
@@ -327,28 +303,27 @@ public class RobotContainer {
     */
 
     new JoystickButton(leftJoystick, 1).whileTrue(new UnloadFuelCommand(m_IntakeSubsystem));
-    new JoystickButton(leftJoystick, 6).whileTrue(new FireAtWillWithShakingCommand(m_ShooterSubsystem, m_FeederSubsystem, m_IndexerSubsystem, null));
+    new JoystickButton(leftJoystick, 6).whileTrue(new FireAtWillWithShakingCommand(m_ShooterSubsystem, m_IndexerSubsystem, null));
 
-    // Left Joystick buttons 7,8,9,10 control the shooter and feeder speed for testing. 7 is stop, 8 is 3000 RPM, 9 is current target RPM - 25, 10 is current target RPM + 25.
+    // Left Joystick buttons 7,8,9,10 control the shooter and feeder speed for testing. 7 is stop, 8 is 3000 RPM, 9 is current target RPM - 50, 10 is current target RPM + 50.
     new JoystickButton(leftJoystick, 7).onTrue(
-      new InstantCommand(() -> stopShooterFeeder(), m_ShooterSubsystem, m_FeederSubsystem)
+      new InstantCommand(() -> m_ShooterSubsystem.stop(), m_ShooterSubsystem)
     );
     new JoystickButton(leftJoystick, 8).onTrue(
-      new InstantCommand(() -> setShooterFeederSpeed(2600), m_ShooterSubsystem, m_FeederSubsystem)
+      new InstantCommand(() -> m_ShooterSubsystem.setRPM(2600), m_ShooterSubsystem)
     );
     new JoystickButton(leftJoystick, 9).onTrue(   
-      new InstantCommand(() -> setShooterFeederSpeed(m_ShooterSubsystem.getTargetRPM()-50), m_ShooterSubsystem, m_FeederSubsystem)
+      new InstantCommand(() -> m_ShooterSubsystem.incrementShooterCorrection(-25.0))
     );
     new JoystickButton(leftJoystick, 10).onTrue(
 
-      new InstantCommand(() -> setShooterFeederSpeed(m_ShooterSubsystem.getTargetRPM()+50), m_ShooterSubsystem, m_FeederSubsystem)
+      new InstantCommand(() -> m_ShooterSubsystem.incrementShooterCorrection(25.0))
     );
-
     new JoystickButton(leftJoystick, 11).onTrue(
-      new InstantCommand(() -> incrementShooterCorrection(Units.inchesToMeters(-6.0)))
+      new InstantCommand(() -> m_ShooterSubsystem.incrementShooterCorrection(-50.0)) // 50 RPM slower or about 6 inches shorter.
     );
     new JoystickButton(leftJoystick, 12).onTrue(
-      new InstantCommand(() -> incrementShooterCorrection(Units.inchesToMeters(6.0)))
+      new InstantCommand(() -> m_ShooterSubsystem.incrementShooterCorrection(50.0)) // 50 RPM faster or about 6 inches shorter.
     );
 
 
@@ -366,10 +341,10 @@ public class RobotContainer {
       new InstantCommand(()->m_IntakeSubsystem.stop(), m_IntakeSubsystem)
     );
     new JoystickButton(rightJoystick, 11).onTrue(
-      new PrepareToShootCommand(m_ShooterSubsystem, m_FeederSubsystem, m_poseEstimatorSubsystem)
+      new PrepareToShootCommand(m_ShooterSubsystem, m_poseEstimatorSubsystem)
     );
     new JoystickButton(rightJoystick, 12).onTrue(
-      new InstantCommand(() -> stopShooterFeeder(), m_ShooterSubsystem, m_FeederSubsystem)
+      new InstantCommand(() -> m_ShooterSubsystem.stop(), m_ShooterSubsystem)
     ); 
     // Left trigger lowers the intake.
     new JoystickButton(rightJoystick, 1).whileTrue(
@@ -383,9 +358,9 @@ public class RobotContainer {
     // Shake the robot to facilitate ball movement.
     new JoystickButton(rightJoystick, 3).whileTrue(new ShakeThingsUpCommand(m_robotDrive));
     // reverse the shooter to clear stuck fuel.
-    new JoystickButton(rightJoystick, 4).whileTrue(new ReverseShooterFeederCommand(m_ShooterSubsystem, m_FeederSubsystem));
+    new JoystickButton(rightJoystick, 4).whileTrue(new ReverseShooterFeederCommand(m_ShooterSubsystem));
     new JoystickButton(rightJoystick, 5).whileTrue(new ShakeTheIntakeCommand(m_IntakeDeploymentSubsystem));
-    new JoystickButton(rightJoystick, 6).whileTrue(new ReverseTheShooterFeederIndexerCommand(m_ShooterSubsystem, m_FeederSubsystem, m_IndexerSubsystem));
+    new JoystickButton(rightJoystick, 6).whileTrue(new ReverseTheShooterFeederIndexerCommand(m_ShooterSubsystem, m_IndexerSubsystem));
 
     // POV buttons to point robot to a given heading where 0 is
     // straight downfield from the driver's perspective.
@@ -425,7 +400,6 @@ public class RobotContainer {
         "G2", new GotoPoseCommand(m_robotDrive,  m_poseEstimatorSubsystem, new Pose2d(12, 6, new Rotation2d(0)), null));
         SmartDashboard.putData("FW", new FireAtWillCommand(
           m_ShooterSubsystem,
-          m_FeederSubsystem,
           m_IndexerSubsystem,
           m_poseEstimatorSubsystem
         ));
@@ -438,11 +412,14 @@ public class RobotContainer {
         //SmartDashboard.putData("RTest", new ShooterTest(m_ShooterSubsystem, m_poseEstimatorSubsystem));     
         //SmartDashboard.putData("RI", new RaiseIntakeCommand(m_IntakeDeploymentSubsystem));
         //SmartDashboard.putData("LI", new LowerIntakeCommand(m_IntakeDeploymentSubsystem));
-        //SmartDashboard.putData("PS", new PrepareToShootCommand(m_ShooterSubsystem, m_FeederSubsystem, m_poseEstimatorSubsystem));
-        //SmartDashboard.putData("FH", new FaceHubCommand(m_robotDrive, m_poseEstimatorSubsystem));
+        SmartDashboard.putData("PS", new PrepareToShootCommand(m_ShooterSubsystem, m_poseEstimatorSubsystem));
+        SmartDashboard.putData("FH", new FaceHubCommand(m_robotDrive, m_poseEstimatorSubsystem));
         //SmartDashboard.putData("AR", new InstantCommand(() -> alignGyroRotationToFieldRotation(RotationConstants.rotate180), m_robotDrive));
-        //SmartDashboard.putData("RS", new ReverseTheShooterFeederIndexerCommand(m_ShooterSubsystem, m_FeederSubsystem, m_IndexerSubsystem));
-        //SmartDashboard.putData("PS", new PrepareToShootCommand(m_ShooterSubsystem, m_FeederSubsystem, m_poseEstimatorSubsystem));
+        SmartDashboard.putData("RS", new ReverseTheShooterFeederIndexerCommand(m_ShooterSubsystem, m_IndexerSubsystem));
+        SmartDashboard.putData("S+", new InstantCommand(() -> m_ShooterSubsystem.incrementShooterCorrection(50.0)));
+        SmartDashboard.putData("S-", new InstantCommand(() -> m_ShooterSubsystem.incrementShooterCorrection(-50.0)));
+        SmartDashboard.putData("SS", new InstantCommand(() -> m_ShooterSubsystem.stop(), m_ShooterSubsystem));
+        //SmartDashboard.putData("PS", new PrepareToShootCommand(m_ShooterSubsystem, m_poseEstimatorSubsystem));
         //Pose2d OneMeter = new Pose2d(1.0, 0.0, new Rotation2d(0.0));
         //SmartDashboard.putData("DB", new DriveWithoutVisionCommand(m_robotDrive, m_poseEstimatorSubsystem, OneMeter, null));
     } // (isSimulation()
@@ -519,15 +496,6 @@ public class RobotContainer {
     m_robotDrive.setAngleDegrees(pose.getRotation().getDegrees());
     m_robotDrive.resetOdometry(pose);
     m_poseEstimatorSubsystem.setCurrentPose(pose);
-  }
-
-  static public double getShooterCorrection() {
-    return shooterCorrection;
-  }
-
-  static public void incrementShooterCorrection(double increment) {
-    shooterCorrection += increment;
-    SmartDashboard.putNumber("Shooter Correction", Units.metersToFeet(shooterCorrection));
   }
 
 }

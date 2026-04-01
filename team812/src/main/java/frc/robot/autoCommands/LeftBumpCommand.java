@@ -40,8 +40,7 @@ public class LeftBumpCommand extends SequentialCommandGroup {
             ),
             // Stop the intake.
             //new InstantCommand(()->RobotContainer.m_IntakeSubsystem.stop(), RobotContainer.m_IntakeSubsystem),
-            new SetShooterSpeedCommand(RobotContainer.m_ShooterSubsystem, RobotContainer.m_FeederSubsystem, 3000), 
-            // Return to out alliance zone 
+            new SetShooterSpeedCommand(RobotContainer.m_ShooterSubsystem, 3000.0),
             new DriveChoreoPathCommand(
             RobotContainer.m_robotDrive,
             RobotContainer.m_poseEstimatorSubsystem,

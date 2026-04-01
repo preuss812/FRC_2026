@@ -5,10 +5,8 @@
 package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.Constants.FeederConstants;
 import frc.robot.Constants.IndexerConstants;
 import frc.robot.Constants.ShooterConstants;
-import frc.robot.subsystems.FeederSubsystem;
 import frc.robot.subsystems.IndexerSubsystem;
 import frc.robot.subsystems.PoseEstimatorSubsystem;
 import frc.robot.subsystems.ShooterSubsystem;
@@ -17,16 +15,13 @@ import frc.robot.subsystems.ShooterSubsystem;
 public class FireAtWillCommand extends Command {
   /** Creates a new FireAtWillCommand. */
   private final ShooterSubsystem shooterSubsystem;
-  private final FeederSubsystem feederSubsystem;
   private final IndexerSubsystem indexerSubsystem;
   private final PoseEstimatorSubsystem poseEstimatorSubsystem;
   public FireAtWillCommand(
     ShooterSubsystem shooterSubsystem,
-    FeederSubsystem feederSubsystem,
     IndexerSubsystem indexerSubsystem,
     PoseEstimatorSubsystem poseEstimatorSubsystem) {
       this.shooterSubsystem = shooterSubsystem;
-      this.feederSubsystem = feederSubsystem;
       this.indexerSubsystem = indexerSubsystem;
       this.poseEstimatorSubsystem = poseEstimatorSubsystem;
     // Use addRequirements() here to declare subsystem dependencies.
@@ -41,8 +36,7 @@ public class FireAtWillCommand extends Command {
   @Override
   public void execute() {
     if (poseEstimatorSubsystem.facingHub(ShooterConstants.rotationTolerance)
-      && shooterSubsystem.readyToShoot(ShooterConstants.RPMTolerance)
-      && feederSubsystem.readyToShoot(FeederConstants.RPMTolerance)) {
+      && shooterSubsystem.readyToShoot()) {
         indexerSubsystem.runMotor(IndexerConstants.indexerPercentOutput);
     } else {
       indexerSubsystem.stop();

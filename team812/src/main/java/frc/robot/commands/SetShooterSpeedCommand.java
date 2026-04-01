@@ -5,32 +5,27 @@
 package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.subsystems.FeederSubsystem;
 import frc.robot.subsystems.ShooterSubsystem;
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
 public class SetShooterSpeedCommand extends Command {
   private final ShooterSubsystem m_ShooterSubsystem;
-  private final FeederSubsystem m_FeederSubsystem;
   private final double m_RPM;
   /** Creates a new SetShooterSpeedCommand. */
   public SetShooterSpeedCommand(
     ShooterSubsystem shooterSubsystem,
-    FeederSubsystem feederSubsystem,
     double RPM
   ) {
     m_ShooterSubsystem = shooterSubsystem;
-    m_FeederSubsystem = feederSubsystem;
     m_RPM = RPM;
     // Use addRequirements() here to declare subsystem dependencies.
-    addRequirements(shooterSubsystem, feederSubsystem);
+    addRequirements(shooterSubsystem);
   }
 
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
     m_ShooterSubsystem.setRPM(m_RPM);
-    m_FeederSubsystem.setRPM(m_RPM);
   }
 
   // Called every time the scheduler runs while the command is scheduled.

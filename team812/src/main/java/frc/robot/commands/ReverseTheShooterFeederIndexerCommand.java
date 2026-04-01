@@ -7,23 +7,19 @@ package frc.robot.commands;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants;
 import frc.robot.Constants.ShooterConstants;
-import frc.robot.subsystems.FeederSubsystem;
 import frc.robot.subsystems.IndexerSubsystem;
 import frc.robot.subsystems.ShooterSubsystem;
 
 // Run the shooter & feeder & indexer backwards to attempt to clear fuel that might be stuck.
 public class ReverseTheShooterFeederIndexerCommand extends Command {
   private final ShooterSubsystem m_ShooterSubsystem;
-  private final FeederSubsystem m_FeederSubsystem;
   private final IndexerSubsystem m_IndexerSubsystem;
   /** Creates a new ReverseTheShooterFeederIndexerCommand. */
   public ReverseTheShooterFeederIndexerCommand(
     ShooterSubsystem shooterSubsystem,
-    FeederSubsystem feederSubsystem,
     IndexerSubsystem indexerSubsystem
   ) {
     this.m_ShooterSubsystem = shooterSubsystem;
-    this.m_FeederSubsystem = feederSubsystem;
     this.m_IndexerSubsystem = indexerSubsystem;
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(shooterSubsystem, /*feederSubsystem, */indexerSubsystem);

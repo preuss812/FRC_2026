@@ -40,7 +40,7 @@ public class RightBumpCommand extends SequentialCommandGroup {
                 1.0
             ),
             // Stop the intake.
-            new SetShooterSpeedCommand(RobotContainer.m_ShooterSubsystem, RobotContainer.m_FeederSubsystem, 3000), 
+            new SetShooterSpeedCommand(RobotContainer.m_ShooterSubsystem, 3000), 
             // Return to out alliance zone 
             new DriveChoreoPathCommand(
             RobotContainer.m_robotDrive,
