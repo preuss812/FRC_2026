@@ -3,7 +3,22 @@
  "version":2,
  "type":"Swerve",
  "variables":{
-  "expressions":{},
+  "expressions":{
+   "bump":{
+    "dimension":"Number",
+    "var":{
+     "exp":"2",
+     "val":2.0
+    }
+   },
+   "gather":{
+    "dimension":"Number",
+    "var":{
+     "exp":"1.8",
+     "val":1.8
+    }
+   }
+  },
   "poses":{}
  },
  "config":{
