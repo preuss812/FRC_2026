@@ -143,12 +143,13 @@ public class DriveSubsystemSRX extends SubsystemBase {
   
   aggressiveAutoConfig = new DrivingConfig()
     .setMaxThrottle(0.8)
-    .setMaxRotation(0.8)
+    .setMaxRotation(0.6)
     .setLinearP(0.40)
     .setLinearIZone(Units.inchesToMeters(4.0))
     .setLinearTolerance(Units.inchesToMeters(2.0))
-    .setAngularP(0.5)
-    .setAngularIZone(Units.degreesToRadians(10.0))
+    .setAngularP(4.0)
+    .setAngularD(0.16)
+    .setAngularIZone(Units.degreesToRadians(2.0))
     .setAngularTolerance(Units.degreesToRadians(2.0));
     // TODO Do we need to reset the gyro here?
   }

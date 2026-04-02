@@ -327,7 +327,7 @@ public final class Constants {
         public static final double kDirectionSlewRate = 1.2; // radians per second
         public static final double kMagnitudeIncreaseSlewRate = 0.75; // percent per second (1 = 100%)
         public static final double kMagnitudeDecreaseSlewRate = 1.8; // percent per second (1 = 100%)
-        public static final double kRotationalIncreaseSlewRate = 0.4;// 2.0; // percent per second (1 = 100%) // UNDO
+        public static final double kRotationalIncreaseSlewRate = 1.0;// 2.0; // percent per second (1 = 100%) // UNDO
         public static final double kRotationalDecreaseSlewRate = 2.0;
 
         // Driving Parameters for PRECISION DrivingMode.  This is a slower mode for more precise positioning.
@@ -655,6 +655,13 @@ public final class Constants {
         public static final double maxRPM = 6784.0; // Neo Vortex
         public static final double kV = 12.0/maxRPM; // Docs say 1.0 should be 12.0 but emperically 12.0 is not right.
         public static final int shakeCycles = 20; // number of periods to move in the same direction before reversing.
+        // Constants to convert position in rotations to position in degrees.  These are based on emperical measurements of the mechanism.
+        public static final double minPosition = -11.0;
+        public static final double maxPosition = 0.0;
+        public static final double minRotation = Units.degreesToRadians(0.0);
+        public static final double maxRotation = Units.degreesToRadians(95.0);
+        public static final double positionToRotationFactor = (maxRotation - minRotation) / (maxPosition - minPosition);
+        public static final double maxFeedForwardPercent = 0.5; // The maximum percent output to use for feed forward.
     }
 
     public static final class BellyConstants {

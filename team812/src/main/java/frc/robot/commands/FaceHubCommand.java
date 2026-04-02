@@ -5,6 +5,8 @@
 package frc.robot.commands;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.AllianceConfigurationSubsystem;
 import frc.robot.subsystems.DriveSubsystemSRX;
@@ -40,6 +42,7 @@ public class FaceHubCommand extends Command {
     double currentRotation = m_PoseEstimatorSubsystem.getCurrentPose().getRotation().getRadians();
     double desiredRotation = AllianceConfigurationSubsystem.robotFrontFacingHub().getRadians();
     double rotationError = MathUtil.angleModulus(currentRotation - desiredRotation);
+    SmartDashboard.putNumber("RotationError", Units.radiansToDegrees(rotationError));
     m_PoseEstimatorSubsystem.setRotationErrorToHub(rotationError);
     double rotationPercent = m_preussAutoDrive.calculateClampedRotation(rotationError);
     m_DriveSubsystemSRX.allianceRelativeDrive(0.0, 0.0, rotationPercent, true, true);

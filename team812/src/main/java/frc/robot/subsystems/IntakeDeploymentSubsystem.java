@@ -28,6 +28,7 @@ public class IntakeDeploymentSubsystem extends SubsystemBase {
 
     // IntakeDeployment settings
     private double targetRPM = 0.0;  // desired intakedeployment wheel speed
+    private double targetPosition = 0.0; // desired intakedeployment position in rotations, where 0.0 is fully raised position.
     private double currentRPM; // the current rpm of the intakedeployment.
     // native units are rpm for the Spark MAX closed loop controller.
     // With external through bore encoder this calculation would be more typical:
@@ -149,9 +150,19 @@ public class IntakeDeploymentSubsystem extends SubsystemBase {
     SmartDashboard.putNumber("IntakeDeployment RPM", currentRPM);
     m_position = encoder.getPosition();
     SmartDashboard.putNumber("Intake Position", m_position);
-    
+
+    double armAngle = IntakeDeploymentConstants.minRotation + (m_position - IntakeDeploymentConstants.minPosition) * IntakeDeploymentConstants.positionToRotationFactor;
+    double feedForward = IntakeDeploymentConstants.maxFeedForwardPercent * Math.cos(armAngle);
+
+    // Set feedforward based on operating mode.
+    if (closedLoopController.getControlType() == ControlType.kVelocity) {
+      SmartDashboard.putNumber("IntakeDeployment Target RPM", targetRPM);
+      closedLoopController.setSetpoint(targetRPM, ControlType.kVelocity); // Not using feedforward although it would possibly help.
+    } else if (closedLoopController.getControlType() == ControlType.kPosition) {
+      SmartDashboard.putNumber("IntakeDeployment Target Position", closedLoopController.getSetpoint());
+      closedLoopController.setSetpoint(targetPosition, ControlType.kPosition, ClosedLoopSlot.kSlot1, feedForward);
+    }
     // = SmartDashboard.getNumber("Target Velocity", 0);
-    closedLoopController.setSetpoint(targetRPM, ControlType.kVelocity);
     m_atFwdLimit = m_fwdLimitSwitch.isPressed();
     m_atRevLimit = m_revLimitSwitch.isPressed();
     SmartDashboard.putBoolean("IntakeFwdLimit", m_atFwdLimit);
@@ -161,6 +172,7 @@ public class IntakeDeploymentSubsystem extends SubsystemBase {
 
     if (m_atFwdLimit) encoder.setPosition(0.0);
   }
+
   public double getPosition() {
     return m_position;
   }
@@ -190,7 +202,13 @@ public class IntakeDeploymentSubsystem extends SubsystemBase {
   }
 
   public void setPosition(double targetPosition) {
-    closedLoopController.setSetpoint(targetPosition, ControlType.kPosition, ClosedLoopSlot.kSlot1);
+    m_position = encoder.getPosition();
+    SmartDashboard.putNumber("Intake Position", m_position);
+    double armAngle = IntakeDeploymentConstants.minRotation + (m_position - IntakeDeploymentConstants.minPosition) * IntakeDeploymentConstants.positionToRotationFactor;
+    double feedForward = IntakeDeploymentConstants.maxFeedForwardPercent * Math.cos(armAngle);
+    this.targetPosition = MathUtil.clamp(targetPosition, IntakeDeploymentConstants.minPosition, IntakeDeploymentConstants.maxPosition);
+    closedLoopController.setSetpoint(targetPosition, ControlType.kPosition, ClosedLoopSlot.kSlot1, feedForward);
+    SmartDashboard.putNumber("IntakeDeployment Target Position", this.targetPosition);
   }
 
   public void stop() {
