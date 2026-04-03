@@ -310,14 +310,14 @@ public class RobotContainer {
       new InstantCommand(() -> m_ShooterSubsystem.stop(), m_ShooterSubsystem)
     );
     new JoystickButton(leftJoystick, 8).onTrue(
-      new InstantCommand(() -> m_ShooterSubsystem.setRPM(2600), m_ShooterSubsystem)
+      new InstantCommand(() -> m_ShooterSubsystem.setFixedRPM(2600), m_ShooterSubsystem)
     );
     new JoystickButton(leftJoystick, 9).onTrue(   
-      new InstantCommand(() -> m_ShooterSubsystem.incrementShooterCorrection(-25.0))
+      new InstantCommand(() -> m_ShooterSubsystem.setFixedRPM(m_ShooterSubsystem.getShooterTargetRPM() - 25.0))
     );
     new JoystickButton(leftJoystick, 10).onTrue(
 
-      new InstantCommand(() -> m_ShooterSubsystem.incrementShooterCorrection(25.0))
+      new InstantCommand(() -> m_ShooterSubsystem.setFixedRPM(m_ShooterSubsystem.getShooterTargetRPM() + 25.0))
     );
     new JoystickButton(leftJoystick, 11).onTrue(
       new InstantCommand(() -> m_ShooterSubsystem.incrementShooterCorrection(-50.0)) // 50 RPM slower or about 6 inches shorter.

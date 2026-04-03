@@ -142,8 +142,8 @@ public class DriveSubsystemSRX extends SubsystemBase {
     .setAngularTolerance(Units.degreesToRadians(2.0));
   
   aggressiveAutoConfig = new DrivingConfig()
-    .setMaxThrottle(0.8)
-    .setMaxRotation(0.6)
+    .setMaxThrottle(1.0)
+    .setMaxRotation(1.0)
     .setLinearP(0.40)
     .setLinearIZone(Units.inchesToMeters(4.0))
     .setLinearTolerance(Units.inchesToMeters(2.0))
