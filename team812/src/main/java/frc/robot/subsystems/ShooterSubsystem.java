@@ -14,7 +14,6 @@ import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.SparkFlexConfig;
-import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -25,6 +24,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.FeederConstants;
 import frc.robot.Constants.ShooterConstants;
+import frc.robot.Constants.ShooterConstants.ShooterMode;
 import frc.robot.RobotContainer;
 import frc.utils.ExponentialSmoother;
 
@@ -65,7 +65,7 @@ public class ShooterSubsystem extends SubsystemBase {
   private ShooterConstants.ShooterMode m_shooterMode = ShooterConstants.ShooterMode.IDLE;
   //private ShooterConstants.ShooterMode m_savedShooterMode = ShooterConstants.ShooterMode.IDLE;
   private final ExponentialSmoother smoothedRange = new ExponentialSmoother(1.0); // Not smoothing for now.
-  private final double pwl[] = { // array or rpm vs feet from hub
+  private final double pwl[] = { // array for rpm vs feet from hub
     2500.0, // 0
     2500.0, // 1
     2500.0, // 2
@@ -112,7 +112,6 @@ public class ShooterSubsystem extends SubsystemBase {
     shooterEncoder = shooterMotor.getEncoder();
     shooterMotorConfig = new SparkFlexConfig();
     shooterMotorConfig.closedLoopRampRate(1.0);
-    shooterMotorConfig.idleMode(IdleMode.kCoast);
     shooterMotorConfig.inverted(ShooterConstants.inverted);
     /*
      * Configure the closed loop controller. We want to make sure we set the
@@ -137,12 +136,10 @@ public class ShooterSubsystem extends SubsystemBase {
       followerClosedLoopController = followerMotor.getClosedLoopController();
       followerMotorConfig = new SparkFlexConfig();
       followerMotorConfig.closedLoopRampRate(1.0);
-      followerMotorConfig.idleMode(IdleMode.kCoast);
-
       followerMotorConfig.inverted(ShooterConstants.followerInverted);
       /*
       * Configure the closed loop controller. We want to make sure we set the
-      * feedback sensor as the primary encoder.
+      * feedback sensor as the primary encoder.%
       */
       followerMotorConfig.closedLoop
           .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
@@ -154,7 +151,7 @@ public class ShooterSubsystem extends SubsystemBase {
           .feedForward
             // kV is now in Volts, so we multiply by the nominal voltage (12V)
             .kV(ShooterConstants.kV);
-      followerMotorConfig.follow(shooterMotor, true);
+      followerMotorConfig.follow(shooterMotor);
       followerMotor.configure(followerMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
 
     } else {
@@ -240,7 +237,6 @@ public class ShooterSubsystem extends SubsystemBase {
       }
       case FIXED_SPEED -> {
         setRPM(shooterTargetRPM);
-
       }
       case UNJAMMING -> {
         /*
@@ -251,8 +247,6 @@ public class ShooterSubsystem extends SubsystemBase {
         smoothedRange.reset(); // Forget the past smoothing.
       }
     }
-    SmartDashboard.putNumber("Shooter PCT OUT", shooterMotor.getAppliedOutput());
-    SmartDashboard.putNumber("Follower PCT OUT", followerMotor.getAppliedOutput());
   }
 
   public void runMotor(double pOut){

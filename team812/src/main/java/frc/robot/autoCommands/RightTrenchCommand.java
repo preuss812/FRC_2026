@@ -12,7 +12,9 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.Constants.IntakeConstants;
+import frc.robot.Constants;
 import frc.robot.RobotContainer;
+import frc.robot.commands.AgitateIntakeCommand;
 import frc.robot.commands.DriveChoreoPathCommand;
 import frc.robot.commands.FaceHubAndShootCommand;
 import frc.robot.commands.LowerIntakeCommand;
@@ -69,8 +71,9 @@ public class RightTrenchCommand extends SequentialCommandGroup {
             // Shoot the fuel cells we just picked up.
             new ParallelCommandGroup(
                 new FaceHubAndShootCommand(),
-                new ShakeTheIntakeCommand(RobotContainer.m_IntakeDeploymentSubsystem))
-                .withTimeout(8)
+                new ShakeTheIntakeCommand(RobotContainer.m_IntakeDeploymentSubsystem),
+                new AgitateIntakeCommand(RobotContainer.m_IntakeSubsystem))
+                .withTimeout(Constants.AutoConstants.kShooterTimout)
             ,
             
             //Drive out to intake a second time

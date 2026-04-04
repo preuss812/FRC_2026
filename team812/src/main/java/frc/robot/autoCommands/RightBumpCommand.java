@@ -11,8 +11,10 @@ import choreo.trajectory.Trajectory;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import frc.robot.Constants;
 import frc.robot.Constants.IntakeConstants;
 import frc.robot.RobotContainer;
+import frc.robot.commands.AgitateIntakeCommand;
 import frc.robot.commands.DriveChoreoPathCommand;
 import frc.robot.commands.FaceHubAndShootCommand;
 import frc.robot.commands.LowerIntakeCommand;
@@ -53,8 +55,9 @@ public class RightBumpCommand extends SequentialCommandGroup {
             // Shoot the fuel cells we just picked up.
             new ParallelCommandGroup(
                 new FaceHubAndShootCommand(),
-                new ShakeTheIntakeCommand(RobotContainer.m_IntakeDeploymentSubsystem)
-            ).withTimeout(6.0),
+                new ShakeTheIntakeCommand(RobotContainer.m_IntakeDeploymentSubsystem),
+                new AgitateIntakeCommand(RobotContainer.m_IntakeSubsystem))
+                .withTimeout(Constants.AutoConstants.kShooterTimout),
 
             // Make a second pass through the center for more fuel.
             new InstantCommand(()->RobotContainer.m_IntakeSubsystem.runMotor(IntakeConstants.pickupFuelSpeed),RobotContainer.m_IntakeSubsystem),
@@ -70,8 +73,8 @@ public class RightBumpCommand extends SequentialCommandGroup {
             new InstantCommand(()->RobotContainer.m_IntakeSubsystem.stop(), RobotContainer.m_IntakeSubsystem),
             new ParallelCommandGroup(
                 new FaceHubAndShootCommand(),
-                new ShakeTheIntakeCommand(RobotContainer.m_IntakeDeploymentSubsystem)
-            )
-        );
+                new ShakeTheIntakeCommand(RobotContainer.m_IntakeDeploymentSubsystem),
+                new AgitateIntakeCommand(RobotContainer.m_IntakeSubsystem))
+            );
     }
 }

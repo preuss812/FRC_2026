@@ -30,7 +30,7 @@ public class DrivingConfig {
     public DrivingConfig() {
       // Set up default values.  These should be good for actual driving.
       drivingMode = DrivingMode.SPEED;
-      maxThrottle = 0.80;
+      maxThrottle = 1.0;
       linearP = 1.0;
       linearI = 0.0; // linearP/100.0;
       linearD = 0.0; // linearP*10.0;

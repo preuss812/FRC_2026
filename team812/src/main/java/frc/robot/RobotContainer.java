@@ -27,6 +27,7 @@ import frc.robot.Constants.CANConstants;
 import frc.robot.Constants.IntakeConstants;
 import frc.robot.Constants.OIConstants;
 import frc.robot.Constants.VisionConstants;
+import frc.robot.commands.AgitateIntakeCommand;
 import frc.robot.commands.DriveCircle;
 import frc.robot.commands.DriveCircleThrottle;
 import frc.robot.commands.DriveFacingHub;
@@ -224,12 +225,9 @@ public class RobotContainer {
     new JoystickButton(m_driverController, Button.kY.value).onTrue(new ResetDriveTrainCommand(this));
 
     // X button reverses and the forwards the intake to try and dislodge stuck fuel.
-    new JoystickButton(m_driverController, Button.kX.value).onTrue(
-      new SequentialCommandGroup(
-      new RunCommand(()->m_IntakeSubsystem.runMotor(-IntakeConstants.pickupFuelSpeed), m_IntakeSubsystem).withTimeout(0.08),
-      new RunCommand(()->m_IntakeSubsystem.runMotor(IntakeConstants.pickupFuelSpeed), m_IntakeSubsystem).withTimeout(0.5),
-      new InstantCommand(()->m_IntakeSubsystem.stop(), m_IntakeSubsystem)
-      ));
+    new JoystickButton(m_driverController, Button.kX.value).whileTrue(
+      new AgitateIntakeCommand(m_IntakeSubsystem)
+      );
 
     // Xbox start button puts thte robot in fast/speed driving mode.
     new JoystickButton(m_driverController, Button.kStart.value).onTrue(
