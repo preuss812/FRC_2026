@@ -13,6 +13,7 @@ import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
+import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkFlexConfig;
 
 import edu.wpi.first.math.MathUtil;
@@ -112,6 +113,7 @@ public class ShooterSubsystem extends SubsystemBase {
     shooterEncoder = shooterMotor.getEncoder();
     shooterMotorConfig = new SparkFlexConfig();
     shooterMotorConfig.closedLoopRampRate(1.0);
+    shooterMotorConfig.idleMode(IdleMode.kCoast);
     shooterMotorConfig.inverted(ShooterConstants.inverted);
     /*
      * Configure the closed loop controller. We want to make sure we set the
@@ -136,6 +138,7 @@ public class ShooterSubsystem extends SubsystemBase {
       followerClosedLoopController = followerMotor.getClosedLoopController();
       followerMotorConfig = new SparkFlexConfig();
       followerMotorConfig.closedLoopRampRate(1.0);
+      followerMotorConfig.idleMode(IdleMode.kCoast);
       followerMotorConfig.inverted(ShooterConstants.followerInverted);
       /*
       * Configure the closed loop controller. We want to make sure we set the
@@ -151,7 +154,7 @@ public class ShooterSubsystem extends SubsystemBase {
           .feedForward
             // kV is now in Volts, so we multiply by the nominal voltage (12V)
             .kV(ShooterConstants.kV);
-      followerMotorConfig.follow(shooterMotor);
+      followerMotorConfig.follow(shooterMotor, true);
       followerMotor.configure(followerMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
 
     } else {
