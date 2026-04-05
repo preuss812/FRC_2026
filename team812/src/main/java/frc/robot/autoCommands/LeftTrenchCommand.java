@@ -11,13 +11,16 @@ import choreo.trajectory.Trajectory;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import frc.robot.Constants;
 import frc.robot.Constants.IntakeConstants;
 import frc.robot.RobotContainer;
+import frc.robot.commands.AgitateIntakeCommand;
 import frc.robot.commands.DriveChoreoPathCommand;
 import frc.robot.commands.FaceHubAndShootCommand;
 import frc.robot.commands.LowerIntakeCommand;
 import frc.robot.commands.SetShooterSpeedCommand;
 import frc.robot.commands.ShakeTheIntakeCommand;
+import frc.robot.subsystems.IntakeSubsystem;
 import frc.robot.subsystems.DriveSubsystemSRX.DrivingMode;
 
 public class LeftTrenchCommand extends SequentialCommandGroup {
@@ -61,8 +64,9 @@ public class LeftTrenchCommand extends SequentialCommandGroup {
             // Shoot the fuel cells we just picked 
             new ParallelCommandGroup(
                 new FaceHubAndShootCommand(),
-                new ShakeTheIntakeCommand(RobotContainer.m_IntakeDeploymentSubsystem))
-                .withTimeout(8)
+                new ShakeTheIntakeCommand(RobotContainer.m_IntakeDeploymentSubsystem),
+                new AgitateIntakeCommand(RobotContainer.m_IntakeSubsystem))
+                .withTimeout(Constants.AutoConstants.kShooterTimout)
             ,
             
             //Gather balls a second time

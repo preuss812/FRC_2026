@@ -538,6 +538,7 @@ public final class Constants {
         public static final double kPYController = 1;
         public static final double kPThetaController = 1;
         public static final double kRotationSpeed = -0.05;
+        public static final double kShooterTimout = 8.0;
     
         // Constraint for the motion profiled robot angle controller
         public static final TrapezoidProfile.Constraints kThetaControllerConstraints = new TrapezoidProfile.Constraints(
@@ -635,9 +636,11 @@ public final class Constants {
     }
 
     public static final class IntakeConstants {
-        public static final double pickupFuelSpeed = 0.6;
+        public static final double pickupFuelSpeed = 0.45;
         public static final double ejectFuelSpeed = -0.35;
         public static final int currentLimit = 60;
+        public static final double agitateReversedTime = 0.08; // seconds to reverse intake if stuck
+        public static final double agitateForwardTime = 0.5; // seconds to run intake forward after reversing
     }
 
     public static final class IntakeDeploymentConstants {
