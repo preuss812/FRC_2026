@@ -27,7 +27,8 @@ public class RightShootTwoCyclesCommand extends SequentialCommandGroup {
                 "RightGather",
                 RobotContainer.m_robotDrive.defaultAutoConfig,
                 0.5,
-                1.0
+                1.0,
+                true
         )
       ),
       new ParallelCommandGroup(
@@ -39,7 +40,8 @@ public class RightShootTwoCyclesCommand extends SequentialCommandGroup {
           "RightReturnShoot",
           RobotContainer.m_robotDrive.defaultAutoConfig,
           0.5,
-          1.0)
+          1.0,
+        false)
       ),
       new FaceHubAndShootCommand().withTimeout(6.0), // TODO: tune the timeout to shoot 8 fuel cells.
     new ParallelCommandGroup(
@@ -51,7 +53,8 @@ public class RightShootTwoCyclesCommand extends SequentialCommandGroup {
           "RightGather2",
           RobotContainer.m_robotDrive.defaultAutoConfig,
           0.5,
-          1.0)
+          1.0,
+          false)
       ),
       new ParallelCommandGroup(
         new InstantCommand(() -> RobotContainer.m_IntakeSubsystem.stop(), RobotContainer.m_IntakeSubsystem),
@@ -62,7 +65,8 @@ public class RightShootTwoCyclesCommand extends SequentialCommandGroup {
           "RightReturnShoot2",
           RobotContainer.m_robotDrive.defaultAutoConfig,
           0.5,
-          1.0)
+          1.0,
+          false)
       ),
       new FaceHubAndShootCommand().withTimeout(6.0) // TODO: tune the timeout 
     );

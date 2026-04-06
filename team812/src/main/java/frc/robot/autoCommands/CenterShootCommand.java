@@ -27,7 +27,8 @@ public class CenterShootCommand extends SequentialCommandGroup {
           "CenterLeftShoot",
           RobotContainer.m_robotDrive.defaultAutoConfig,
           1.0,
-          1.0)
+          1.0,
+        true)
       ),
       new FaceHubAndShootCommand().withTimeout(5.0), // TODO: tune the timeout to shoot 8 fuel cells.
 

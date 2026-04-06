@@ -20,7 +20,6 @@ import frc.robot.commands.FaceHubAndShootCommand;
 import frc.robot.commands.LowerIntakeCommand;
 import frc.robot.commands.SetShooterSpeedCommand;
 import frc.robot.commands.ShakeTheIntakeCommand;
-import frc.robot.subsystems.IntakeSubsystem;
 import frc.robot.subsystems.DriveSubsystemSRX.DrivingMode;
 
 public class LeftTrenchCommand extends SequentialCommandGroup {
@@ -44,7 +43,8 @@ public class LeftTrenchCommand extends SequentialCommandGroup {
                 leftTrenchGather,
                 RobotContainer.m_robotDrive.defaultAutoConfig,
                 speedFactor,
-                1.0
+                1.0,
+                true
             ),
             // Note: we are leaving the intake running on the way back.
             // Start shooter spinning so it is up to speed when we get back to our home zone.
@@ -57,7 +57,8 @@ public class LeftTrenchCommand extends SequentialCommandGroup {
                     leftTrenchReturn,
                     RobotContainer.m_robotDrive.defaultAutoConfig,
                     speedFactor,
-                    1.0
+                    2.0,
+                    false
                 )
             ),
         
@@ -76,7 +77,8 @@ public class LeftTrenchCommand extends SequentialCommandGroup {
                     leftTrenchGather2,
                     RobotContainer.m_robotDrive.defaultAutoConfig,
                     speedFactor,
-                    1.0
+                    1.0,
+                    false
                 )
         );
     }

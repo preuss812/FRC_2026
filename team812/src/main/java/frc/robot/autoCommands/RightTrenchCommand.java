@@ -11,8 +11,8 @@ import choreo.trajectory.Trajectory;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
-import frc.robot.Constants.IntakeConstants;
 import frc.robot.Constants;
+import frc.robot.Constants.IntakeConstants;
 import frc.robot.RobotContainer;
 import frc.robot.commands.AgitateIntakeCommand;
 import frc.robot.commands.DriveChoreoPathCommand;
@@ -49,7 +49,8 @@ public class RightTrenchCommand extends SequentialCommandGroup {
                     rightTrenchGather,
                     RobotContainer.m_robotDrive.defaultAutoConfig,
                     speedFactor,
-                    1.0
+                    1.0,
+                    true
                 )
             ),
             // Decided not to stop the intake.
@@ -64,7 +65,8 @@ public class RightTrenchCommand extends SequentialCommandGroup {
                     rightTrenchReturn,
                     RobotContainer.m_robotDrive.defaultAutoConfig,
                     speedFactor,
-                    1.0
+                    1.0,
+                    false
                 )
             ),
         
@@ -85,7 +87,8 @@ public class RightTrenchCommand extends SequentialCommandGroup {
                     rightTrenchGather2,
                     RobotContainer.m_robotDrive.defaultAutoConfig,
                     speedFactor,
-                    1.0
+                    1.0,
+                    false
                 )
         );
     }

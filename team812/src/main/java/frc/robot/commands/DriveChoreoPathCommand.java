@@ -38,6 +38,7 @@ public class DriveChoreoPathCommand extends Command {
   private PIDController[] pidControllers = new PIDController[3]; // X, Y, and Rotation
   private boolean debug = true;
   private Optional<Pose2d> m_initialPose = Optional.empty();
+  private final boolean m_setRobotPose;
 
   /** Creates a new DriveChoreoPathCommand. */
   public DriveChoreoPathCommand(
@@ -46,10 +47,12 @@ public class DriveChoreoPathCommand extends Command {
   , String trajectoryName 
   , DrivingConfig config
   , double speedFactor
-  , double pidCorrectionFactor) {
+  , double pidCorrectionFactor
+  , boolean setRobotPose) {
     this.m_robotDrive = robotDrive;
     this.m_poseEstimatorSubsystem = poseEstimatorSubsystem;
     this.m_speedFactor = speedFactor;
+    this.m_setRobotPose = setRobotPose;
     m_trajectory  = Choreo.loadTrajectory(trajectoryName);
     pidControllers[0] = new PIDController(10.0 * pidCorrectionFactor, 0.0, 0.0);
     pidControllers[1] = new PIDController(10.0 * pidCorrectionFactor, 0.0, 0.0);
@@ -67,11 +70,14 @@ public class DriveChoreoPathCommand extends Command {
   ,  Optional<Trajectory<SwerveSample>> trajectory
   , DrivingConfig config
   , double speedFactor
-  , double pidCorrectionFactor) {
+  , double pidCorrectionFactor
+  , boolean setRobotPose) {
     this.m_robotDrive = robotDrive;
     this.m_poseEstimatorSubsystem = poseEstimatorSubsystem;
     this.m_trajectory = trajectory;
     this.m_speedFactor = speedFactor;
+    this.m_setRobotPose = setRobotPose;
+
     pidControllers[0] = new PIDController(10.0 * pidCorrectionFactor, 0.0, 0.0);
     pidControllers[1] = new PIDController(10.0 * pidCorrectionFactor, 0.0, 0.0);
     pidControllers[2] = new PIDController(7.5  * pidCorrectionFactor, 0.0, 0.0);
@@ -93,11 +99,12 @@ public class DriveChoreoPathCommand extends Command {
                 // Reset odometry to the start of the trajectory
                 //robotDrive.resetOdometry(initialPose.get());
 
-                RobotContainer.setRobotPose(m_initialPose.get());
        
-               // Set the pose estimator to the start of the traject
-              m_poseEstimatorSubsystem.setCurrentPose(m_initialPose.get());
-                
+               // Set the pose estimator to the start of the trajectory
+              if (m_setRobotPose) {
+                RobotContainer.setRobotPose(m_initialPose.get());
+                m_poseEstimatorSubsystem.setCurrentPose(m_initialPose.get());
+              }
             }
             RobotContainer.m_poseEstimatorSubsystem.field2d.getObject("trajectory").setTrajectory(choreoToWPITrajectory(m_trajectory));
           }

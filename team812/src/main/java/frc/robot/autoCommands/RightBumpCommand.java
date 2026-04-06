@@ -39,7 +39,8 @@ public class RightBumpCommand extends SequentialCommandGroup {
                 rightBumpGather,
                 RobotContainer.m_robotDrive.defaultAutoConfig,
                 speedFactor,
-                1.0
+                1.0,
+                true
             ),
             // Stop the intake.
             new SetShooterSpeedCommand(RobotContainer.m_ShooterSubsystem, 3000), 
@@ -50,7 +51,8 @@ public class RightBumpCommand extends SequentialCommandGroup {
             rightBumpReturn,
             RobotContainer.m_robotDrive.defaultAutoConfig,
             speedFactor,
-            1.0),
+            1.0,
+            false),
         
             // Shoot the fuel cells we just picked up.
             new ParallelCommandGroup(
@@ -67,7 +69,8 @@ public class RightBumpCommand extends SequentialCommandGroup {
             rightBumpGather2,
             RobotContainer.m_robotDrive.defaultAutoConfig,
             speedFactor,
-            1.0),
+            1.0,
+            false),
 
             // Shoot the fuel we just gathered.
             new InstantCommand(()->RobotContainer.m_IntakeSubsystem.stop(), RobotContainer.m_IntakeSubsystem),

@@ -25,7 +25,8 @@ public class FarRightShootOutpostShootCommand extends SequentialCommandGroup {
           "FarRightToShoot",
           RobotContainer.m_robotDrive.defaultAutoConfig,
           1.0,
-          1.0)
+          1.0,
+        true)
       ),
       new FaceHubAndShootCommand().withTimeout(6.0), // TODO: tune the timeout to shoot 8 fuel cells.
 
@@ -36,7 +37,8 @@ public class FarRightShootOutpostShootCommand extends SequentialCommandGroup {
         "FarRtShootToOutpost",
         RobotContainer.m_robotDrive.defaultAutoConfig,
         1.0,
-        1.0),
+        1.0,
+        false),
       new StandStillCommand(RobotContainer.m_robotDrive).withTimeout(6.0),
       new DriveChoreoPathCommand(
       RobotContainer.m_robotDrive,
@@ -44,7 +46,8 @@ public class FarRightShootOutpostShootCommand extends SequentialCommandGroup {
         "OutpostToShoot",
         RobotContainer.m_robotDrive.defaultAutoConfig,
         1.0,
-        1.0
+        1.0,
+        false
       ),
       // Shoot the fuel cells we just picked up.
       new FaceHubAndShootCommand().withTimeout(6.0) // TODO: tune the timeout.

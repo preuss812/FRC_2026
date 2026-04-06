@@ -11,8 +11,8 @@ import choreo.trajectory.Trajectory;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
-import frc.robot.Constants.IntakeConstants;
 import frc.robot.Constants;
+import frc.robot.Constants.IntakeConstants;
 import frc.robot.RobotContainer;
 import frc.robot.commands.AgitateIntakeCommand;
 import frc.robot.commands.DriveChoreoPathCommand;
@@ -38,7 +38,8 @@ public class LeftBumpCommand extends SequentialCommandGroup {
                 leftBumpGather,
                 RobotContainer.m_robotDrive.defaultAutoConfig,
                 speedFactor,
-                1.0
+                1.0,
+                true
             ),
             // Stop the intake.
             //new InstantCommand(()->RobotContainer.m_IntakeSubsystem.stop(), RobotContainer.m_IntakeSubsystem),
@@ -49,7 +50,8 @@ public class LeftBumpCommand extends SequentialCommandGroup {
             leftBumpReturn,
             RobotContainer.m_robotDrive.defaultAutoConfig,
             speedFactor,
-            1.0),
+            1.0,
+            false),
         
             // Shoot the fuel cells we just picked up.
             new ParallelCommandGroup(
@@ -66,7 +68,8 @@ public class LeftBumpCommand extends SequentialCommandGroup {
             leftBumpGather2,
             RobotContainer.m_robotDrive.defaultAutoConfig,
             speedFactor,
-            1.0),
+            1.0,
+            false),
 
             // Shoot the fuel cells we just picked up.
             new ParallelCommandGroup(
