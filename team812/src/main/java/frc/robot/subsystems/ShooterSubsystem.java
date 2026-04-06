@@ -128,7 +128,8 @@ public class ShooterSubsystem extends SubsystemBase {
         .outputRange(ShooterConstants.minOutputPercent, ShooterConstants.maxOutputPercent)
         .feedForward
           // kV is now in Volts, so we multiply by the nominal voltage (12V)
-          .kV(ShooterConstants.kV);
+          .kV(ShooterConstants.kV)
+          .kS(ShooterConstants.kS);
     shooterMotor.configure(shooterMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
 
 

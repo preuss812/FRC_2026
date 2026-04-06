@@ -620,13 +620,14 @@ public final class Constants {
         public static final double d = 3063.16870;
         public static final double RPMTolerance = 75;
         public static final double RPMToVolts = 442.5;
-        public static final double kP = 0.0; //0.0008;
+        public static final double kP = 0.0006; //0.0006;
         public static final double kI = 0.0; //0.0003/FeederConstants.maxRPM;
         public static final double kD = 0.0;
         public static final double minOutputPercent = -0.8;
         public static final double maxOutputPercent = 0.8;
         public static final double maxRPM = 6784.0; // Neo Vortex
         public static final double kV = 12.0/maxRPM * 3000.0 / 2900.0 * 2600/2555; // Docs say 1.0 should be 12.0 but emperically 12.0 is not right.
+        public static final double kS = 0.0;
         public static final double rotationTolerance = Units.degreesToRadians(2.0);
         public static final int currentLimit = 60;
         public enum ShooterMode {IDLE, AUTO_RANGING, UNJAMMING, FIXED_SPEED };
@@ -636,10 +637,10 @@ public final class Constants {
     }
 
     public static final class IntakeConstants {
-        public static final double pickupFuelSpeed = 0.45;
+        public static final double pickupFuelSpeed = 0.5;
         public static final double ejectFuelSpeed = -0.35;
         public static final int currentLimit = 60;
-        public static final double agitateReversedTime = 0.08; // seconds to reverse intake if stuck
+        public static final double agitateReversedTime = 0.1; // seconds to reverse intake if stuck
         public static final double agitateForwardTime = 0.5; // seconds to run intake forward after reversing
     }
 
