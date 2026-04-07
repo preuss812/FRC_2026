@@ -54,7 +54,8 @@ public final class Constants {
         public static final int kIndexerMotor = 47;
         //public static final int kShooterElevationMotor = 41;
         public static final int kIntakeDeploymentMotor = 48;
-        public static final int kBellyMotor = 49;
+        public static final int kBellyMotor1 = 50;
+        public static final int kBellyMotor2 = 51;
 
         public static final int kPDP = 0; // was 50 until 3/12/2024
         //public static final int kPCM = 51;

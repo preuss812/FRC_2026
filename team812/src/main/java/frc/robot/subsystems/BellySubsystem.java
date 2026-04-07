@@ -33,28 +33,30 @@ public class BellySubsystem extends SubsystemBase {
     private final double RPMToNativeUnits = 1.0;
     private final double nativeUnitsToRPM = 1.0/RPMToNativeUnits; // Typical CTRE Mag Encoder CPR
     private final SparkFlex motor1;
-    //private final SparkFlex motor2;
+    private final SparkFlex motor2;
     private final SparkFlexSim motor1Sim;
-    //bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb8888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888818nj mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmprivate final SparkFlexSim motor2Sim;
-    private final DCMotor m_dcMotor = DCMotor.getNEO(1);
+    private final SparkFlexSim motor2Sim;
+    private final DCMotor m_dcMotor1 = DCMotor.getNEO(1);
+    private final DCMotor m_dcMotor2 = DCMotor.getNEO(1);
 
     //private final SparkFlex motor2;
-    private final SparkFlexConfig motorConfig;
+    private final SparkFlexConfig motorConfig1;
+    private final SparkFlexConfig motorConfig2;
     //private final SparkFlexConfig motorFollowerConfig;
     private final SparkClosedLoopController closedLoopController;
     private final RelativeEncoder encoder;
     
     private boolean debug = false;
 
-  public BellySubsystem(int bellyCANId) {
+  public BellySubsystem(int bellyMotor1CANId, int bellyMotor2CANId) {
       /** Creates a new BellySubsystem. */
 
   /*
      * Initialize the SPARK MAX and get its encoder and closed loop controller
      * objects for later use.
      */
-    motor1 = new SparkFlex(CANConstants.kBellyMotor, MotorType.kBrushless);
-    motor1Sim = new SparkFlexSim(motor1, m_dcMotor);
+    motor1 = new SparkFlex(CANConstants.kBellyMotor1, MotorType.kBrushless);
+    motor1Sim = new SparkFlexSim(motor1, m_dcMotor1);
 
     //motor2 = new SparkFlex(CANConstants.kBellyMotor2, MotorType.kBrushless);
     closedLoopController = motor1.getClosedLoopController();
@@ -64,16 +66,16 @@ public class BellySubsystem extends SubsystemBase {
      * Create a new SPARK MAX configuration object. This will store the
      * configuration parameters for the SPARK MAX that we will set below.
      */
-    motorConfig = new SparkFlexConfig();
+    motorConfig1 = new SparkFlexConfig();
     //motorFollowerConfig = new SparkFlexConfig();
-    motorConfig.inverted(false);
+    motorConfig1.inverted(false);
     /*
      * Configure the encoder. For this specific example, we are using the
      * integrated encoder of the NEO, and we don't need to configure it. If
      * needed, we can adjust values like the position or velocity conversion
      * factors.
      */
-    motorConfig.encoder
+    motorConfig1.encoder
         .positionConversionFactor(1)
         .velocityConversionFactor(1);
     /*
@@ -88,7 +90,7 @@ public class BellySubsystem extends SubsystemBase {
      * Configure the closed loop controller. We want to make sure we set the
      * feedback sensor as the primary encoder.
      */
-    motorConfig.closedLoop
+    motorConfig1.closedLoop
         .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
         // Set PID values for velocity control in slot 1
         .p(BellyConstants.kP)
@@ -109,7 +111,72 @@ public class BellySubsystem extends SubsystemBase {
      * the SPARK MAX loses power. This is useful for power cycles that may occur
      * mid-operation.
      */
-    motor1.configure(motorConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
+    motor1.configure(motorConfig1, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
+
+    /*
+     * Initialize the SPARK MAX and get its encoder and closed loop controller
+     * objects for later use.
+     */
+    motor2 = new SparkFlex(CANConstants.kBellyMotor2, MotorType.kBrushless);
+    motor2Sim = new SparkFlexSim(motor2, m_dcMotor2);
+
+    //motor2 = new SparkFlex(CANConstants.kBellyMotor2, MotorType.kBrushless);
+    //closedLoopController = motor1.getClosedLoopController();
+    //encoder = motor1.getEncoder();
+
+    /*
+     * Create a new SPARK MAX configuration object. This will store the
+     * configuration parameters for the SPARK MAX that we will set below.
+     */
+    motorConfig2 = new SparkFlexConfig();
+    //motorFollowerConfig = new SparkFlexConfig();
+    motorConfig2.inverted(false);
+    /*
+     * Configure the encoder. For this specific example, we are using the
+     * integrated encoder of the NEO, and we don't need to configure it. If
+     * needed, we can adjust values like the position or velocity conversion
+     * factors.
+     */
+    motorConfig2.encoder
+        .positionConversionFactor(1)
+        .velocityConversionFactor(1);
+    /*
+     * Configure the 2nd motor on the Belly to follow, inverted, the primary motor
+     */
+    //motorFollowerConfig
+    //  .apply(motorConfig)
+    //  .follow(motor1)
+    //  .inverted(true);
+
+    /*
+     * Configure the closed loop controller. We want to make sure we set the
+     * feedback sensor as the primary encoder.
+     */
+    motorConfig2.closedLoop
+        .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
+        // Set PID values for velocity control in slot 1
+        .p(BellyConstants.kP)
+        .i(BellyConstants.kI)
+        .d(BellyConstants.kD)
+        .outputRange(BellyConstants.minOutputPercent, BellyConstants.maxOutputPercent)
+        .feedForward
+          // kV is now in Volts, so we multiply by the nominal voltage (12V)
+          .kV(BellyConstants.kV);
+
+    /*
+     * Apply the configuration to the SPARK MAX.
+     *
+     * kResetSafeParameters is used to get the SPARK MAX to a known state. This
+     * is useful in case the SPARK MAX is replaced.
+     *
+     * kPersistParameters is used to ensure the configuration is not lost when
+     * the SPARK MAX loses power. This is useful for power cycles that may occur
+     * mid-operation.
+     */
+     motorConfig2.follow(motor1, false);
+
+    motor2.configure(motorConfig2, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
+
     /*
     motorFollowerConfig
       .apply(motorConfig)

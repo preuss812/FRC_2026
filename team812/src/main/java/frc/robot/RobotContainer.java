@@ -39,6 +39,7 @@ import frc.robot.commands.FireAtWillWithShakingCommand;
 import frc.robot.commands.GotoPoseCommand;
 import frc.robot.commands.IntakeFuelCommand;
 import frc.robot.commands.LowerIntakeCommand;
+import frc.robot.commands.MoveFuelInBellyCommand;
 import frc.robot.commands.PointCameraTowardHubCommand;
 import frc.robot.commands.PrepareToShootCommand;
 import frc.robot.commands.RaiseIntakeCommand;
@@ -54,6 +55,7 @@ import frc.robot.commands.SimSetRobotPoseCommand;
 import frc.robot.commands.SpinIndexerCommand;
 import frc.robot.commands.UnloadFuelCommand;
 import frc.robot.subsystems.AllianceConfigurationSubsystem;
+import frc.robot.subsystems.BellySubsystem;
 import frc.robot.subsystems.DriveSubsystemSRX;
 import frc.robot.subsystems.DriveSubsystemSRX.DrivingMode;
 import frc.robot.subsystems.IndexerSubsystem;
@@ -93,6 +95,7 @@ public class RobotContainer {
   public static IntakeSubsystem m_IntakeSubsystem = new IntakeSubsystem(CANConstants.kIntakeMotor);
   public static IntakeDeploymentSubsystem m_IntakeDeploymentSubsystem = new IntakeDeploymentSubsystem(CANConstants.kIntakeDeploymentMotor);
   public static IndexerSubsystem m_IndexerSubsystem = new IndexerSubsystem(CANConstants.kIndexerMotor);
+  public static BellySubsystem m_BellySubsystem = new BellySubsystem(CANConstants.kBellyMotor1, CANConstants.kBellyMotor2);
 
   private static boolean m_raisingIntake = true;
   /*
@@ -301,6 +304,8 @@ public class RobotContainer {
     */
 
     new JoystickButton(leftJoystick, 1).whileTrue(new UnloadFuelCommand(m_IntakeSubsystem));
+    new JoystickButton(leftJoystick, 2).whileTrue(new MoveFuelInBellyCommand(m_BellySubsystem));
+
     new JoystickButton(leftJoystick, 6).whileTrue(new FireAtWillWithShakingCommand(m_ShooterSubsystem, m_IndexerSubsystem, null));
 
     // Left Joystick buttons 7,8,9,10 control the shooter and feeder speed for testing. 7 is stop, 8 is 3000 RPM, 9 is current target RPM - 50, 10 is current target RPM + 50.
