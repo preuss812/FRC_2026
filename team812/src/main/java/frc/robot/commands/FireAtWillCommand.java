@@ -5,6 +5,8 @@
 package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.RobotContainer;
+import frc.robot.Constants.BellyConstants;
 import frc.robot.Constants.IndexerConstants;
 import frc.robot.Constants.ShooterConstants;
 import frc.robot.subsystems.IndexerSubsystem;
@@ -38,8 +40,12 @@ public class FireAtWillCommand extends Command {
     if (poseEstimatorSubsystem.facingHub(ShooterConstants.rotationTolerance)
       && shooterSubsystem.readyToShoot()) {
         indexerSubsystem.runMotor(IndexerConstants.indexerPercentOutput);
+        RobotContainer.m_BellySubsystem.setRPM(BellyConstants.feedFuelRPM);
+
+
     } else {
       indexerSubsystem.stop();
+      RobotContainer.m_BellySubsystem.stop();
     }
     
   }

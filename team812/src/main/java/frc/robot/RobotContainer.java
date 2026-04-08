@@ -13,11 +13,14 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.PowerDistribution;
+import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.XboxController.Button;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
@@ -38,6 +41,7 @@ import frc.robot.commands.FireAtWillCommand;
 import frc.robot.commands.FireAtWillWithShakingCommand;
 import frc.robot.commands.GotoPoseCommand;
 import frc.robot.commands.IntakeFuelCommand;
+import frc.robot.commands.LightLEDStickCommand;
 import frc.robot.commands.LowerIntakeCommand;
 import frc.robot.commands.MoveFuelInBellyCommand;
 import frc.robot.commands.PointCameraTowardHubCommand;
@@ -96,7 +100,7 @@ public class RobotContainer {
   public static IntakeDeploymentSubsystem m_IntakeDeploymentSubsystem = new IntakeDeploymentSubsystem(CANConstants.kIntakeDeploymentMotor);
   public static IndexerSubsystem m_IndexerSubsystem = new IndexerSubsystem(CANConstants.kIndexerMotor);
   public static BellySubsystem m_BellySubsystem = new BellySubsystem(CANConstants.kBellyMotor1, CANConstants.kBellyMotor2);
-
+  private static PowerDistribution m_powerDistribution = new PowerDistribution(1, ModuleType.kRev);
   private static boolean m_raisingIntake = true;
   /*
 
@@ -291,7 +295,10 @@ public class RobotContainer {
     // Right trigger shoots but running the indexer
     Trigger rightTriggerButton = new Trigger(() -> m_driverController.getRightTriggerAxis() >= 0.5);
     rightTriggerButton.whileTrue(
-      new SpinIndexerCommand(m_IndexerSubsystem)
+      new ParallelCommandGroup(
+        new SpinIndexerCommand(m_IndexerSubsystem),
+        new MoveFuelInBellyCommand(m_BellySubsystem)
+      )
     );
 
     /*
@@ -305,6 +312,8 @@ public class RobotContainer {
 
     new JoystickButton(leftJoystick, 1).whileTrue(new UnloadFuelCommand(m_IntakeSubsystem));
     new JoystickButton(leftJoystick, 2).whileTrue(new MoveFuelInBellyCommand(m_BellySubsystem));
+    new JoystickButton(leftJoystick, 3).onTrue(new LightLEDStickCommand(m_powerDistribution, true));
+    new JoystickButton(leftJoystick, 4).onTrue(new LightLEDStickCommand(m_powerDistribution, false));
 
     new JoystickButton(leftJoystick, 6).whileTrue(new FireAtWillWithShakingCommand(m_ShooterSubsystem, m_IndexerSubsystem, null));
 
@@ -351,7 +360,10 @@ public class RobotContainer {
     ); 
     // Left trigger lowers the intake.
     new JoystickButton(rightJoystick, 1).whileTrue(
-      new SpinIndexerCommand(m_IndexerSubsystem)
+      new ParallelCommandGroup(
+        new SpinIndexerCommand(m_IndexerSubsystem),
+        new MoveFuelInBellyCommand(m_BellySubsystem)
+      )
     );
 
     new JoystickButton(rightJoystick, 2).whileTrue(

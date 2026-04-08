@@ -677,6 +677,7 @@ public final class Constants {
         public static final double maxOutputPercent = 0.8;
         public static final double maxRPM = 6784.0; // Neo Vortex
         public static final double kV = 12.0/maxRPM; // Docs say 1.0 should 
+        public static final double feedFuelRPM = -600;
     }
    
     

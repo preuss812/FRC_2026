@@ -4,42 +4,41 @@
 
 package frc.robot.commands;
 
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.units.measure.Power;
+import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.Constants.BellyConstants;
-import frc.robot.subsystems.BellySubsystem;
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
-public class MoveFuelInBellyCommand extends Command {
-  private final BellySubsystem m_BellySubsystem;
-  /** Creates a new MoveFuelInBellyCommand. */
-  public MoveFuelInBellyCommand(BellySubsystem bellySubsystem) {
-    m_BellySubsystem  = bellySubsystem;
+public class LightLEDStickCommand extends Command {
+  private final PowerDistribution m_powerDistribution;
+  private final boolean m_state;
+  /** Creates a new LightLEDStickCommand. */
+  public LightLEDStickCommand(PowerDistribution powerDistribution, boolean state) {
+    m_powerDistribution = powerDistribution;
+    m_state = state;
     // Use addRequirements() here to declare subsystem dependencies.
-    addRequirements(m_BellySubsystem);
   }
 
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    m_BellySubsystem.setRPM(BellyConstants.feedFuelRPM);
-    //m_BellySubsystem.runMotor(0.1);
+    m_powerDistribution.setSwitchableChannel(m_state);
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
-  public void execute() {
-  }
+  public void execute() {}
 
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    m_BellySubsystem.stop();
+    //m_powerDistribution.setSwitchableChannel(true);
+
   }
 
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return false;
+    return true;
   }
 }
