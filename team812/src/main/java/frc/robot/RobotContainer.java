@@ -22,7 +22,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.RunCommand;
-import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.POVButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -100,7 +99,7 @@ public class RobotContainer {
   public static IntakeDeploymentSubsystem m_IntakeDeploymentSubsystem = new IntakeDeploymentSubsystem(CANConstants.kIntakeDeploymentMotor);
   public static IndexerSubsystem m_IndexerSubsystem = new IndexerSubsystem(CANConstants.kIndexerMotor);
   public static BellySubsystem m_BellySubsystem = new BellySubsystem(CANConstants.kBellyMotor1, CANConstants.kBellyMotor2);
-  private static PowerDistribution m_powerDistribution = new PowerDistribution(1, ModuleType.kRev);
+  public static PowerDistribution m_powerDistribution = new PowerDistribution(1, ModuleType.kRev);
   private static boolean m_raisingIntake = true;
   /*
 
@@ -513,4 +512,9 @@ public class RobotContainer {
     m_poseEstimatorSubsystem.setCurrentPose(pose);
   }
 
+  public static void setLED(boolean on) {
+    m_powerDistribution.setSwitchableChannel(on);
+    if (isSimulation())
+      SmartDashboard.putBoolean("LED", on);
+  }
 }
