@@ -100,7 +100,7 @@ public final class Constants {
         public static final int kXboxLTrigger = 9;
         public static final int kXboxRTrigger = 10;
 
-        public static final int kDriverControllerPort = 3;
+        public static final int kDriverControllerPort = 2;
         public static final double kDriveDeadband = 0.10;
     }
 
@@ -110,7 +110,7 @@ public final class Constants {
     public static final class AnalogIOConstants {
         /*
         * no pneumatics this year:
-        public static final int kPressureTransducer = 0;
+        public   static final int kPressureTransducer = 0;
         public static final int kPressureOffset = -20;
         public static final int kPressureRange = 200;
         */

@@ -4,6 +4,7 @@
 
 package frc.robot.commands;
 
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.BellySubsystem;
 
@@ -20,12 +21,14 @@ public class MoveFuelInBellyCommand extends Command {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    m_BellySubsystem.setRPM(100);
+    m_BellySubsystem.setRPM(200);
+    //m_BellySubsystem.runMotor(0.1);
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
-  public void execute() {}
+  public void execute() {
+  }
 
   // Called once the command ends or is interrupted.
   @Override

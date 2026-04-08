@@ -13,6 +13,7 @@ import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
+import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkFlexConfig;
 
 import edu.wpi.first.math.MathUtil;
@@ -101,6 +102,8 @@ public class BellySubsystem extends SubsystemBase {
           // kV is now in Volts, so we multiply by the nominal voltage (12V)
           .kV(BellyConstants.kV);
 
+    motorConfig1.idleMode(IdleMode.kCoast);
+
     /*
      * Apply the configuration to the SPARK MAX.
      *
@@ -173,9 +176,11 @@ public class BellySubsystem extends SubsystemBase {
      * the SPARK MAX loses power. This is useful for power cycles that may occur
      * mid-operation.
      */
-     motorConfig2.follow(motor1, false);
+    motorConfig2.follow(motor1, false);
+    motorConfig2.idleMode(IdleMode.kCoast);
 
     motor2.configure(motorConfig2, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
+
 
     /*
     motorFollowerConfig
