@@ -4,7 +4,6 @@
 
 package frc.robot.autoCommands;
 
-import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.Constants.DriveConstants;
@@ -20,7 +19,7 @@ public class CenterShootCommand extends SequentialCommandGroup {
   public CenterShootCommand() {
     addCommands(
       new ParallelCommandGroup(
-        new InstantCommand(() -> RobotContainer.m_ShooterSubsystem.setRPM(2500.0), RobotContainer.m_ShooterSubsystem), // Start the flywheel spinning at an initial guess.
+        //new InstantCommand(() -> RobotContainer.m_ShooterSubsystem.setRPM(2500.0), RobotContainer.m_ShooterSubsystem), // Start the flywheel spinning at an initial guess.
         new DriveChoreoPathCommand(
           RobotContainer.m_robotDrive,
           RobotContainer.m_poseEstimatorSubsystem,
@@ -28,7 +27,9 @@ public class CenterShootCommand extends SequentialCommandGroup {
           RobotContainer.m_robotDrive.defaultAutoConfig,
           1.0,
           1.0,
-        true)
+          true, 
+          true // True starts the shooter with the speed for the first shot at the end of the trajectory.
+        )
       ),
       new FaceHubAndShootCommand().withTimeout(5.0), // TODO: tune the timeout to shoot 8 fuel cells.
 

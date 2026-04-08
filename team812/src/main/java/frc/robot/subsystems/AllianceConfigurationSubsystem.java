@@ -118,7 +118,12 @@ public class AllianceConfigurationSubsystem extends SubsystemBase {
       }
     } else {
       // In autonomous, just turn on off the LED.
-      RobotContainer.setLED(false);
+      if (RobotContainer.m_poseEstimatorSubsystem.facingHub(ShooterConstants.rotationTolerance)
+        && RobotContainer.m_ShooterSubsystem.readyToShoot()) {
+        RobotContainer.setLED(true); // Hub is active, turn on LED.
+      } else {
+        blinkLED();
+      }
     }
   }
 

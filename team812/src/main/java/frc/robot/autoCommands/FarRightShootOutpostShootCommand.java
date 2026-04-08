@@ -4,7 +4,6 @@
 
 package frc.robot.autoCommands;
 
-import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.RobotContainer;
@@ -18,7 +17,7 @@ public class FarRightShootOutpostShootCommand extends SequentialCommandGroup {
   public FarRightShootOutpostShootCommand() {
     addCommands(
       new ParallelCommandGroup(
-        new InstantCommand(() -> RobotContainer.m_ShooterSubsystem.setRPM(3000.0)), // Start the flywheel spinning at an initial guess at the required rpm.  Could do better - TODO
+        //new InstantCommand(() -> RobotContainer.m_ShooterSubsystem.setRPM(3000.0)), // Start the flywheel spinning at an initial guess at the required rpm.  Could do better - TODO
         new DriveChoreoPathCommand(
           RobotContainer.m_robotDrive,
           RobotContainer.m_poseEstimatorSubsystem,
@@ -26,7 +25,9 @@ public class FarRightShootOutpostShootCommand extends SequentialCommandGroup {
           RobotContainer.m_robotDrive.defaultAutoConfig,
           1.0,
           1.0,
-        true)
+          true,
+          true
+        )
       ),
       new FaceHubAndShootCommand().withTimeout(6.0), // TODO: tune the timeout to shoot 8 fuel cells.
 
@@ -38,7 +39,9 @@ public class FarRightShootOutpostShootCommand extends SequentialCommandGroup {
         RobotContainer.m_robotDrive.defaultAutoConfig,
         1.0,
         1.0,
-        false),
+        false,
+        false
+      ),
       new StandStillCommand(RobotContainer.m_robotDrive).withTimeout(6.0),
       new DriveChoreoPathCommand(
       RobotContainer.m_robotDrive,
@@ -47,7 +50,8 @@ public class FarRightShootOutpostShootCommand extends SequentialCommandGroup {
         RobotContainer.m_robotDrive.defaultAutoConfig,
         1.0,
         1.0,
-        false
+        false,
+        true // True starts the shooter with the speed for the first shot at the end of the trajectory.
       ),
       // Shoot the fuel cells we just picked up.
       new FaceHubAndShootCommand().withTimeout(6.0) // TODO: tune the timeout.

@@ -18,7 +18,6 @@ import frc.robot.commands.AgitateIntakeCommand;
 import frc.robot.commands.DriveChoreoPathCommand;
 import frc.robot.commands.FaceHubAndShootCommand;
 import frc.robot.commands.LowerIntakeCommand;
-import frc.robot.commands.SetShooterSpeedCommand;
 import frc.robot.commands.ShakeTheIntakeCommand;
 import frc.robot.subsystems.DriveSubsystemSRX.DrivingMode;
 
@@ -50,14 +49,15 @@ public class RightTrenchCommand extends SequentialCommandGroup {
                     RobotContainer.m_robotDrive.defaultAutoConfig,
                     speedFactor,
                     1.0,
-                    true
+                    true,
+                    false
                 )
             ),
             // Decided not to stop the intake.
             // new InstantCommand(()->RobotContainer.m_IntakeSubsystem.stop(), RobotContainer.m_IntakeSubsystem),
             new ParallelCommandGroup(
                 
-                new SetShooterSpeedCommand(RobotContainer.m_ShooterSubsystem, 3000), 
+                //new SetShooterSpeedCommand(RobotContainer.m_ShooterSubsystem, 3000), 
                 // Return to out alliance zone 
                 new DriveChoreoPathCommand(
                 RobotContainer.m_robotDrive,
@@ -66,7 +66,8 @@ public class RightTrenchCommand extends SequentialCommandGroup {
                     RobotContainer.m_robotDrive.defaultAutoConfig,
                     speedFactor,
                     1.0,
-                    false
+                    false,
+                    true
                 )
             ),
         
@@ -88,6 +89,7 @@ public class RightTrenchCommand extends SequentialCommandGroup {
                     RobotContainer.m_robotDrive.defaultAutoConfig,
                     speedFactor,
                     1.0,
+                    false,
                     false
                 )
         );

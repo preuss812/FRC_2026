@@ -18,7 +18,6 @@ import frc.robot.commands.AgitateIntakeCommand;
 import frc.robot.commands.DriveChoreoPathCommand;
 import frc.robot.commands.FaceHubAndShootCommand;
 import frc.robot.commands.LowerIntakeCommand;
-import frc.robot.commands.SetShooterSpeedCommand;
 import frc.robot.commands.ShakeTheIntakeCommand;
 
 public class RightBumpCommand extends SequentialCommandGroup {
@@ -40,19 +39,22 @@ public class RightBumpCommand extends SequentialCommandGroup {
                 RobotContainer.m_robotDrive.defaultAutoConfig,
                 speedFactor,
                 1.0,
-                true
+                true,
+                false
             ),
             // Stop the intake.
-            new SetShooterSpeedCommand(RobotContainer.m_ShooterSubsystem, 3000), 
+            //new SetShooterSpeedCommand(RobotContainer.m_ShooterSubsystem, 3000), 
             // Return to out alliance zone 
             new DriveChoreoPathCommand(
-            RobotContainer.m_robotDrive,
-            RobotContainer.m_poseEstimatorSubsystem,
-            rightBumpReturn,
-            RobotContainer.m_robotDrive.defaultAutoConfig,
-            speedFactor,
-            1.0,
-            false),
+                RobotContainer.m_robotDrive,
+                RobotContainer.m_poseEstimatorSubsystem,
+                rightBumpReturn,
+                RobotContainer.m_robotDrive.defaultAutoConfig,
+                speedFactor,
+                1.0,
+                false,
+                true // True starts the shooter with the speed for the first shot at the end of the trajectory.
+            ),
         
             // Shoot the fuel cells we just picked up.
             new ParallelCommandGroup(
@@ -70,14 +72,16 @@ public class RightBumpCommand extends SequentialCommandGroup {
             RobotContainer.m_robotDrive.defaultAutoConfig,
             speedFactor,
             1.0,
-            false),
+            false,
+            true // True starts the shooter with the speed for the first shot at the end of the trajectory.
+        ),
 
-            // Shoot the fuel we just gathered.
-            new InstantCommand(()->RobotContainer.m_IntakeSubsystem.stop(), RobotContainer.m_IntakeSubsystem),
-            new ParallelCommandGroup(
-                new FaceHubAndShootCommand(),
-                new ShakeTheIntakeCommand(RobotContainer.m_IntakeDeploymentSubsystem),
-                new AgitateIntakeCommand(RobotContainer.m_IntakeSubsystem))
-            );
+        // Shoot the fuel we just gathered.
+        new InstantCommand(()->RobotContainer.m_IntakeSubsystem.stop(), RobotContainer.m_IntakeSubsystem),
+        new ParallelCommandGroup(
+            new FaceHubAndShootCommand(),
+            new ShakeTheIntakeCommand(RobotContainer.m_IntakeDeploymentSubsystem),
+            new AgitateIntakeCommand(RobotContainer.m_IntakeSubsystem))
+        );
     }
 }

@@ -25,7 +25,6 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.FeederConstants;
 import frc.robot.Constants.ShooterConstants;
-import frc.robot.Constants.ShooterConstants.ShooterMode;
 import frc.robot.RobotContainer;
 import frc.utils.ExponentialSmoother;
 
@@ -209,9 +208,9 @@ public class ShooterSubsystem extends SubsystemBase {
     
     //Distance from the center of the robot (Adjust later)
     Pose2d robotPose = RobotContainer.m_poseEstimatorSubsystem.getCurrentPose();
-    Translation2d hubPos = AllianceConfigurationSubsystem.getHubCenter();
+    Translation2d hubCenter = AllianceConfigurationSubsystem.getHubCenter();
     double shooterOffset = 0;
-    double distance = robotPose.getTranslation().getDistance(hubPos) - shooterOffset;
+    double distance = robotPose.getTranslation().getDistance(hubCenter) - shooterOffset;
     SmartDashboard.putString("Distance to Hub", String.format("%1dft %1din", (int)Units.metersToInches(distance)/12, (int)Units.metersToInches(distance)%12));
     
     // This next section seemed like a good idea but there are unresolved bugs: 
@@ -383,4 +382,13 @@ public class ShooterSubsystem extends SubsystemBase {
     SmartDashboard.putNumber("Shooter Correction", shooterCorrection);
   }
 
+  public double autoRangeRPM(Translation2d robotCenter, Translation2d hubCenter) {
+    double RPM = 2600.0; // Default RPM if we don't have a valid distance.
+    double shooterOffset = 0;
+    double distance = robotCenter.getDistance(hubCenter) - shooterOffset;
+    double correction = getShooterCorrection();
+    double adjustedDistance = smoothedRange.addSample(distance);
+    RPM = distanceToRPMPWL(MathUtil.clamp(adjustedDistance, 1.0, 6.0)) + correction; // The RPM is not fit beyond this range.
+    return RPM;
+  }
 }
