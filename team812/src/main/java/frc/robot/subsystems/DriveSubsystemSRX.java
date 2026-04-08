@@ -147,7 +147,7 @@ public class DriveSubsystemSRX extends SubsystemBase {
     .setLinearP(0.40)
     .setLinearIZone(Units.inchesToMeters(4.0))
     .setLinearTolerance(Units.inchesToMeters(2.0))
-    .setAngularP(4.0)
+    .setAngularP(2.0)
     .setAngularD(0.16)
     .setAngularIZone(Units.degreesToRadians(2.0))
     .setAngularTolerance(Units.degreesToRadians(2.0));

@@ -17,13 +17,14 @@ import frc.robot.RobotContainer;
 import frc.robot.commands.AgitateIntakeCommand;
 import frc.robot.commands.DriveChoreoPathCommand;
 import frc.robot.commands.FaceHubAndShootCommand;
+import frc.robot.commands.IntakeFuelCommand;
 import frc.robot.commands.LowerIntakeCommand;
 import frc.robot.commands.SetShooterSpeedCommand;
 import frc.robot.commands.ShakeTheIntakeCommand;
 import frc.robot.subsystems.DriveSubsystemSRX.DrivingMode;
 
 public class RightTrenchCommand extends SequentialCommandGroup {
-    private final double speedFactor = 0.8; // 1.0 would be full speed.
+    private final double speedFactor = 1.0; // 1.0 would be full speed.
     /** Creates a new RightTrenchCommand. */
     public RightTrenchCommand(
         Optional<Trajectory<SwerveSample>> rightTrenchGather,
@@ -77,6 +78,7 @@ public class RightTrenchCommand extends SequentialCommandGroup {
                 new AgitateIntakeCommand(RobotContainer.m_IntakeSubsystem))
                 .withTimeout(Constants.AutoConstants.kShooterTimout)
             ,
+            new IntakeFuelCommand(RobotContainer.m_IntakeSubsystem),
             
             //Drive out to intake a second time
                 
