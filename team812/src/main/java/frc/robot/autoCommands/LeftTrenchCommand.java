@@ -19,7 +19,6 @@ import frc.robot.commands.DriveChoreoPathCommand;
 import frc.robot.commands.FaceHubAndShootCommand;
 import frc.robot.commands.IntakeFuelCommand;
 import frc.robot.commands.LowerIntakeCommand;
-import frc.robot.commands.SetShooterSpeedCommand;
 import frc.robot.commands.ShakeTheIntakeCommand;
 import frc.robot.subsystems.IntakeSubsystem;
 import frc.robot.subsystems.DriveSubsystemSRX.DrivingMode;
@@ -46,12 +45,13 @@ public class LeftTrenchCommand extends SequentialCommandGroup {
                 RobotContainer.m_robotDrive.defaultAutoConfig,
                 speedFactor,
                 1.0,
-                true
+                true,
+                false
             ),
             // Note: we are leaving the intake running on the way back.
             // Start shooter spinning so it is up to speed when we get back to our home zone.
             new SequentialCommandGroup (
-                new SetShooterSpeedCommand(RobotContainer.m_ShooterSubsystem, 3000), 
+                //new SetShooterSpeedCommand(RobotContainer.m_ShooterSubsystem, 3000), 
 
                 new DriveChoreoPathCommand(
                     RobotContainer.m_robotDrive,
@@ -60,7 +60,8 @@ public class LeftTrenchCommand extends SequentialCommandGroup {
                     RobotContainer.m_robotDrive.defaultAutoConfig,
                     speedFactor,
                     2.0,
-                    false
+                    false,
+                    true // True starts the shooter with the speed for the first shot at the end of the trajectory.
                 )
             ),
         
@@ -75,14 +76,15 @@ public class LeftTrenchCommand extends SequentialCommandGroup {
             
             //Gather balls a second time
             new DriveChoreoPathCommand(
-                    RobotContainer.m_robotDrive,
-                    RobotContainer.m_poseEstimatorSubsystem,
-                    leftTrenchGather2,
-                    RobotContainer.m_robotDrive.defaultAutoConfig,
-                    speedFactor,
-                    1.0,
-                    false
-                )
+                RobotContainer.m_robotDrive,
+                RobotContainer.m_poseEstimatorSubsystem,
+                leftTrenchGather2,
+                RobotContainer.m_robotDrive.defaultAutoConfig,
+                speedFactor,
+                1.0,
+                false,
+                false
+            )
         );
     }
 }

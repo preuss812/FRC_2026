@@ -15,9 +15,11 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.FieldConstants;
+import frc.robot.Constants.ShooterConstants;
 import frc.robot.Constants.VisionConstants;
 import frc.robot.Constants.VisionConstants.AprilTag;
 import frc.robot.Robot;
+import frc.robot.RobotContainer;
 
 /*
  * AllianceConfigurationSubsystem
@@ -50,6 +52,10 @@ public class AllianceConfigurationSubsystem extends SubsystemBase {
   public static final int AUTO_MODE_RIGHT_TRENCH_RETURN_BUMP = 7;
   private static boolean m_hubActive = true; // Match starts with active hubs.
   private static boolean m_hubActiveSoon = true; // Match starts with active hubs.
+  private static final int BLINK_LED_COUNT = 10;
+  private static int m_blinkLEDCounter = 0;
+  private static boolean m_blinkLEDState = false;
+
   
   /** Creates a new AllianceConfigurationSubsystem. */
   public AllianceConfigurationSubsystem(DriveSubsystemSRX robotDrive, PoseEstimatorSubsystem poseEstimatorSubsystem) {
@@ -90,9 +96,35 @@ public class AllianceConfigurationSubsystem extends SubsystemBase {
       }
     }
     m_hubActive = isHubActive(0.0); // right now.
-    m_hubActiveSoon = isHubActive(3.0); // looking ahead 3 seconds.
+    m_hubActiveSoon = isHubActive(5.0); // looking ahead 5 seconds.
     SmartDashboard.putBoolean("HubActive", m_hubActive);
     SmartDashboard.putBoolean("HubActiveSoon", m_hubActiveSoon);
+
+    if (!m_isAutonomous) {
+      if (!m_hubActive && m_hubActiveSoon) {
+        // Hub is inactive but will be active soon, blink LED to warn driver.
+        blinkLED();
+      } else if (!m_hubActive && !m_hubActiveSoon) {
+        // Hub is inactive and will not be inactive soon, turn off LED.
+        RobotContainer.setLED(false); // Hub is inactive, turn off LED.
+      } else {
+        //Hub is active. Determine if we are ready to shoot and blink if not or solid if ready.
+        if (RobotContainer.m_poseEstimatorSubsystem.facingHub(ShooterConstants.rotationTolerance)
+          && RobotContainer.m_ShooterSubsystem.readyToShoot()) {
+          RobotContainer.setLED(true); // Hub is active, turn on LED.
+        } else {
+          blinkLED();
+        }
+      }
+    } else {
+      // In autonomous, just turn on off the LED.
+      if (RobotContainer.m_poseEstimatorSubsystem.facingHub(ShooterConstants.rotationTolerance)
+        && RobotContainer.m_ShooterSubsystem.readyToShoot()) {
+        RobotContainer.setLED(true); // Hub is active, turn on LED.
+      } else {
+        blinkLED();
+      }
+    }
   }
 
   public static void setAutonomous() {
@@ -382,5 +414,15 @@ public class AllianceConfigurationSubsystem extends SubsystemBase {
    */
   public static boolean hubActiveSoon() {
     return m_hubActiveSoon;
+  }
+
+  private void blinkLED() {
+    if (m_blinkLEDCounter <= 0) {
+      m_blinkLEDState = !m_blinkLEDState;
+      RobotContainer.setLED(m_blinkLEDState);
+      m_blinkLEDCounter = BLINK_LED_COUNT;
+    } else {
+      m_blinkLEDCounter--;
+    }
   }
 }

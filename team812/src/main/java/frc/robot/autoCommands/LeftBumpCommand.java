@@ -18,7 +18,6 @@ import frc.robot.commands.AgitateIntakeCommand;
 import frc.robot.commands.DriveChoreoPathCommand;
 import frc.robot.commands.FaceHubAndShootCommand;
 import frc.robot.commands.LowerIntakeCommand;
-import frc.robot.commands.SetShooterSpeedCommand;
 import frc.robot.commands.ShakeTheIntakeCommand;
 
 public class LeftBumpCommand extends SequentialCommandGroup {
@@ -39,19 +38,22 @@ public class LeftBumpCommand extends SequentialCommandGroup {
                 RobotContainer.m_robotDrive.defaultAutoConfig,
                 speedFactor,
                 1.0,
-                true
+                true,
+                false
             ),
             // Stop the intake.
             //new InstantCommand(()->RobotContainer.m_IntakeSubsystem.stop(), RobotContainer.m_IntakeSubsystem),
-            new SetShooterSpeedCommand(RobotContainer.m_ShooterSubsystem, 3000.0),
+            //new SetShooterSpeedCommand(RobotContainer.m_ShooterSubsystem, 3000.0),
             new DriveChoreoPathCommand(
-            RobotContainer.m_robotDrive,
-            RobotContainer.m_poseEstimatorSubsystem,
-            leftBumpReturn,
-            RobotContainer.m_robotDrive.defaultAutoConfig,
-            speedFactor,
-            1.0,
-            false),
+                RobotContainer.m_robotDrive,
+                RobotContainer.m_poseEstimatorSubsystem,
+                leftBumpReturn,
+                RobotContainer.m_robotDrive.defaultAutoConfig,
+                speedFactor,
+                1.0,
+                false,
+                true // True starts the shooter with the speed for the first shot at the end of the trajectory.
+            ),
         
             // Shoot the fuel cells we just picked up.
             new ParallelCommandGroup(
@@ -69,7 +71,9 @@ public class LeftBumpCommand extends SequentialCommandGroup {
             RobotContainer.m_robotDrive.defaultAutoConfig,
             speedFactor,
             1.0,
-            false),
+            false,
+            true
+        ),
 
             // Shoot the fuel cells we just picked up.
             new ParallelCommandGroup(

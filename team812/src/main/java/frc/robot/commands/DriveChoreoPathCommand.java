@@ -23,6 +23,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants.FieldConstants;
 import frc.robot.RobotContainer;
+import frc.robot.subsystems.AllianceConfigurationSubsystem;
 import frc.robot.subsystems.DriveSubsystemSRX;
 import frc.robot.subsystems.PoseEstimatorSubsystem;
 import frc.utils.DrivingConfig;
@@ -38,7 +39,9 @@ public class DriveChoreoPathCommand extends Command {
   private PIDController[] pidControllers = new PIDController[3]; // X, Y, and Rotation
   private boolean debug = true;
   private Optional<Pose2d> m_initialPose = Optional.empty();
+  private Optional<Pose2d> m_finalPose = Optional.empty();
   private final boolean m_setRobotPose;
+  private final boolean m_startShooter;
 
   /** Creates a new DriveChoreoPathCommand. */
   public DriveChoreoPathCommand(
@@ -48,17 +51,20 @@ public class DriveChoreoPathCommand extends Command {
   , DrivingConfig config
   , double speedFactor
   , double pidCorrectionFactor
-  , boolean setRobotPose) {
+  , boolean setRobotPose
+  , boolean startShooter) {
     this.m_robotDrive = robotDrive;
     this.m_poseEstimatorSubsystem = poseEstimatorSubsystem;
     this.m_speedFactor = speedFactor;
     this.m_setRobotPose = setRobotPose;
+    this.m_startShooter = startShooter;
     m_trajectory  = Choreo.loadTrajectory(trajectoryName);
     pidControllers[0] = new PIDController(10.0 * pidCorrectionFactor, 0.0, 0.0);
     pidControllers[1] = new PIDController(10.0 * pidCorrectionFactor, 0.0, 0.0);
     pidControllers[2] = new PIDController(7.5  * pidCorrectionFactor, 0.0, 0.0);
     pidControllers[2].enableContinuousInput(-Math.PI, Math.PI); // For wrapping rotation.
     m_initialPose = m_trajectory.get().getInitialPose(isRedAlliance());
+    m_finalPose = m_trajectory.get().getFinalPose(isRedAlliance());
 
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(robotDrive, poseEstimatorSubsystem);
@@ -71,18 +77,22 @@ public class DriveChoreoPathCommand extends Command {
   , DrivingConfig config
   , double speedFactor
   , double pidCorrectionFactor
-  , boolean setRobotPose) {
+  , boolean setRobotPose
+  , boolean startShooter) {
     this.m_robotDrive = robotDrive;
     this.m_poseEstimatorSubsystem = poseEstimatorSubsystem;
     this.m_trajectory = trajectory;
     this.m_speedFactor = speedFactor;
     this.m_setRobotPose = setRobotPose;
+    this.m_startShooter = startShooter;
 
     pidControllers[0] = new PIDController(10.0 * pidCorrectionFactor, 0.0, 0.0);
     pidControllers[1] = new PIDController(10.0 * pidCorrectionFactor, 0.0, 0.0);
     pidControllers[2] = new PIDController(7.5  * pidCorrectionFactor, 0.0, 0.0);
     pidControllers[2].enableContinuousInput(-Math.PI, Math.PI); // For wrapping rotation.
     m_initialPose = m_trajectory.get().getInitialPose(isRedAlliance());
+    m_finalPose = m_trajectory.get().getFinalPose(isRedAlliance());
+
 
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(robotDrive, poseEstimatorSubsystem);
@@ -92,26 +102,28 @@ public class DriveChoreoPathCommand extends Command {
   public void initialize() {
     m_count = 0;
     if (m_trajectory.isPresent()) {
-     //RobotContainer.m_PoseEstimatorSubsystem.field2d.getObject("trajectory").setTrajectory(trajectory.get());// wrong class of trajectory
-            // Get the initial pose of the trajectory
+      //RobotContainer.m_PoseEstimatorSubsystem.field2d.getObject("trajectory").setTrajectory(trajectory.get());// wrong class of trajectory
+      // Get the initial pose of the trajectory
 
-            if (m_initialPose.isPresent()) {
-                // Reset odometry to the start of the trajectory
-                //robotDrive.resetOdometry(initialPose.get());
-
-       
-               // Set the pose estimator to the start of the trajectory
-              if (m_setRobotPose) {
-                RobotContainer.setRobotPose(m_initialPose.get());
-                m_poseEstimatorSubsystem.setCurrentPose(m_initialPose.get());
-              }
-            }
-            RobotContainer.m_poseEstimatorSubsystem.field2d.getObject("trajectory").setTrajectory(choreoToWPITrajectory(m_trajectory));
-          }
-
-        // Reset and start the timer when the autonomous period begins
-        m_timer.restart();
-    
+      if (m_initialPose.isPresent()) {
+        // If requested, set the pose estimator to the start of the trajectory
+        if (m_setRobotPose) {
+          RobotContainer.setRobotPose(m_initialPose.get());
+          m_poseEstimatorSubsystem.setCurrentPose(m_initialPose.get());
+        }
+      }
+      RobotContainer.m_poseEstimatorSubsystem.field2d.getObject("trajectory").setTrajectory(choreoToWPITrajectory(m_trajectory));
+    }
+    if (m_startShooter) {
+      if (m_finalPose.isPresent()) {
+        RobotContainer.m_ShooterSubsystem.setFixedRPM(RobotContainer.m_ShooterSubsystem.autoRangeRPM(m_finalPose.get().getTranslation(), AllianceConfigurationSubsystem.getHubCenter()));
+      } else {
+        RobotContainer.m_ShooterSubsystem.setFixedRPM(2600); // Default RPM if we don't have a final pose to range from.
+      }
+    }
+    // Reset and start the timer when the autonomous period begins
+    m_timer.restart();
+      
   }
 
   // Called every time the scheduler runs while the command is scheduled.
@@ -225,7 +237,7 @@ public class DriveChoreoPathCommand extends Command {
   /*
    * getInitialPose - helper function to return the initial pose of the trajectory if it exists, otherwise return a default pose.
    */
- public Pose2d getInitialPose() {
+  public Pose2d getInitialPose() {
     return m_initialPose.orElse(new Pose2d());
   }
 }
