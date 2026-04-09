@@ -6,6 +6,8 @@ package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants;
+import frc.robot.RobotContainer;
+import frc.robot.Constants.BellyConstants;
 import frc.robot.Constants.ShooterConstants;
 import frc.robot.subsystems.IndexerSubsystem;
 import frc.robot.subsystems.ShooterSubsystem;
@@ -22,7 +24,7 @@ public class ReverseTheShooterFeederIndexerCommand extends Command {
     this.m_ShooterSubsystem = shooterSubsystem;
     this.m_IndexerSubsystem = indexerSubsystem;
     // Use addRequirements() here to declare subsystem dependencies.
-    addRequirements(shooterSubsystem, /*feederSubsystem, */indexerSubsystem);
+    addRequirements(shooterSubsystem, /*feederSubsystem, */indexerSubsystem, RobotContainer.m_BellySubsystem);
   }
 
   // Called when the command is initially scheduled.
@@ -32,6 +34,7 @@ public class ReverseTheShooterFeederIndexerCommand extends Command {
     //m_FeederSubsystem.setRPM(-6000);
     m_ShooterSubsystem.setShooterMode(ShooterConstants.ShooterMode.UNJAMMING);
     m_IndexerSubsystem.runMotor(-Constants.IndexerConstants.indexerPercentOutput);
+    RobotContainer.m_BellySubsystem.setRPM(-BellyConstants.feedFuelRPM);
   }
 
   // Called every time the scheduler runs while the command is scheduled.
@@ -45,6 +48,7 @@ public class ReverseTheShooterFeederIndexerCommand extends Command {
     //m_FeederSubsystem.stop();
     m_ShooterSubsystem.setShooterMode(ShooterConstants.ShooterMode.AUTO_RANGING);
     m_IndexerSubsystem.stop();
+    RobotContainer.m_BellySubsystem.stop();
   }
 
   // Returns true when the command should end.

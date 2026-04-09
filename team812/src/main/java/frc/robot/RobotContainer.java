@@ -365,15 +365,22 @@ public class RobotContainer {
       )
     );
 
+    /*
     new JoystickButton(rightJoystick, 2).whileTrue(
       new RunCommand(() -> m_robotDrive.setX(), m_robotDrive)
     );
+    */
 
     // Shake the robot to facilitate ball movement.
     new JoystickButton(rightJoystick, 3).whileTrue(new ShakeThingsUpCommand(m_robotDrive));
     // reverse the shooter to clear stuck fuel.
-    new JoystickButton(rightJoystick, 4).whileTrue(new ReverseShooterFeederCommand(m_ShooterSubsystem));
-    new JoystickButton(rightJoystick, 5).whileTrue(new ShakeTheIntakeCommand(m_IntakeDeploymentSubsystem));
+    new JoystickButton(rightJoystick, 4).whileTrue(new RunCommand(() -> m_robotDrive.setX(), m_robotDrive));
+    new JoystickButton(rightJoystick, 5).whileTrue(
+      new ParallelCommandGroup(
+        new ShakeTheIntakeCommand(m_IntakeDeploymentSubsystem),
+        new AgitateIntakeCommand(m_IntakeSubsystem)
+    )
+    );
     new JoystickButton(rightJoystick, 6).whileTrue(new ReverseTheShooterFeederIndexerCommand(m_ShooterSubsystem, m_IndexerSubsystem));
 
     // POV buttons to point robot to a given heading where 0 is
