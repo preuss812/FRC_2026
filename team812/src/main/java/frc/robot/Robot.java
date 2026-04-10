@@ -48,6 +48,8 @@ public class Robot extends TimedRobot {
   public static final Optional<Trajectory<SwerveSample>> m_leftBumpGather = Choreo.loadTrajectory("LeftBumpGather");
   public static final Optional<Trajectory<SwerveSample>> m_leftBumpReturn = Choreo.loadTrajectory("LeftBumpReturn");
   public static final Optional<Trajectory<SwerveSample>> m_leftBumpGather2 = Choreo.loadTrajectory("LeftBumpGather2");
+  public static final Optional<Trajectory<SwerveSample>> m_depotCenterShoot = Choreo.loadTrajectory("DepotCenterShoot");
+  public static final Optional<Trajectory<SwerveSample>> m_centerShoot = Choreo.loadTrajectory("CenterShoot");
   public static final Optional<Trajectory<SwerveSample>> m_rightTrenchGather = ChoreoUtils.mirrorY(m_leftTrenchGather);
   public static final Optional<Trajectory<SwerveSample>> m_rightTrenchReturn = ChoreoUtils.mirrorY(m_leftTrenchReturn);
   public static final Optional<Trajectory<SwerveSample>> m_rightTrenchReturnBump = ChoreoUtils.mirrorY(m_leftTrenchReturnBump);

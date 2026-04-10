@@ -39,6 +39,7 @@ import frc.robot.commands.FaceHubCommand;
 import frc.robot.commands.FireAtWillCommand;
 import frc.robot.commands.FireAtWillWithShakingCommand;
 import frc.robot.commands.GotoPoseCommand;
+import frc.robot.commands.ShakeIntakeWithPauseCommand;
 import frc.robot.commands.IntakeFuelCommand;
 import frc.robot.commands.LightLEDStickCommand;
 import frc.robot.commands.LowerIntakeCommand;
@@ -372,7 +373,7 @@ public class RobotContainer {
     */
 
     // Shake the robot to facilitate ball movement.
-    new JoystickButton(rightJoystick, 3).whileTrue(new ShakeThingsUpCommand(m_robotDrive));
+    new JoystickButton(rightJoystick, 3).whileTrue(new ShakeIntakeWithPauseCommand(m_IntakeDeploymentSubsystem));
     // reverse the shooter to clear stuck fuel.
     new JoystickButton(rightJoystick, 4).whileTrue(new RunCommand(() -> m_robotDrive.setX(), m_robotDrive));
     new JoystickButton(rightJoystick, 5).whileTrue(

@@ -79,7 +79,10 @@ public class RightTrenchCommand extends SequentialCommandGroup {
                 new AgitateIntakeCommand(RobotContainer.m_IntakeSubsystem))
                 .withTimeout(Constants.AutoConstants.kShooterTimout)
             ,
-            new IntakeFuelCommand(RobotContainer.m_IntakeSubsystem),
+            new ParallelCommandGroup(
+                new IntakeFuelCommand(RobotContainer.m_IntakeSubsystem),
+                new LowerIntakeCommand(RobotContainer.m_IntakeDeploymentSubsystem)
+            ),
             
             //Drive out to intake a second time
                 

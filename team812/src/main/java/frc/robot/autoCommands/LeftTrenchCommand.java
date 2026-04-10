@@ -72,7 +72,10 @@ public class LeftTrenchCommand extends SequentialCommandGroup {
                 new AgitateIntakeCommand(RobotContainer.m_IntakeSubsystem))
                 .withTimeout(Constants.AutoConstants.kShooterTimout)
             ,
-            new IntakeFuelCommand(RobotContainer.m_IntakeSubsystem),
+            new ParallelCommandGroup(
+                new IntakeFuelCommand(RobotContainer.m_IntakeSubsystem),
+                new LowerIntakeCommand(RobotContainer.m_IntakeDeploymentSubsystem)
+            ),
             
             //Gather balls a second time
             new DriveChoreoPathCommand(

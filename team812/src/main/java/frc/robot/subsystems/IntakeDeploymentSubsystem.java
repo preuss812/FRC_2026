@@ -140,7 +140,7 @@ public class IntakeDeploymentSubsystem extends SubsystemBase {
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
-
+    SmartDashboard.putNumber("Intake Deployment Percent Output", motor1.getAppliedOutput());
     SmartDashboard.putNumber("Intake Deployment Motor Current", motor1.getOutputCurrent());
     //double rpm = SmartDashboard.getNumber("IntakeDeployment RPM Target", 0.0);
     //setRPM(rpm);
@@ -170,7 +170,7 @@ public class IntakeDeploymentSubsystem extends SubsystemBase {
     SmartDashboard.putBoolean("IntakeUp", m_atFwdLimit);
     SmartDashboard.putBoolean("IntakeDown", m_atRevLimit);
 
-    if (m_atFwdLimit) encoder.setPosition(0.0);
+    if (m_atRevLimit) encoder.setPosition(0.0);
   }
 
   public double getPosition() {

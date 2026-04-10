@@ -50,6 +50,8 @@ public class AllianceConfigurationSubsystem extends SubsystemBase {
   public static final int AUTO_MODE_LEFT_TRENCH_RETURN_TRENCH = 5;
   public static final int AUTO_MODE_LEFT_TRENCH_RETURN_BUMP = 6;
   public static final int AUTO_MODE_RIGHT_TRENCH_RETURN_BUMP = 7;
+  public static final int AUTO_MODE_MOVE_OFF_LINE_AND_SHOOT = 8;
+  public static final int AUTO_MODE_DEPOT_CENTER_SHOOT = 9;
   private static boolean m_hubActive = true; // Match starts with active hubs.
   private static boolean m_hubActiveSoon = true; // Match starts with active hubs.
   private static final int BLINK_LED_COUNT = 10;
@@ -71,6 +73,8 @@ public class AllianceConfigurationSubsystem extends SubsystemBase {
     Robot.autoChooser.addOption("Right Trench Return Bump", AUTO_MODE_RIGHT_TRENCH_RETURN_BUMP);
     Robot.autoChooser.addOption("Do Nothing", AUTO_MODE_DO_NOTHING);
     Robot.autoChooser.addOption("Move Off Line and Stop", AUTO_MODE_MOVE_OFF_LINE_AND_STOP);
+    Robot.autoChooser.addOption("Move Off Line and Shoot", AUTO_MODE_MOVE_OFF_LINE_AND_SHOOT);
+    Robot.autoChooser.addOption("Depot Center Shoot", AUTO_MODE_DEPOT_CENTER_SHOOT);
 
     // Add more commands here and define the plan number above.  Put the commands needed for each auto mode in AutonomousPlans.java.
     SmartDashboard.putData("AutoSelector", Robot.autoChooser);

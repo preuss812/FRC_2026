@@ -19,14 +19,24 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.Constants.FieldConstants;
+import frc.robot.Constants.IntakeConstants;
 import frc.robot.Constants.VisionConstants;
 import frc.robot.autoCommands.LeftBumpCommand;
 import frc.robot.autoCommands.LeftTrenchCommand;
 import frc.robot.autoCommands.RightBumpCommand;
 import frc.robot.autoCommands.RightTrenchCommand;
+import frc.robot.commands.AgitateIntakeCommand;
+import frc.robot.commands.DriveChoreoPathCommand;
 import frc.robot.commands.DriveWithoutVisionCommand;
+import frc.robot.commands.FaceHubAndShootCommand;
+import frc.robot.commands.FaceHubCommand;
+import frc.robot.commands.IntakeFuelCommand;
+import frc.robot.commands.LowerIntakeCommand;
+import frc.robot.commands.PrepareToShootCommand;
+import frc.robot.commands.ShakeTheIntakeCommand;
 import frc.robot.subsystems.AllianceConfigurationSubsystem;
 import frc.robot.subsystems.DriveSubsystemSRX;
 import frc.robot.subsystems.DriveSubsystemSRX.DrivingMode;
@@ -124,15 +134,55 @@ public class Autonomous extends SequentialCommandGroup {
             new InstantCommand(() -> RobotContainer.m_robotDrive.setDrivingMode(DrivingMode.SPEED))
           )
         );
+
         // Drive one meter backwards.  That should get us off the start line.
         addCommands(new DriveWithoutVisionCommand(m_robotDrive, m_PoseEstimatorSubsystem,  new Pose2d(-1.0, 0, new Rotation2d(0.0)), null));
+        break;
+      
+        case AllianceConfigurationSubsystem.AUTO_MODE_MOVE_OFF_LINE_AND_SHOOT:
+          // Tell the robot it is on the start line in the center of the field facing toward field center.
+          // The robot could be placed anywhere on the start line.  Seeing an apriltag will 'cure' the unknown location.
+          addCommands(
+            new SequentialCommandGroup(
+              new InstantCommand(
+                () -> AllianceConfigurationSubsystem.setStartingPose(
+                  new Pose2d(
+                    AllianceConfigurationSubsystem.getStartLine(), 
+                    FieldConstants.yCenter, 
+                    new Rotation2d(AllianceConfigurationSubsystem.allianceAdjustedHeading(0.0)) // facing toward field center.
+                  )
+                )
+              ),
+              new InstantCommand(() -> RobotContainer.m_robotDrive.setDrivingMode(DrivingMode.SPEED)),
+              new DriveWithoutVisionCommand(m_robotDrive, m_PoseEstimatorSubsystem,  new Pose2d(-1.0, 0, new Rotation2d(0.0)), null),
+
+              new ParallelCommandGroup(
+                new InstantCommand(()->RobotContainer.m_IntakeSubsystem.runMotor(IntakeConstants.pickupFuelSpeed), RobotContainer.m_IntakeSubsystem),
+                new LowerIntakeCommand(RobotContainer.m_IntakeDeploymentSubsystem).withTimeout(1.0)
+              )
+            )
+          );
+          
+
+
+          // Drive one meter backwards.  That should get us off the start line.
+          addCommands(
+                  new ParallelCommandGroup(
+                  new FaceHubAndShootCommand(),
+                  new ShakeTheIntakeCommand(RobotContainer.m_IntakeDeploymentSubsystem),
+                  new AgitateIntakeCommand(RobotContainer.m_IntakeSubsystem).withTimeout(Constants.AutoConstants.kShooterTimout)
+          ),
+          new InstantCommand(()->RobotContainer.m_IntakeSubsystem.runMotor(IntakeConstants.pickupFuelSpeed), RobotContainer.m_IntakeSubsystem)
+      
+          );
+
         break;
       
       case AllianceConfigurationSubsystem.AUTO_MODE_RIGHT_TRENCH_RETURN_TRENCH:
         addCommands(new RightTrenchCommand(Robot.m_rightTrenchGather, Robot.m_rightTrenchReturn, Robot.m_rightTrenchGather2));
         break;
       case AllianceConfigurationSubsystem.AUTO_MODE_RIGHT_TRENCH_RETURN_BUMP:
-        addCommands(new RightTrenchCommand(Robot.m_rightTrenchGather, Robot.m_rightTrenchReturnBump, Robot.m_rightTrenchBumpGather));
+        addCommands(new RightTrenchCommand(Robot.m_rightTrenchGather, Robot.m_rightTrenchReturnBump, Robot.m_rightTrenchGather2));
         break;
 
       case AllianceConfigurationSubsystem.AUTO_MODE_RIGHT_BUMP:
@@ -148,7 +198,45 @@ public class Autonomous extends SequentialCommandGroup {
         addCommands(new LeftTrenchCommand(Robot.m_leftTrenchGather, Robot.m_leftTrenchReturn, Robot.m_leftTrenchGather2));
         break;
       case AllianceConfigurationSubsystem.AUTO_MODE_LEFT_TRENCH_RETURN_BUMP:
-        addCommands(new LeftTrenchCommand(Robot.m_leftTrenchGather, Robot.m_leftTrenchReturnBump, Robot.m_leftTrenchBumpGather));
+        addCommands(new LeftTrenchCommand(Robot.m_leftTrenchGather, Robot.m_leftTrenchReturnBump, Robot.m_leftTrenchGather2));
+        break;
+      case AllianceConfigurationSubsystem.AUTO_MODE_DEPOT_CENTER_SHOOT:
+        addCommands(
+          new InstantCommand(
+              () -> AllianceConfigurationSubsystem.setStartingPose(
+                new Pose2d(
+                  AllianceConfigurationSubsystem.getStartLine(), 
+                  FieldConstants.yCenter, 
+                  new Rotation2d(AllianceConfigurationSubsystem.allianceAdjustedHeading(180.0)) // facing toward field center.
+                )
+              )
+            ),
+          new ParallelCommandGroup(
+          new LowerIntakeCommand(RobotContainer.m_IntakeDeploymentSubsystem).withTimeout(1.0), // The timeout is just for simulation.
+          new InstantCommand(()->RobotContainer.m_IntakeSubsystem.runMotor(IntakeConstants.pickupFuelSpeed),RobotContainer.m_IntakeSubsystem),
+          new InstantCommand(() -> RobotContainer.m_robotDrive.setDrivingMode(DrivingMode.SPEED)),
+          new DriveChoreoPathCommand(
+                    RobotContainer.m_robotDrive,
+                    RobotContainer.m_poseEstimatorSubsystem,
+                    Robot.m_depotCenterShoot,
+                    RobotContainer.m_robotDrive.defaultAutoConfig,
+                    1.0,
+                    2.0,
+                    true,
+                    true // True starts the shooter with the speed for the first shot at the end of the trajectory.
+                )
+        ),
+        new ParallelCommandGroup(
+                new FaceHubAndShootCommand(),
+                new ShakeTheIntakeCommand(RobotContainer.m_IntakeDeploymentSubsystem),
+                new AgitateIntakeCommand(RobotContainer.m_IntakeSubsystem))
+                .withTimeout(Constants.AutoConstants.kShooterTimout)
+            ,
+            new ParallelCommandGroup(
+                new IntakeFuelCommand(RobotContainer.m_IntakeSubsystem),
+                new LowerIntakeCommand(RobotContainer.m_IntakeDeploymentSubsystem)
+            )
+        );
         break;
       
         
