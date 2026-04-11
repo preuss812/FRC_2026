@@ -661,7 +661,7 @@ public final class Constants {
         public static final double kV = 12.0/maxRPM; // Docs say 1.0 should be 12.0 but emperically 12.0 is not right.
         public static final int shakeCycles = 20; // number of periods to move in the same direction before reversing.
         // Constants to convert position in rotations to position in degrees.  These are based on emperical measurements of the mechanism.
-        public static final double maxPosition = -11;
+        public static final double maxPosition = 9;
         public static final double minPosition = 0.0;
         public static final double minRotation = Units.degreesToRadians(0.0);
         public static final double maxRotation = Units.degreesToRadians(95.0);

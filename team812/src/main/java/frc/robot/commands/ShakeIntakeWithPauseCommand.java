@@ -6,6 +6,7 @@ package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants;
+import frc.robot.Constants.IntakeDeploymentConstants;
 import frc.robot.RobotContainer;
 import frc.robot.subsystems.IntakeDeploymentSubsystem;
 
@@ -13,11 +14,13 @@ import frc.robot.subsystems.IntakeDeploymentSubsystem;
 public class ShakeIntakeWithPauseCommand extends Command {
   private final IntakeDeploymentSubsystem m_intakeDeploymentSubsystem;
   private final double upPosition = Constants.IntakeDeploymentConstants.maxPosition/2;
-  private final double downPosition = Constants.IntakeDeploymentConstants.maxPosition/4;
+  private final double downPosition = 0;
   private final int upCount = 50;
   private final int downCount = 5;
   private boolean goingUp = true;
   private int counter = 0;
+  private enum mode  {GOING_UP, GOING_DOWN, FULLY_DOWN, HOLDING_UP};
+  private mode currentMode;
 
 
   /** Creates a new HoldIntakeSteadyCommand. */
@@ -30,7 +33,7 @@ public class ShakeIntakeWithPauseCommand extends Command {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    m_intakeDeploymentSubsystem.setPosition(upPosition);
+    currentMode = mode.GOING_UP;
     counter = 0;
     goingUp = true;
   }
@@ -38,15 +41,35 @@ public class ShakeIntakeWithPauseCommand extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    //  if (m_intakeDeploymentSubsystem.getPosition() <= Constants.IntakeDeploymentConstants.kIntakeDeploymentLoweredPosition) {
-    //    m_intakeDeploymentSubsystem.setRPM(-10);
-    //  }
+    switch(currentMode) {
+      case GOING_UP:
+        m_intakeDeploymentSubsystem.setPosition(upPosition);
+        currentMode = mode.HOLDING_UP;
+        counter = 0;
+        break;
+      case HOLDING_UP:
+        counter++;
+        if(counter >= upCount) {
+          counter = 0;
+          currentMode = mode.GOING_DOWN;
+        }
+        break;
+      case GOING_DOWN:
+        counter = 0;
+        m_intakeDeploymentSubsystem.setRPM(IntakeDeploymentConstants.kIntakeDeploymentDownRPM);
+        currentMode = mode.FULLY_DOWN;
+        break;
+      case FULLY_DOWN:
+        counter = 0;
+        if (m_intakeDeploymentSubsystem.fullyLowered()) currentMode = mode.GOING_UP;
+        break;
+    }
     // counter++;
     // if (goingUp && counter >= upCount) {
     //     counter = 0;
     //     goingUp = false;
-    //     m_intakeDeploymentSubsystem.setPosition(downPosition);
-    // } else if (!goingUp && counter >= downCount) {
+    //     m_intakeDeploymentSubsystem.setRPM(IntakeDeploymentConstants.kIntakeDeploymentDownRPM);;
+    // } else if (!goingUp && m_intakeDeploymentSubsystem.fullyLowered()) {
     //     counter = 0;
     //     goingUp = true;
     //     m_intakeDeploymentSubsystem.setPosition(upPosition);
