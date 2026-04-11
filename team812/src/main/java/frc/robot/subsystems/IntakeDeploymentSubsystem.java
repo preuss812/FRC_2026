@@ -20,6 +20,7 @@ import com.revrobotics.spark.config.SparkFlexConfig;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.IntakeDeploymentConstants;
@@ -153,6 +154,10 @@ public class IntakeDeploymentSubsystem extends SubsystemBase {
 
     double armAngle = IntakeDeploymentConstants.minRotation + (m_position - IntakeDeploymentConstants.minPosition) * IntakeDeploymentConstants.positionToRotationFactor;
     double feedForward = IntakeDeploymentConstants.maxFeedForwardPercent * Math.cos(armAngle);
+    SmartDashboard.putNumber("Intake Angle", Units.radiansToDegrees(armAngle));
+    SmartDashboard.putNumber("Intake Feed Forward Position", feedForward);
+    SmartDashboard.putString("Intake Control Type", closedLoopController.getControlType().toString());
+
 
     // Set feedforward based on operating mode.
     if (closedLoopController.getControlType() == ControlType.kVelocity) {
@@ -207,7 +212,7 @@ public class IntakeDeploymentSubsystem extends SubsystemBase {
     double armAngle = IntakeDeploymentConstants.minRotation + (m_position - IntakeDeploymentConstants.minPosition) * IntakeDeploymentConstants.positionToRotationFactor;
     double feedForward = IntakeDeploymentConstants.maxFeedForwardPercent * Math.cos(armAngle);
     this.targetPosition = MathUtil.clamp(targetPosition, IntakeDeploymentConstants.minPosition, IntakeDeploymentConstants.maxPosition);
-    closedLoopController.setSetpoint(targetPosition, ControlType.kPosition, ClosedLoopSlot.kSlot1, feedForward);
+    closedLoopController.setSetpoint(targetPosition, ControlType.kPosition);//, ClosedLoopSlot.kSlot1, feedForward);
     SmartDashboard.putNumber("IntakeDeployment Target Position", this.targetPosition);
   }
 

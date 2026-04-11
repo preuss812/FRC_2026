@@ -15,12 +15,12 @@ public class ShakeIntakeWithPauseCommand extends Command {
   private final IntakeDeploymentSubsystem m_intakeDeploymentSubsystem;
   private final double upPosition = Constants.IntakeDeploymentConstants.maxPosition/2;
   private final double downPosition = 0;
-  private final int upCount = 50;
-  private final int downCount = 5;
-  private boolean goingUp = true;
-  private int counter = 0;
-  private enum mode  {GOING_UP, GOING_DOWN, FULLY_DOWN, HOLDING_UP};
-  private mode currentMode;
+  // private final int upCount = 50;
+  // private final int downCount = 5;
+  // private boolean goingUp = true;
+  // private int counter = 0;
+  // private enum mode  {GOING_UP, GOING_DOWN, FULLY_DOWN, HOLDING_UP};
+  // private mode currentMode;
 
 
   /** Creates a new HoldIntakeSteadyCommand. */
@@ -33,36 +33,15 @@ public class ShakeIntakeWithPauseCommand extends Command {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    currentMode = mode.GOING_UP;
-    counter = 0;
-    goingUp = true;
+    // currentMode = mode.GOING_UP;
+    // counter = 0;
+    // goingUp = true;
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    switch(currentMode) {
-      case GOING_UP:
         m_intakeDeploymentSubsystem.setPosition(upPosition);
-        currentMode = mode.HOLDING_UP;
-        counter = 0;
-        break;
-      case HOLDING_UP:
-        counter++;
-        if(counter >= upCount) {
-          counter = 0;
-          currentMode = mode.GOING_DOWN;
-        }
-        break;
-      case GOING_DOWN:
-        counter = 0;
-        m_intakeDeploymentSubsystem.setRPM(IntakeDeploymentConstants.kIntakeDeploymentDownRPM);
-        currentMode = mode.FULLY_DOWN;
-        break;
-      case FULLY_DOWN:
-        counter = 0;
-        if (m_intakeDeploymentSubsystem.fullyLowered()) currentMode = mode.GOING_UP;
-        break;
     }
     // counter++;
     // if (goingUp && counter >= upCount) {
@@ -74,12 +53,12 @@ public class ShakeIntakeWithPauseCommand extends Command {
     //     goingUp = true;
     //     m_intakeDeploymentSubsystem.setPosition(upPosition);
     // }
-    }
+    
 
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    m_intakeDeploymentSubsystem.stop();
+    m_intakeDeploymentSubsystem.setRPM(Constants.IntakeDeploymentConstants.kIntakeDeploymentDownRPM);
     
   }
 

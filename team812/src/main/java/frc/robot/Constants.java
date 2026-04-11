@@ -539,7 +539,7 @@ public final class Constants {
         public static final double kPYController = 1;
         public static final double kPThetaController = 1;
         public static final double kRotationSpeed = -0.05;
-        public static final double kShooterTimout = 6.0;
+        public static final double kShooterTimout = 5;
     
         // Constraint for the motion profiled robot angle controller
         public static final TrapezoidProfile.Constraints kThetaControllerConstraints = new TrapezoidProfile.Constraints(
@@ -638,7 +638,7 @@ public final class Constants {
     }
 
     public static final class IntakeConstants {
-        public static final double pickupFuelSpeed = 0.5;
+        public static final double pickupFuelSpeed = 0.75;
         public static final double ejectFuelSpeed = -0.35;
         public static final int currentLimit = 60;
         public static final double agitateReversedTime = 0.1; // seconds to reverse intake if stuck
@@ -646,13 +646,13 @@ public final class Constants {
     }
 
     public static final class IntakeDeploymentConstants {
-        public static final double kIntakeDeploymentUpRPM = 1400;
+        public static final double kIntakeDeploymentUpRPM = 1100;
         public static final double kIntakeDeploymentUpSlowlyRPM = 100;
         public static final double kIntakeDeploymentDownRPM = -800;
         public static final double kIntakeDeploymentShakeUpRPM = -800;
         public static final double kIntakeDeploymentShakeDownRPM = 400;
         public static final double kIntakeDeploymentLoweredPosition = -8.0;
-        public static final double kP = 0.0002;
+        public static final double kP = 0.0004;
         public static final double kI = 0.0;
         public static final double kD = 0.0;
         public static final double minOutputPercent = -0.80;
@@ -661,12 +661,12 @@ public final class Constants {
         public static final double kV = 12.0/maxRPM; // Docs say 1.0 should be 12.0 but emperically 12.0 is not right.
         public static final int shakeCycles = 20; // number of periods to move in the same direction before reversing.
         // Constants to convert position in rotations to position in degrees.  These are based on emperical measurements of the mechanism.
-        public static final double maxPosition = 9;
+        public static final double maxPosition = 9.8;
         public static final double minPosition = 0.0;
         public static final double minRotation = Units.degreesToRadians(0.0);
-        public static final double maxRotation = Units.degreesToRadians(95.0);
+        public static final double maxRotation = Units.degreesToRadians(90.0);
         public static final double positionToRotationFactor = (maxRotation - minRotation) / (maxPosition - minPosition);
-        public static final double maxFeedForwardPercent = 0.05; // The mximum percent output to use for feed forward.
+        public static final double maxFeedForwardPercent = 0.3; // The mximum percent output to use for feed forward.
     }
 
     public static final class BellyConstants {

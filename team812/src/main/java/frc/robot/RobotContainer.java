@@ -377,10 +377,8 @@ public class RobotContainer {
     // reverse the shooter to clear stuck fuel.
     new JoystickButton(rightJoystick, 4).whileTrue(new RunCommand(() -> m_robotDrive.setX(), m_robotDrive));
     new JoystickButton(rightJoystick, 5).whileTrue(
-      new ParallelCommandGroup(
-        new ShakeTheIntakeCommand(m_IntakeDeploymentSubsystem),
-        new AgitateIntakeCommand(m_IntakeSubsystem)
-    )
+        new ShakeTheIntakeCommand(m_IntakeDeploymentSubsystem)
+        //new AgitateIntakeCommand(m_IntakeSubsystem)
     );
     new JoystickButton(rightJoystick, 6).whileTrue(new ReverseTheShooterFeederIndexerCommand(m_ShooterSubsystem, m_IndexerSubsystem));
 

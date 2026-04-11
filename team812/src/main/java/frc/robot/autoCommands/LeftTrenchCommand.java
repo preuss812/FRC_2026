@@ -50,7 +50,6 @@ public class LeftTrenchCommand extends SequentialCommandGroup {
             ),
             // Note: we are leaving the intake running on the way back.
             // Start shooter spinning so it is up to speed when we get back to our home zone.
-            new SequentialCommandGroup (
                 //new SetShooterSpeedCommand(RobotContainer.m_ShooterSubsystem, 3000), 
 
                 new DriveChoreoPathCommand(
@@ -62,8 +61,7 @@ public class LeftTrenchCommand extends SequentialCommandGroup {
                     2.0,
                     false,
                     true // True starts the shooter with the speed for the first shot at the end of the trajectory.
-                )
-            ),
+                ),
         
             // Shoot the fuel cells we just picked 
             new ParallelCommandGroup(
@@ -73,9 +71,9 @@ public class LeftTrenchCommand extends SequentialCommandGroup {
                 .withTimeout(Constants.AutoConstants.kShooterTimout)
             ,
             new ParallelCommandGroup(
-                new IntakeFuelCommand(RobotContainer.m_IntakeSubsystem),
+                new InstantCommand(()->RobotContainer.m_IntakeSubsystem.runMotor(IntakeConstants.pickupFuelSpeed),RobotContainer.m_IntakeSubsystem),
                 new LowerIntakeCommand(RobotContainer.m_IntakeDeploymentSubsystem)
-            ),
+            ).withTimeout(0.5),
             
             //Gather balls a second time
             new DriveChoreoPathCommand(
@@ -87,6 +85,16 @@ public class LeftTrenchCommand extends SequentialCommandGroup {
                 1.0,
                 false,
                 false
+            ),
+            new ParallelCommandGroup(
+                new FaceHubAndShootCommand(),
+                new ShakeTheIntakeCommand(RobotContainer.m_IntakeDeploymentSubsystem),
+                new AgitateIntakeCommand(RobotContainer.m_IntakeSubsystem))
+                .withTimeout(Constants.AutoConstants.kShooterTimout)
+            ,
+            new ParallelCommandGroup(
+                new IntakeFuelCommand(RobotContainer.m_IntakeSubsystem),
+                new LowerIntakeCommand(RobotContainer.m_IntakeDeploymentSubsystem)
             )
         );
     }

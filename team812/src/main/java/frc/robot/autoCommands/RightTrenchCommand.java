@@ -80,9 +80,9 @@ public class RightTrenchCommand extends SequentialCommandGroup {
                 .withTimeout(Constants.AutoConstants.kShooterTimout)
             ,
             new ParallelCommandGroup(
-                new IntakeFuelCommand(RobotContainer.m_IntakeSubsystem),
+                new InstantCommand(()->RobotContainer.m_IntakeSubsystem.runMotor(IntakeConstants.pickupFuelSpeed),RobotContainer.m_IntakeSubsystem),
                 new LowerIntakeCommand(RobotContainer.m_IntakeDeploymentSubsystem)
-            ),
+            ).withTimeout(0.5),
             
             //Drive out to intake a second time
                 
@@ -96,7 +96,17 @@ public class RightTrenchCommand extends SequentialCommandGroup {
                     1.0,
                     false,
                     false
-                )
+                ),
+                new ParallelCommandGroup(
+                new FaceHubAndShootCommand(),
+                new ShakeTheIntakeCommand(RobotContainer.m_IntakeDeploymentSubsystem),
+                new AgitateIntakeCommand(RobotContainer.m_IntakeSubsystem))
+                .withTimeout(Constants.AutoConstants.kShooterTimout)
+            ,
+            new ParallelCommandGroup(
+                new IntakeFuelCommand(RobotContainer.m_IntakeSubsystem),
+                new LowerIntakeCommand(RobotContainer.m_IntakeDeploymentSubsystem)
+            )
         );
     }
 }
