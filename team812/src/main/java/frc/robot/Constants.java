@@ -539,7 +539,7 @@ public final class Constants {
         public static final double kPYController = 1;
         public static final double kPThetaController = 1;
         public static final double kRotationSpeed = -0.05;
-        public static final double kShooterTimout = 5;
+        public static final double kShooterTimout = 4.5;
     
         // Constraint for the motion profiled robot angle controller
         public static final TrapezoidProfile.Constraints kThetaControllerConstraints = new TrapezoidProfile.Constraints(

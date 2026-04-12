@@ -85,8 +85,9 @@ public class ShooterSubsystem extends SubsystemBase {
     3150.0, // 16
     3225.0, // 17
     3300.0, // 18
-    3475.0, // 19
-    3330.0, // 20
+    3375.0, // 19
+    3450.0, // 20
+
   };
   //private final SparkFlex motor2;
   private final SparkFlexConfig followerMotorConfig;
