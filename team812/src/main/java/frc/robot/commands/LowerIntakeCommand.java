@@ -12,9 +12,8 @@ import frc.robot.subsystems.IntakeDeploymentSubsystem;
 
 public class LowerIntakeCommand extends Command {
   private final IntakeDeploymentSubsystem m_intakeDeploymentSubsystem;
-  private boolean m_limitSwitchHit = false;
-  private double m_targetPosition = 0.0;
-  private double m_limitHitTimestamp = 0.0;
+  private boolean m_atBottom = false;
+  private double m_startTime = 0.0;
 
   /** Creates a new LowerIntakeCommand. */
   public LowerIntakeCommand(IntakeDeploymentSubsystem intakeDeploymentSubsystem) {
@@ -25,59 +24,47 @@ public class LowerIntakeCommand extends Command {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    m_limitSwitchHit = false;
-    m_targetPosition = 0.0;
-    m_limitHitTimestamp = 0.0;
-    m_intakeDeploymentSubsystem.setRPM(IntakeDeploymentConstants.kIntakeDeploymentDownRPM);
+    m_atBottom = false;
+    m_startTime = Timer.getFPGATimestamp();
+    m_intakeDeploymentSubsystem.setHoldDown(true);
+    // Use low-power duty cycle to lower, NEVER velocity PID into a hard stop
+    m_intakeDeploymentSubsystem.runMotor(IntakeDeploymentConstants.kIntakeDeploymentLoweringDutyCycle);
     RobotContainer.setRaisingIntake(false);
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    if (!m_limitSwitchHit) {
-      if (m_intakeDeploymentSubsystem.isRevLimitSwitchPressed()) {
-        m_limitSwitchHit = true;
-        m_limitHitTimestamp = Timer.getFPGATimestamp();
-        // Downward motion is negative, so subtract extra rotations to continue further down:
-        m_targetPosition = m_intakeDeploymentSubsystem.getPosition() - IntakeDeploymentConstants.kIntakeDeploymentExtraRotations;
-        
-        // Actively drive down with controlled speed to force through mechanical backlash/slop:
-        m_intakeDeploymentSubsystem.setRPM(IntakeDeploymentConstants.kIntakeDeploymentSlowDownRPM);
+    double elapsedTime = Timer.getFPGATimestamp() - m_startTime;
+
+    // Detect bottom either via reverse limit switch, motor stall, or after 0.8s max lowering
+    if (!m_atBottom) {
+      if (m_intakeDeploymentSubsystem.isRevLimitSwitchPressed()
+          || (elapsedTime > 0.4 && Math.abs(m_intakeDeploymentSubsystem.getRPM()) < 50.0)
+          || elapsedTime > 0.8) {
+        m_atBottom = true;
       }
+    }
+
+    if (m_atBottom) {
+      // Continuously apply gentle, current regulated holding torque to keep arm clamped down against hard stop
+      m_intakeDeploymentSubsystem.holdDown();
+    } else {
+      m_intakeDeploymentSubsystem.runMotor(IntakeDeploymentConstants.kIntakeDeploymentLoweringDutyCycle);
     }
   }
 
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
+    // Hold down mode is set, so stop() keeps the holding torque applied instead of cutting power.
     m_intakeDeploymentSubsystem.stop();
-    // Zero the encoder at the fully lowered / seated position
-    if (!interrupted && m_limitSwitchHit) {
-      m_intakeDeploymentSubsystem.resetEncoder(0.0);
-    }
   }
 
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    if (!m_limitSwitchHit) {
-      return false;
-    }
-    double timeSinceHit = Timer.getFPGATimestamp() - m_limitHitTimestamp;
-
-    // 1. Finished when the motor completes the extra rotations:
-    boolean reachedTarget = m_intakeDeploymentSubsystem.getPosition() <= m_targetPosition;
-
-    // 2. True stall detection: only if the motor has physically stopped rotating (< 40 RPM)
-    // and is pulling high current against the hard mechanical stop.
-    boolean stallDetected = (timeSinceHit > 0.15) 
-        && (Math.abs(m_intakeDeploymentSubsystem.getRPM()) < 40.0)
-        && (m_intakeDeploymentSubsystem.getOutputCurrent() >= IntakeDeploymentConstants.kIntakeDeploymentStallCurrentAmps);
-
-    // 3. Safety timeout:
-    boolean timedOut = timeSinceHit >= IntakeDeploymentConstants.kIntakeDeploymentLockdownTimeout;
-
-    return reachedTarget || stallDetected || timedOut;
+    // Keep running and holding torque down until interrupted (e.g. by RaiseIntakeCommand)
+    return false;
   }
 }

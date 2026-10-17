@@ -21,6 +21,8 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.XboxController.Button;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.RunCommand;
@@ -185,7 +187,16 @@ public class RobotContainer {
         m_robotDrive)
     );
 
-    
+    // When the intake is deployed, keep it lowered and clamped against the hard stop whenever
+    // no other command is using it (e.g. after shaking, shooting, or when teleop starts after auto).
+    m_IntakeDeploymentSubsystem.setDefaultCommand(
+      new ConditionalCommand(
+        new LowerIntakeCommand(m_IntakeDeploymentSubsystem),
+        Commands.idle(m_IntakeDeploymentSubsystem),
+        m_IntakeDeploymentSubsystem::isHoldDown
+      )
+    );
+
 
     /*
     // The XBox right trigger will control the indexer motor turning it on when the trigger is > 50%.

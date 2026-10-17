@@ -58,8 +58,10 @@ public class ShakeIntakeWithPauseCommand extends Command {
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    m_intakeDeploymentSubsystem.setRPM(Constants.IntakeDeploymentConstants.kIntakeDeploymentDownRPM);
-    
+    // Return to the lowered position. Never use velocity control into the hard stop (~45A stall);
+    // the default command lowers the intake and then applies the gentle holding torque.
+    m_intakeDeploymentSubsystem.setHoldDown(true);
+    m_intakeDeploymentSubsystem.stop();
   }
 
   // Returns true when the command should end.

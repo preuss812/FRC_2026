@@ -51,6 +51,9 @@ public class IntakeDeploymentSubsystem extends SubsystemBase {
     private boolean m_atFwdLimit = true; // dont allow motion until after periodic sets this.
     private boolean m_atRevLimit = true; // dont allow motion until after periodic sets this.
     private double m_position = 0.0; // 0.0 is the fully raised position.
+    private boolean m_holdDown = false; // true while the intake is deployed and should be clamped against the bottom hard stop.
+    private boolean m_holdActive = false; // true while periodic() is regulating the holding current.
+    private double m_holdDutyCycle = 0.0; // current holding duty cycle (negative is down).
     private final boolean debug = true;
 
   public IntakeDeploymentSubsystem(int intakedeploymentCANId) {
@@ -171,6 +174,17 @@ public class IntakeDeploymentSubsystem extends SubsystemBase {
       SmartDashboard.putNumber("IntakeDeployment Target Position", closedLoopController.getSetpoint());
       closedLoopController.setSetpoint(targetPosition, ControlType.kPosition, ClosedLoopSlot.kSlot1, feedForward);
     }
+    // Regulate the holding duty cycle so the holding current stays near the target
+    // and cannot creep up over time.
+    if (m_holdActive) {
+      double currentError = IntakeDeploymentConstants.kIntakeDeploymentHoldDownCurrent - Math.abs(motor1.getOutputCurrent());
+      m_holdDutyCycle = MathUtil.clamp(
+        m_holdDutyCycle - IntakeDeploymentConstants.kIntakeDeploymentHoldDownGain * currentError,
+        IntakeDeploymentConstants.kIntakeDeploymentHoldDownDutyCycle,
+        IntakeDeploymentConstants.kIntakeDeploymentMinHoldDownDutyCycle);
+      closedLoopController.setSetpoint(m_holdDutyCycle, ControlType.kDutyCycle);
+    }
+    SmartDashboard.putNumber("Intake Hold Duty Cycle", m_holdActive ? m_holdDutyCycle : 0.0);
     // = SmartDashboard.getNumber("Target Velocity", 0);
     m_atFwdLimit = m_fwdLimitSwitch.isPressed();
     m_atRevLimit = m_revLimitSwitch.isPressed();
@@ -178,6 +192,8 @@ public class IntakeDeploymentSubsystem extends SubsystemBase {
     SmartDashboard.putBoolean("IntakeRevLimit", m_atRevLimit); 
     SmartDashboard.putBoolean("IntakeUp", m_atFwdLimit);
     SmartDashboard.putBoolean("IntakeDown", m_atRevLimit);
+    SmartDashboard.putBoolean("Intake Hold Down", m_holdDown);
+    SmartDashboard.putString("Intake Deployment Command", getCurrentCommand() == null ? "none" : getCurrentCommand().getName());
   }
 
   public boolean isRevLimitSwitchPressed() {
@@ -201,6 +217,8 @@ public class IntakeDeploymentSubsystem extends SubsystemBase {
   }
 
   public void runMotor(double pOut){
+    m_holdActive = false;
+    targetRPM = 0.0;
     pOut = MathUtil.clamp(pOut, IntakeDeploymentConstants.minOutputPercent, IntakeDeploymentConstants.maxOutputPercent);
     closedLoopController.setSetpoint(pOut, ControlType.kDutyCycle);
   }
@@ -214,6 +232,7 @@ public class IntakeDeploymentSubsystem extends SubsystemBase {
    * @param rpm (double) The rpm target for the intakedeployment
    */
   public void setRPM(double rpm) {
+    m_holdActive = false;
     targetRPM = rpm;
     double targetVelocity = rpmToNativeUnits(rpm);
     closedLoopController.setSetpoint(targetVelocity, ControlType.kVelocity);
@@ -225,6 +244,7 @@ public class IntakeDeploymentSubsystem extends SubsystemBase {
   }
 
   public void setPosition(double targetPosition) {
+    m_holdActive = false;
     m_position = encoder.getPosition();
     SmartDashboard.putNumber("Intake Position", m_position);
     double armAngle = IntakeDeploymentConstants.minRotation + (m_position - IntakeDeploymentConstants.minPosition) * IntakeDeploymentConstants.positionToRotationFactor;
@@ -234,9 +254,45 @@ public class IntakeDeploymentSubsystem extends SubsystemBase {
     SmartDashboard.putNumber("IntakeDeployment Target Position", this.targetPosition);
   }
 
+  /**
+   * stop - stop active motion. If the intake is deployed (hold down mode), keep applying
+   * the gentle hold-down torque instead of cutting power so the arm stays pinned against
+   * the bottom hard stop when a command using the intake ends or is interrupted.
+   */
   public void stop() {
-    closedLoopController.setSetpoint(0, ControlType.kDutyCycle);
+    if (m_holdDown) {
+      holdDown();
+    } else {
+      m_holdActive = false;
+      closedLoopController.setSetpoint(0, ControlType.kDutyCycle);
+    }
     targetRPM = 0.0;
+  }
+
+  /**
+   * holdDown - clamp the arm against the bottom hard stop with a gentle, current
+   * regulated holding torque. periodic() keeps adjusting the duty cycle to hold the
+   * target current until another motion method is called. Safe to call every loop.
+   */
+  public void holdDown() {
+    if (!m_holdActive) {
+      m_holdActive = true;
+      m_holdDutyCycle = IntakeDeploymentConstants.kIntakeDeploymentHoldDownDutyCycle;
+      closedLoopController.setSetpoint(m_holdDutyCycle, ControlType.kDutyCycle);
+    }
+    targetRPM = 0.0;
+  }
+
+  /**
+   * setHoldDown - set whether the intake is deployed and should be held down.
+   * @param holdDown (boolean) true when lowering the intake, false when raising it.
+   */
+  public void setHoldDown(boolean holdDown) {
+    m_holdDown = holdDown;
+  }
+
+  public boolean isHoldDown() {
+    return m_holdDown;
   }
 
   @Override
